@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>חפיסת 54 קלפי פוקר אוניברסליים • גליונות הדפסה סופיים לדפוס</title>
+  
+  <!-- Authentic English/Rouen Vector Playing Cards Engine -->
+  <script src="cardmeister.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --card-w: 63.5mm;
+      --card-h: 88.9mm;
+      --page-w: 210mm;
+      --page-h: 297mm;
+      --margin-x: 9.75mm;
+      --margin-y: 15.15mm;
+      --border-guide: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #1e293b;
+      font-family: 'Rubik', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Screen UI Controls (Hidden on Print) */
+    .screen-control-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245, 208, 97, 0.35);
+      padding: 16px 24px;
+      color: #f8fafc;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    .control-container {
+      max-width: 1250px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-title-box h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fef08a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-title-box p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .control-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #f5d061, #e6b422);
+      color: #0f172a;
+      box-shadow: 0 4px 14px rgba(245, 208, 97, 0.35);
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 208, 97, 0.5);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .view-filter-btn.active {
+      background: #3b82f6;
+      color: #fff;
+      border-color: #60a5fa;
+    }
+
+    /* Print Preview Wrapper */
+    .print-preview-wrapper {
+      padding: 40px 10px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* An A4 Sheet on Screen */
+    .a4-sheet {
+      width: var(--page-w);
+      height: var(--page-h);
+      background: #ffffff;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      position: relative;
+      padding: var(--margin-y) var(--margin-x);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .sheet-meta-tag {
+      position: absolute;
+      top: 4mm;
+      right: 10mm;
+      font-size: 8pt;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      direction: rtl;
+    }
+
+    .sheet-duplex-hint {
+      position: absolute;
+      bottom: 4mm;
+      left: 10mm;
+      right: 10mm;
+      text-align: center;
+      font-size: 7.5pt;
+      color: #94a3b8;
+    }
+
+    /* 3x3 Cards Grid (190.5mm x 266.7mm) */
+    .cards-grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, var(--card-w));
+      grid-template-rows: repeat(3, var(--card-h));
+      width: 190.5mm;
+      height: 266.7mm;
+      box-sizing: border-box;
+      border: 0.5pt solid var(--border-guide);
+    }
+
+    /* Individual Poker Card Cell (63.5mm x 88.9mm) */
+    .card-cell {
+      width: var(--card-w);
+      height: var(--card-h);
+      box-sizing: border-box;
+      border: 0.5pt dashed var(--border-guide);
+      position: relative;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    /* The Genuine Vector Card Container */
+    .card-inner-poker {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    playing-card {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    playing-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: fill;
+    }
+
+    /* TOP-RIGHT CORNER: SERIAL NUMBER (EMPTY CORNER) */
+    .card-corner-top-right {
+      position: absolute;
+      top: 3.2mm;
+      right: 3.8mm;
+      font-family: 'Outfit', sans-serif;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      z-index: 10;
+      line-height: 1;
+      pointer-events: none;
+      letter-spacing: -0.2px;
+    }
+
+    /* BOTTOM-LEFT CORNER: SERIAL NUMBER (EMPTY CORNER, INVERTED) */
+    .card-corner-bottom-left {
+      position: absolute;
+      bottom: 3.2mm;
+      left: 3.8mm;
+      font-family: 'Outfit', sans-serif;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      z-index: 10;
+      line-height: 1;
+      transform: rotate(180deg);
+      pointer-events: none;
+      letter-spacing: -0.2px;
+    }
+
+    /* JOKER CARD STYLING */
+    .joker-card-box {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .joker-corner-top-left {
+      position: absolute;
+      top: 3mm;
+      left: 3.8mm;
+      font-family: 'Playfair Display', serif;
+      font-size: 11pt;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .joker-corner-bottom-right {
+      position: absolute;
+      bottom: 3mm;
+      right: 3.8mm;
+      font-family: 'Playfair Display', serif;
+      font-size: 11pt;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      transform: rotate(180deg);
+    }
+
+    .joker-center-container {
+      width: 48mm;
+      height: 68mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* CARD BACK (QR MEDALLION) */
+    .card-back {
+      background: radial-gradient(circle at center, #1e293b 0%, #090e17 100%);
+      border: 3mm solid #ffffff;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Filigree ornament border */
+    .back-ornate-frame {
+      position: absolute;
+      inset: 2mm;
+      border: 1.2pt solid rgba(212, 175, 55, 0.45);
+      border-radius: 2mm;
+      pointer-events: none;
+    }
+
+    .back-ornate-inner {
+      position: absolute;
+      inset: 3.5mm;
+      border: 0.6pt solid rgba(212, 175, 55, 0.25);
+      pointer-events: none;
+    }
+
+    .filigree-ring {
+      position: relative;
+      width: 42mm;
+      height: 42mm;
+      border-radius: 50%;
+      border: 1.5pt solid #d4af37;
+      box-shadow: 0 0 12pt rgba(212, 175, 55, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    .qr-print-img {
+      width: 32mm;
+      height: 32mm;
+      display: block;
+      object-fit: contain;
+    }
+
+    .back-brand-text {
+      position: absolute;
+      bottom: 4.5mm;
+      font-size: 6.5pt;
+      color: #fef08a;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    /* Print Styles: Direct to PDF / Print Shop */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+      }
+
+      .screen-control-bar {
+        display: none !important;
+      }
+
+      .print-preview-wrapper {
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+
+      .a4-sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .card-cell {
+        border-color: #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Control Bar -->
+  <div class="screen-control-bar">
+    <div class="control-container">
+      <div class="control-title-box">
+        <h1>🎴 חפיסת 54 קלפי פוקר אוניברסליים • גליונות הדפסה סופיים</h1>
+        <p>קלפי פוקר קלאסיים אותנטיים (איורים מסורתיים מלאים) • המספר בפינות הריקות (שמאל-למטה וימין-למעלה)</p>
+      </div>
+
+      <div class="control-actions">
+        <button type="button" class="btn btn-outline view-filter-btn active" onclick="showSheets('all')">📄 כל 12 הגליונות</button>
+        <button type="button" class="btn btn-outline view-filter-btn" onclick="showSheets('fronts')">👁️ חזיתות בלבד (6)</button>
+        <button type="button" class="btn btn-outline view-filter-btn" onclick="showSheets('backs')">🔒 גבים בלבד (6)</button>
+        <button type="button" class="btn btn-gold" onclick="window.print()">🖨️ הדפס / שמור כ-PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sheets Container -->
+  <div class="print-preview-wrapper" id="sheetsWrapper">
+    <!-- Generated by JavaScript -->
+  </div>
+
+  <script>
+    // MASTER 54 CARDS DATABASE
+    const DECK = [
+      // CLUBS (1-13)
+      { num: 1, cid: 'Ac', title: 'אס תלתן' },
+      { num: 2, cid: '2c', title: '2 תלתן' },
+      { num: 3, cid: '3c', title: '3 תלתן' },
+      { num: 4, cid: '4c', title: '4 תלתן' },
+      { num: 5, cid: '5c', title: '5 תלתן' },
+      { num: 6, cid: '6c', title: '6 תלתן' },
+      { num: 7, cid: '7c', title: '7 תלתן' },
+      { num: 8, cid: '8c', title: '8 תלתן' },
+      { num: 9, cid: '9c', title: '9 תלתן' },
+      { num: 10, cid: 'Tc', title: '10 תלתן' },
+      { num: 11, cid: 'Jc', title: 'נסיך תלתן' },
+      { num: 12, cid: 'Qc', title: 'מלכה תלתן' },
+      { num: 13, cid: 'Kc', title: 'מלך תלתן' },
+
+      // DIAMONDS (14-26)
+      { num: 14, cid: 'Ad', title: 'אס יהלום' },
+      { num: 15, cid: '2d', title: '2 יהלום' },
+      { num: 16, cid: '3d', title: '3 יהלום' },
+      { num: 17, cid: '4d', title: '4 יהלום' },
+      { num: 18, cid: '5d', title: '5 יהלום' },
+      { num: 19, cid: '6d', title: '6 יהלום' },
+      { num: 20, cid: '7d', title: '7 יהלום' },
+      { num: 21, cid: '8d', title: '8 יהלום' },
+      { num: 22, cid: '9d', title: '9 יהלום' },
+      { num: 23, cid: 'Td', title: '10 יהלום' },
+      { num: 24, cid: 'Jd', title: 'נסיך יהלום' },
+      { num: 25, cid: 'Qd', title: 'מלכה יהלום' },
+      { num: 26, cid: 'Kd', title: 'מלך יהלום' },
+
+      // HEARTS (27-39)
+      { num: 27, cid: 'Ah', title: 'אס לב' },
+      { num: 28, cid: '2h', title: '2 לב' },
+      { num: 29, cid: '3h', title: '3 לב' },
+      { num: 30, cid: '4h', title: '4 לב' },
+      { num: 31, cid: '5h', title: '5 לב' },
+      { num: 32, cid: '6h', title: '6 לב' },
+      { num: 33, cid: '7h', title: '7 לב' },
+      { num: 34, cid: '8h', title: '8 לב' },
+      { num: 35, cid: '9h', title: '9 לב' },
+      { num: 36, cid: 'Th', title: '10 לב' },
+      { num: 37, cid: 'Jh', title: 'נסיך לב' },
+      { num: 38, cid: 'Qh', title: 'מלכה לב' },
+      { num: 39, cid: 'Kh', title: 'מלך לב' },
+
+      // SPADES (40-52)
+      { num: 40, cid: 'As', title: 'אס עלה' },
+      { num: 41, cid: '2s', title: '2 עלה' },
+      { num: 42, cid: '3s', title: '3 עלה' },
+      { num: 43, cid: '4s', title: '4 עלה' },
+      { num: 44, cid: '5s', title: '5 עלה' },
+      { num: 45, cid: '6s', title: '6 עלה' },
+      { num: 46, cid: '7s', title: '7 עלה' },
+      { num: 47, cid: '8s', title: '8 עלה' },
+      { num: 48, cid: '9s', title: '9 עלה' },
+      { num: 49, cid: 'Ts', title: '10 עלה' },
+      { num: 50, cid: 'Js', title: 'נסיך עלה' },
+      { num: 51, cid: 'Qs', title: 'מלכה עלה' },
+      { num: 52, cid: 'Ks', title: 'מלך עלה' },
+
+      // JOKERS (53-54)
+      { num: 53, isJoker: true, color: 'red', title: 'ג\'וקר צבעוני' },
+      { num: 54, isJoker: true, color: 'red', title: 'ג\'וקר צבעוני' }
+    ];
+
+    function getJokerVectorSVG(color) {
+      return `
+        <svg class="joker-vector-art" viewBox="0 0 140 180" width="100%" height="100%">
+          <rect x="5" y="5" width="130" height="170" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="8" y="8" width="124" height="164" rx="2" fill="none" stroke="currentColor" stroke-width="0.6"/>
+          
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          <circle cx="128" cy="12" r="2" fill="currentColor"/>
+          <circle cx="12" cy="168" r="2" fill="currentColor"/>
+          <circle cx="128" cy="168" r="2" fill="currentColor"/>
+          
+          <g transform="translate(20, 22)">
+            <!-- Center Horn -->
+            <path d="M50 48 Q46 20 50 2 Q54 20 50 48 Z" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="50" cy="2" r="3.5" fill="currentColor"/>
+            
+            <!-- Left Horn -->
+            <path d="M42 48 C35 32, 15 22, 10 32 C7 38, 16 44, 25 45 C32 46, 38 48, 42 48" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="10" cy="32" r="3.5" fill="currentColor"/>
+
+            <!-- Right Horn -->
+            <path d="M58 48 C65 32, 85 22, 90 32 C93 38, 84 44, 75 45 C68 46, 62 48, 58 48" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="90" cy="32" r="3.5" fill="currentColor"/>
+
+            <!-- Crown Band -->
+            <path d="M26 48 Q50 54 74 48 L76 56 Q50 62 24 56 Z" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.25"/>
+            
+            <!-- Face -->
+            <path d="M28 56 Q27 82 50 86 Q73 82 72 56" fill="#ffffff" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M37 66 Q42 62 45 66" stroke="currentColor" stroke-width="1.6" fill="none"/>
+            <path d="M55 66 Q58 62 63 66" stroke="currentColor" stroke-width="1.6" fill="none"/>
+            <circle cx="41" cy="65.5" r="1.2" fill="currentColor"/>
+            <circle cx="59" cy="65.5" r="1.2" fill="currentColor"/>
+            <path d="M36 74 Q50 82 64 74" stroke="currentColor" stroke-width="1.8" fill="none"/>
+            <path d="M34 72 Q36 74 38 74" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M66 72 Q64 74 62 74" stroke="currentColor" stroke-width="1.2"/>
+
+            <!-- Collar with bells -->
+            <path d="M22 84 L30 102 L40 88 L50 104 L60 88 L70 102 L78 84" stroke="currentColor" stroke-width="1.6" fill="currentColor" fill-opacity="0.15"/>
+            <circle cx="30" cy="102" r="2.5" fill="currentColor"/>
+            <circle cx="50" cy="104" r="2.5" fill="currentColor"/>
+            <circle cx="70" cy="102" r="2.5" fill="currentColor"/>
+          </g>
+
+          <text x="70" y="148" text-anchor="middle" font-family="'Playfair Display', serif" font-size="14" font-weight="700" letter-spacing="3" fill="currentColor">JOKER</text>
+          <line x1="30" y1="154" x2="110" y2="154" stroke="currentColor" stroke-width="0.8"/>
+          <circle cx="70" cy="154" r="2" fill="currentColor"/>
+        </svg>
+      `;
+    }
+
+    function generateCardFrontHTML(card) {
+      if (card.isJoker) {
+        const colorStyle = card.color === 'red' ? 'color: #dc2626;' : 'color: #0f172a;';
+        const jokerImg = card.color === 'red' ? 'assets/joker_standing_color.svg' : 'assets/joker_standing_black.svg';
+        return `
+          <div class="card-cell">
+            <div class="card-inner-poker joker-card-box" style="${colorStyle}">
+              <!-- 1. TOP-RIGHT: STAR (NO SERIAL NUMBER ON JOKER) -->
+              <div class="card-corner-top-right" style="font-size: 13pt;">★</div>
+
+              <!-- 2. BOTTOM-LEFT: STAR (NO SERIAL NUMBER ON JOKER) -->
+              <div class="card-corner-bottom-left" style="font-size: 13pt;">★</div>
+
+              <!-- Authentic Standing Jester Center Artwork -->
+              <div class="joker-center-container" style="width: 100%; height: 100%;">
+                <img src="${jokerImg}" alt="ג'וקר" style="width: 100%; height: 100%; object-fit: fill; display: block;">
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card-cell">
+          <div class="card-inner-poker">
+            <!-- 1. TOP-RIGHT: SERIAL NUMBER (EMPTY CORNER) -->
+            <div class="card-corner-top-right">${card.num}</div>
+
+            <!-- 2. BOTTOM-LEFT: SERIAL NUMBER (EMPTY CORNER) -->
+            <div class="card-corner-bottom-left">${card.num}</div>
+
+            <!-- 3. AUTHENTIC ENGLISH / ROUEN VECTOR PLAYING CARD -->
+            <playing-card cid="${card.cid}" suitcolor="#111827,#dc2626,#dc2626,#111827" rankcolor="#111827,#dc2626,#dc2626,#111827" bordercolor="transparent" borderradius="8"></playing-card>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateCardBackHTML(card) {
+      const isJoker = card.isJoker;
+      const numTag = isJoker ? '★ ג\'וקר חופשי ★' : 'קלף #' + card.num;
+      const title = card.title || (isJoker ? 'ג\'וקר' : 'קלף פוקר');
+      return `
+        <div class="card-cell">
+          <div class="card-inner-poker card-back">
+            <div class="back-ornate-frame"></div>
+            <div class="back-ornate-inner"></div>
+
+            <div class="filigree-ring">
+              <img class="qr-print-img" src="assets/qr/qr_card_${card.num}.png" alt="QR #${card.num}">
+            </div>
+
+            <div class="back-brand-text">★ MYSTERY KEY ★</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // GENERATE ALL 12 SHEETS (6 FRONTS + 6 BACKS DUPLEX MIRRORED)
+    function renderPrintSheets() {
+      const container = document.getElementById('sheetsWrapper');
+      let html = '';
+
+      const CARDS_PER_SHEET = 9;
+      const TOTAL_SHEETS = 6;
+
+      for (let s = 0; s < TOTAL_SHEETS; s++) {
+        const startIdx = s * CARDS_PER_SHEET;
+        const sheetCards = DECK.slice(startIdx, startIdx + CARDS_PER_SHEET);
+
+        // 1. FRONT SHEET (Page 2*s + 1)
+        html += `
+          <div class="a4-sheet sheet-front" id="sheet-front-${s+1}">
+            <div class="sheet-meta-tag">גליון ${s*2 + 1} מתוך 12 • עמוד חזית (קלפים ${sheetCards[0].num} עד ${sheetCards[sheetCards.length-1].num})</div>
+            <div class="cards-grid-3x3">
+              ${sheetCards.map(c => generateCardFrontHTML(c)).join('')}
+            </div>
+            <div class="sheet-duplex-hint">הדפסה דו-צדדית (Duplex) • הפוך על הציר הארוך (Flip on Long Edge) • גודל כרטיס: 63.5 × 88.9 מ״מ</div>
+          </div>
+        `;
+
+        // 2. BACK SHEET (Page 2*s + 2) - HORIZONTAL MIRRORING FOR DUPLEX CUT ALIGNMENT!
+        const mirroredBackCards = [
+          sheetCards[2], sheetCards[1], sheetCards[0],
+          sheetCards[5], sheetCards[4], sheetCards[3],
+          sheetCards[8], sheetCards[7], sheetCards[6]
+        ];
+
+        html += `
+          <div class="a4-sheet sheet-back" id="sheet-back-${s+1}">
+            <div class="sheet-meta-tag">גליון ${s*2 + 2} מתוך 12 • עמוד גב (היפוך מראה מותאם חיתוך לקלפים ${sheetCards[0].num} עד ${sheetCards[sheetCards.length-1].num})</div>
+            <div class="cards-grid-3x3">
+              ${mirroredBackCards.map(c => generateCardBackHTML(c)).join('')}
+            </div>
+            <div class="sheet-duplex-hint">גב הקלפים • מותאם לחיתוך בדפוס מול גליון ${s*2 + 1}</div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function showSheets(filter) {
+      document.querySelectorAll('.view-filter-btn').forEach(b => b.classList.remove('active'));
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+
+      const fronts = document.querySelectorAll('.sheet-front');
+      const backs = document.querySelectorAll('.sheet-back');
+
+      if (filter === 'all') {
+        fronts.forEach(el => el.style.display = 'flex');
+        backs.forEach(el => el.style.display = 'flex');
+      } else if (filter === 'fronts') {
+        fronts.forEach(el => el.style.display = 'flex');
+        backs.forEach(el => el.style.display = 'none');
+      } else if (filter === 'backs') {
+        fronts.forEach(el => el.style.display = 'none');
+        backs.forEach(el => el.style.display = 'flex');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', renderPrintSheets);
+  </script>
+
+</body>
+</html>

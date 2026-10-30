@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>חפיסת קלפי פוקר אוניברסליים • תצוגה מקדימה ואימות 54 קלפים</title>
+  
+  <script src="cardmeister.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #070a12;
+      --gold: #d4af37;
+      --gold-light: #fef08a;
+      --crimson: #dc2626;
+      --navy: #0f172a;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 15%, #18223a 0%, #060911 100%);
+      color: var(--text);
+      font-family: 'Rubik', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      max-width: 900px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      color: var(--gold-light);
+      margin-bottom: 12px;
+      text-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .badge-exact {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      color: #86efac;
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    /* Main Showcase Box */
+    .cards-mockup-frame {
+      width: 100%;
+      background: rgba(18, 24, 38, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 20px;
+      padding: 26px;
+      margin-bottom: 40px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .mockup-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Corner Diagram Explanations */
+    .corners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      margin-top: 28px;
+    }
+
+    .corner-card-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .pill-title {
+      font-weight: 700;
+      color: var(--gold-light);
+      font-size: 1.1rem;
+    }
+
+    .pill-tag {
+      font-family: 'Outfit', sans-serif;
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .pill-desc {
+      color: #cbd5e1;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Action bar */
+    .action-cta-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      padding: 18px 24px;
+      margin-bottom: 40px;
+    }
+
+    .action-cta-title h2 {
+      font-size: 1.25rem;
+      color: var(--gold-light);
+    }
+    .action-cta-title p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #f5d061, #e6b422);
+      color: #0f172a;
+      box-shadow: 0 4px 16px rgba(245, 208, 97, 0.4);
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(245, 208, 97, 0.6);
+    }
+
+    /* Interactive 54-Card Explorer */
+    .deck-explorer-section {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .deck-explorer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 16px;
+    }
+
+    .explorer-filter-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-tab:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .filter-tab.active {
+      background: #3b82f6;
+      border-color: #60a5fa;
+      color: #fff;
+    }
+
+    /* Cards Grid in Preview */
+    .cards-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card-preview-item {
+      position: relative;
+      aspect-ratio: 63.5 / 88.9;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card-preview-item:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(245, 208, 97, 0.35);
+      z-index: 5;
+    }
+
+    playing-card {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    playing-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: fill;
+    }
+
+    .preview-corner-tr {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e293b;
+      z-index: 10;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .preview-corner-bl {
+      position: absolute;
+      bottom: 4px;
+      left: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e293b;
+      z-index: 10;
+      line-height: 1;
+      transform: rotate(180deg);
+      pointer-events: none;
+    }
+
+    /* Preview Joker Box */
+    .preview-joker {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .preview-joker-tl {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-family: 'Playfair Display', serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .preview-joker-br {
+      position: absolute;
+      bottom: 4px;
+      right: 6px;
+      font-family: 'Playfair Display', serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <header>
+      <h1>🎴 חפיסת קלפי פוקר אוניברסליים • 54 קלפים</h1>
+      <p class="subtitle">
+        הפתרון הכי נקי, סימטרי ומדויק: אות וסמל פוקר קלאסיים (למעלה-שמאל ולמטה-ימין),<br>
+        <strong>והמספר הסידורי מוטבע בפינות הנגדיות הריקות: שמאל-למטה וימין-למעלה!</strong>
+      </p>
+
+      <div class="badge-exact">
+        <span>✨ איור מסורתי מקורי 100% • צורות פוקר קלאסיות ללא שינוי • מספר בשמאל למטה וימין למעלה</span>
+      </div>
+    </header>
+
+    <!-- Approved Mockup Showcase -->
+    <div class="cards-mockup-frame">
+      <img src="diagonal_corner_numbers.jpg" alt="קלפי פוקר אותנטיים עם מלך מלכה נסיך ו-9 כשהמספר בפינות שמאל למטה וימין למעלה" class="mockup-img">
+
+      <div class="corners-grid">
+        <div class="corner-card-pill">
+          <div class="pill-header">
+            <span class="pill-title">👑 מלך לבבות (K)</span>
+            <span class="pill-tag">מספר 39</span>
+          </div>
+          <p class="pill-desc">
+            • <strong>למעלה-שמאל ולמטה-ימין:</strong> <code>K ♥</code> קלאסי וטהור.<br>
+            • <strong>למטה-שמאל ולמעלה-ימין:</strong> <code>39</code> עדין בשוליים הלבנים, במקום שבו אין צורה.
+          </p>
+        </div>
+
+        <div class="corner-card-pill">
+          <div class="pill-header">
+            <span class="pill-title">👸 מלכת יהלום (Q)</span>
+            <span class="pill-tag">מספר 25</span>
+          </div>
+          <p class="pill-desc">
+            • <strong>למעלה-שמאל ולמטה-ימין:</strong> <code>Q ♦</code> קלאסי וטהור.<br>
+            • <strong>למטה-שמאל ולמעלה-ימין:</strong> <code>25</code> עדין בשוליים הלבנים הריקים.
+          </p>
+        </div>
+
+        <div class="corner-card-pill">
+          <div class="pill-header">
+            <span class="pill-title">🛡️ נסיך תלתן (J)</span>
+            <span class="pill-tag">מספר 11</span>
+          </div>
+          <p class="pill-desc">
+            • <strong>למעלה-שמאל ולמטה-ימין:</strong> <code>J ♣</code> קלאסי וטהור.<br>
+            • <strong>למטה-שמאל ולמעלה-ימין:</strong> <code>11</code> עדין בשוליים הלבנים הריקים.
+          </p>
+        </div>
+
+        <div class="corner-card-pill">
+          <div class="pill-header">
+            <span class="pill-title">♥ 9 לבבות</span>
+            <span class="pill-tag">מספר 35</span>
+          </div>
+          <p class="pill-desc">
+            • <strong>למעלה-שמאל ולמטה-ימין:</strong> <code>9 ♥</code> עם כל 9 הלבבות במרכז.<br>
+            • <strong>למטה-שמאל ולמעלה-ימין:</strong> <code>35</code> עדין בשוליים הלבנים.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Bar -->
+    <div class="action-cta-bar">
+      <div class="action-cta-title">
+        <h2>🖨️ מוכנים להדפסה בדפוס?</h2>
+        <p>12 גליונות A4 מלאים (6 חזיתות + 6 גבים מותאמים בהיפוך מראה מושלם לחיתוך דו-צדדי)</p>
+      </div>
+      <a href="universal_print.html" class="btn btn-gold" target="_blank">פתח גליונות להדפסה (universal_print.html) ➔</a>
+    </div>
+
+    <!-- Live 54-Card Explorer -->
+    <div class="deck-explorer-section">
+      <div class="deck-explorer-header">
+        <div>
+          <h2 style="color: var(--gold-light); font-size: 1.3rem;">🔍 גלריית כל 54 הקלפים המוכנים</h2>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-top: 4px;">כל קלף מעובד ברמת וקטור חדה עם המספר הסידורי בפינות הנגדיות</p>
+        </div>
+
+        <div class="explorer-filter-tabs">
+          <button type="button" class="filter-tab active" onclick="filterPreview('all')">הכל (54)</button>
+          <button type="button" class="filter-tab" onclick="filterPreview('c')">♣ תלתן (1-13)</button>
+          <button type="button" class="filter-tab" onclick="filterPreview('d')">♦ יהלום (14-26)</button>
+          <button type="button" class="filter-tab" onclick="filterPreview('h')">♥ לב (27-39)</button>
+          <button type="button" class="filter-tab" onclick="filterPreview('s')">♠ עלה (40-52)</button>
+          <button type="button" class="filter-tab" onclick="filterPreview('joker')">🃏 ג'וקרים (53-54)</button>
+        </div>
+      </div>
+
+      <div class="cards-preview-grid" id="previewGrid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const DECK = [
+      // CLUBS (1-13)
+      { num: 1, cid: 'Ac', suit: 'c', title: 'אס תלתן' },
+      { num: 2, cid: '2c', suit: 'c', title: '2 תלתן' },
+      { num: 3, cid: '3c', suit: 'c', title: '3 תלתן' },
+      { num: 4, cid: '4c', suit: 'c', title: '4 תלתן' },
+      { num: 5, cid: '5c', suit: 'c', title: '5 תלתן' },
+      { num: 6, cid: '6c', suit: 'c', title: '6 תלתן' },
+      { num: 7, cid: '7c', suit: 'c', title: '7 תלתן' },
+      { num: 8, cid: '8c', suit: 'c', title: '8 תלתן' },
+      { num: 9, cid: '9c', suit: 'c', title: '9 תלתן' },
+      { num: 10, cid: 'Tc', suit: 'c', title: '10 תלתן' },
+      { num: 11, cid: 'Jc', suit: 'c', title: 'נסיך תלתן' },
+      { num: 12, cid: 'Qc', suit: 'c', title: 'מלכה תלתן' },
+      { num: 13, cid: 'Kc', suit: 'c', title: 'מלך תלתן' },
+
+      // DIAMONDS (14-26)
+      { num: 14, cid: 'Ad', suit: 'd', title: 'אס יהלום' },
+      { num: 15, cid: '2d', suit: 'd', title: '2 יהלום' },
+      { num: 16, cid: '3d', suit: 'd', title: '3 יהלום' },
+      { num: 17, cid: '4d', suit: 'd', title: '4 יהלום' },
+      { num: 18, cid: '5d', suit: 'd', title: '5 יהלום' },
+      { num: 19, cid: '6d', suit: 'd', title: '6 יהלום' },
+      { num: 20, cid: '7d', suit: 'd', title: '7 יהלום' },
+      { num: 21, cid: '8d', suit: 'd', title: '8 יהלום' },
+      { num: 22, cid: '9d', suit: 'd', title: '9 יהלום' },
+      { num: 23, cid: 'Td', suit: 'd', title: '10 יהלום' },
+      { num: 24, cid: 'Jd', suit: 'd', title: 'נסיך יהלום' },
+      { num: 25, cid: 'Qd', suit: 'd', title: 'מלכה יהלום' },
+      { num: 26, cid: 'Kd', suit: 'd', title: 'מלך יהלום' },
+
+      // HEARTS (27-39)
+      { num: 27, cid: 'Ah', suit: 'h', title: 'אס לב' },
+      { num: 28, cid: '2h', suit: 'h', title: '2 לב' },
+      { num: 29, cid: '3h', suit: 'h', title: '3 לב' },
+      { num: 30, cid: '4h', suit: 'h', title: '4 לב' },
+      { num: 31, cid: '5h', suit: 'h', title: '5 לב' },
+      { num: 32, cid: '6h', suit: 'h', title: '6 לב' },
+      { num: 33, cid: '7h', suit: 'h', title: '7 לב' },
+      { num: 34, cid: '8h', suit: 'h', title: '8 לב' },
+      { num: 35, cid: '9h', suit: 'h', title: '9 לב' },
+      { num: 36, cid: 'Th', suit: 'h', title: '10 לב' },
+      { num: 37, cid: 'Jh', suit: 'h', title: 'נסיך לב' },
+      { num: 38, cid: 'Qh', suit: 'h', title: 'מלכה לב' },
+      { num: 39, cid: 'Kh', suit: 'h', title: 'מלך לב' },
+
+      // SPADES (40-52)
+      { num: 40, cid: 'As', suit: 's', title: 'אס עלה' },
+      { num: 41, cid: '2s', suit: 's', title: '2 עלה' },
+      { num: 42, cid: '3s', suit: 's', title: '3 עלה' },
+      { num: 43, cid: '4s', suit: 's', title: '4 עלה' },
+      { num: 44, cid: '5s', suit: 's', title: '5 עלה' },
+      { num: 45, cid: '6s', suit: 's', title: '6 עלה' },
+      { num: 46, cid: '7s', suit: 's', title: '7 עלה' },
+      { num: 47, cid: '8s', suit: 's', title: '8 עלה' },
+      { num: 48, cid: '9s', suit: 's', title: '9 עלה' },
+      { num: 49, cid: 'Ts', suit: 's', title: '10 עלה' },
+      { num: 50, cid: 'Js', suit: 's', title: 'נסיך עלה' },
+      { num: 51, cid: 'Qs', suit: 's', title: 'מלכה עלה' },
+      { num: 52, cid: 'Ks', suit: 's', title: 'מלך עלה' },
+
+      // JOKERS (53-54)
+      { num: 53, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר צבעוני' },
+      { num: 54, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר צבעוני' }
+    ];
+
+    function getJokerVectorSVG() {
+      return `
+        <svg viewBox="0 0 140 180" width="85%" height="85%">
+          <rect x="5" y="5" width="130" height="170" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <g transform="translate(20, 22)">
+            <path d="M50 48 Q46 20 50 2 Q54 20 50 48 Z" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="50" cy="2" r="3.5" fill="currentColor"/>
+            <path d="M42 48 C35 32, 15 22, 10 32 C7 38, 16 44, 25 45 C32 46, 38 48, 42 48" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="10" cy="32" r="3.5" fill="currentColor"/>
+            <path d="M58 48 C65 32, 85 22, 90 32 C93 38, 84 44, 75 45 C68 46, 62 48, 58 48" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="90" cy="32" r="3.5" fill="currentColor"/>
+            <path d="M26 48 Q50 54 74 48 L76 56 Q50 62 24 56 Z" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.25"/>
+            <path d="M28 56 Q27 82 50 86 Q73 82 72 56" fill="#ffffff" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M37 66 Q42 62 45 66" stroke="currentColor" stroke-width="1.6" fill="none"/>
+            <path d="M55 66 Q58 62 63 66" stroke="currentColor" stroke-width="1.6" fill="none"/>
+            <circle cx="41" cy="65.5" r="1.2" fill="currentColor"/>
+            <circle cx="59" cy="65.5" r="1.2" fill="currentColor"/>
+            <path d="M36 74 Q50 82 64 74" stroke="currentColor" stroke-width="1.8" fill="none"/>
+            <path d="M22 84 L30 102 L40 88 L50 104 L60 88 L70 102 L78 84" stroke="currentColor" stroke-width="1.6" fill="currentColor" fill-opacity="0.15"/>
+          </g>
+          <text x="70" y="148" text-anchor="middle" font-family="'Playfair Display', serif" font-size="14" font-weight="700" letter-spacing="3" fill="currentColor">JOKER</text>
+        </svg>
+      `;
+    }
+
+    function renderDeck(suitFilter = 'all') {
+      const grid = document.getElementById('previewGrid');
+      const filtered = suitFilter === 'all' ? DECK : DECK.filter(c => c.suit === suitFilter);
+
+      grid.innerHTML = filtered.map(card => {
+        if (card.isJoker) {
+          const colorStyle = card.color === 'red' ? 'color: #dc2626;' : 'color: #0f172a;';
+          const jokerImg = card.color === 'red' ? 'assets/joker_standing_color.svg' : 'assets/joker_standing_black.svg';
+          return `
+            <div class="card-preview-item" title="${card.title} (${card.color === 'red' ? 'אדום' : 'שחור'})">
+              <div class="preview-joker" style="${colorStyle}">
+                <div class="preview-corner-tr" style="font-size: 14px;">★</div>
+                <div class="preview-corner-bl" style="font-size: 14px;">★</div>
+                <img src="${jokerImg}" alt="ג'וקר" style="width: 100%; height: 100%; object-fit: fill; display: block;">
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="card-preview-item" title="${card.title} (#${card.num})">
+            <div class="preview-corner-tr">${card.num}</div>
+            <div class="preview-corner-bl">${card.num}</div>
+            <playing-card cid="${card.cid}" suitcolor="#111827,#dc2626,#dc2626,#111827" rankcolor="#111827,#dc2626,#dc2626,#111827" bordercolor="transparent" borderradius="8"></playing-card>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterPreview(suit) {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+      renderDeck(suit);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => renderDeck('all'));
+  </script>
+
+</body>
+</html>

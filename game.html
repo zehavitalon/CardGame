@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="משחק מחשב משפחתי: הורים מול ילדים – הקרב על ה-37 • יום נישואין 37 לזהבית וחיים">
+  <meta name="robots" content="noindex, nofollow">
+  <title>משחק מחשב: הורים מול ילדים • הקרב על ה-37</title>
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="game.css?v=20261026a">
+</head>
+<body>
+  <!-- Ambient Lighting Effects -->
+  <div class="ambient-glow glow-parents" aria-hidden="true"></div>
+  <div class="ambient-glow glow-kids" aria-hidden="true"></div>
+
+  <!-- Hidden Audio Player -->
+  <audio id="gameAudio" preload="auto"></audio>
+
+  <!-- Main Game Container -->
+  <div class="game-app" id="gameApp">
+    
+    <!-- Top Bar: Scores & Goal Progress -->
+    <header class="game-header" id="gameHeader">
+      <div class="header-left">
+        <a href="dashboard.html" class="nav-btn" id="backToDashBtn" title="חזרה ללוח הניהול">
+          <span>🏠</span>
+          <span>לוח ניהול</span>
+        </a>
+        <button type="button" class="nav-btn" id="restartGameBtn" onclick="document.getElementById('setupModal').classList.remove('hidden')" title="הגדרות ומשחק חדש">
+          <span>⚙️</span>
+          <span>משחק חדש</span>
+        </button>
+      </div>
+
+      <!-- Center: Goal Progress Bar -->
+      <div class="header-center">
+        <div class="progress-header">
+          <span>התקדמות ציר הזמן:</span>
+          <strong><span id="progressCount">1</span> מתוך <span id="targetDisplay">37</span> קלפים</strong>
+        </div>
+        <div class="progress-track" aria-label="Game Progress">
+          <div class="progress-fill" id="progressBar" style="width: 3%;"></div>
+        </div>
+      </div>
+
+      <!-- Right: Team Score Badges -->
+      <div class="header-right">
+        <div class="team-scoreboard">
+          <!-- Team 1: Parents (Gold) -->
+          <div class="team-pill team-parents active-turn" id="team1Pill">
+            <span class="team-icon">👑</span>
+            <span class="team-name" id="team1Name">ההורים</span>
+            <span class="team-score" id="team1Score">0</span>
+          </div>
+          
+          <!-- Team 2: Kids (Cyan) -->
+          <div class="team-pill team-kids" id="team2Pill">
+            <span class="team-icon">🚀</span>
+            <span class="team-name" id="team2Name">הילדים</span>
+            <span class="team-score" id="team2Score">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Turn Banner -->
+    <div class="turn-banner turn-parents" id="turnBanner">
+      <span class="turn-sparkle">✨</span>
+      <span id="turnText">תור קבוצת ההורים (חיים וזהבית) 👑</span>
+      <span class="turn-sparkle">✨</span>
+    </div>
+
+    <!-- Center Stage: The Mystery Card -->
+    <!-- Center Stage: The Mystery Cinema Stage -->
+    <main class="game-stage" id="gameStage">
+      <div class="mystery-card-container turn-parents" id="mysteryContainer">
+        
+        <!-- Hero Media Cinema Screen (Maximized for full visual impact, no cropping!) -->
+        <div class="stage-card-item is-covered" id="stageCardItem" title="לחצו להפעלה או גררו לציר">
+          <!-- Dynamically populated by game.js -->
+        </div>
+
+        <!-- Sleek Horizontal Control & Info Strip -->
+        <div class="stage-card-info">
+          <div class="stage-info-text">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="category-tag" id="stageCategory">שיר אהבה 🎵</span>
+              <span class="couple-tag" id="coupleTag" style="display: none;">💑 חוויה של ההורים בלבד</span>
+            </div>
+            <h1 class="stage-title" id="stagePrompt">קלף זיכרון חדש נשלף 🎴</h1>
+            <p class="stage-instructions" id="stageInstructions">
+              לחצו על הקלף או על הכפתור כדי להפעיל את הזיכרון.
+            </p>
+          </div>
+
+          <div class="stage-actions">
+            <button type="button" class="action-btn btn-activate" id="activateCardBtn">
+              <span>▶️</span>
+              <span id="activateBtnText">הפעל והאזן לשיר</span>
+            </button>
+            <button type="button" class="action-btn btn-skip" id="skipCardBtn" style="display: none;" title="מדלגים על חוויה של ההורים בלבד ושולפים קלף חדש">
+              <span>⏭️</span>
+              <span>דלג (חוויה של ההורים)</span>
+            </button>
+            <button type="button" class="action-btn btn-play" id="playToggleBtn" style="display: none;">
+              <span>⏸️</span>
+              <span>השהה שיר</span>
+            </button>
+            <button type="button" class="action-btn btn-next-card" id="nextCardBtn" style="display: none;">
+              <span>עברו לקלף הבא</span>
+              <span>⬅️</span>
+            </button>
+            <span class="drag-hint-pill" id="dragHintPill" style="display: none;">
+              <span>💡</span>
+              <span>גררו לציר או לחצו על ה-(+) הרצוי</span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Bottom Section: The Horizontal Timeline -->
+    <section class="timeline-section" id="timelineSection">
+      <div class="timeline-header">
+        <div class="timeline-title">
+          <span>📅</span>
+          <span>ציר 37 שנות הנישואין (לפי סדר כרונולוגי)</span>
+        </div>
+        <div class="timeline-count-badge" id="timelineCountBadge">1 קלפים בציר</div>
+      </div>
+
+      <div class="timeline-scroll-container" id="timelineScrollContainer">
+        <div class="timeline-track" id="timelineTrack">
+          <!-- Populated dynamically with slots and placed cards -->
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Feedback Toast (Verdict) -->
+  <div class="toast-verdict" id="toastVerdict">
+    <span id="toastMessage">כל הכבוד!</span>
+  </div>
+
+  <!-- Setup Modal (Lobby) -->
+  <div class="modal-overlay" id="setupModal">
+    <div class="modal-dialog">
+      <div class="modal-badge">✨ יום נישואין 37 • משחק המחשב המשפחתי</div>
+      <h2 class="modal-title">הקרב על ה-37</h2>
+      <p class="modal-desc">
+        בנו יחד את ציר הזמן המפואר של 37 שנות הנישואין! שבצו שירים, תמונות משפחתיות וסרטונים היסטוריים בסדר הכרונולוגי הנכון.
+      </p>
+
+      <!-- Mode Selection -->
+      <div class="setup-group">
+        <label class="setup-label">בחרו מצב משחק:</label>
+        <div class="option-grid">
+          <div class="option-card mode-option selected" data-mode="parents_vs_kids" id="modeParentsKids">
+            <div class="option-icon">👑⚔️🚀</div>
+            <div class="option-title">הורים מול ילדים</div>
+            <div class="option-sub">חיים וזהבית נגד 4 הילדים</div>
+          </div>
+          <div class="option-card mode-option" data-mode="couples" id="modeCouples">
+            <div class="option-icon">💑</div>
+            <div class="option-title">משחק זוגי</div>
+            <div class="option-sub">חיים מול זהבית ראש-בראש</div>
+          </div>
+          <div class="option-card mode-option" data-mode="solo" id="modeSolo">
+            <div class="option-icon">👤</div>
+            <div class="option-title">משחק סולו</div>
+            <div class="option-sub">אתגר אישי נינוח</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Selection -->
+      <div class="setup-group">
+        <label class="setup-label">יעד קלפים לסיום על הציר:</label>
+        <div class="option-grid">
+          <div class="option-card target-option" data-target="15" id="target15">
+            <div class="option-icon">⚡</div>
+            <div class="option-title">15 קלפים</div>
+            <div class="option-sub">משחק מהיר (כ-10 דק')</div>
+          </div>
+          <div class="option-card target-option" data-target="25" id="target25">
+            <div class="option-icon">🎯</div>
+            <div class="option-title">25 קלפים</div>
+            <div class="option-sub">משחק בינוני (כ-20 דק')</div>
+          </div>
+          <div class="option-card target-option selected" data-target="37" id="target37">
+            <div class="option-icon">💖</div>
+            <div class="option-title">37 קלפים</div>
+            <div class="option-sub">המשחק החגיגי המלא</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="start-btn" id="startBtn">🚀 התחילו לשחק!</button>
+    </div>
+  </div>
+
+  <!-- Victory Modal -->
+  <div class="modal-overlay hidden" id="victoryModal">
+    <div class="modal-dialog">
+      <div class="modal-badge">🎉 סיום המשחק החגיגי!</div>
+      <h2 class="modal-title" id="victoryTitle">קבוצת ההורים ניצחה!</h2>
+      <p class="modal-desc" id="victorySubtitle">
+        ציר 37 שנות הנישואין הושלם בהצלחה מדהימה!
+      </p>
+
+      <div class="setup-group" id="victoryScoreboard" style="display: flex; justify-content: center; gap: 24px; margin-bottom: 24px;">
+        <div class="team-pill team-parents" style="padding: 10px 20px; font-size: 1.1rem;">
+          <span>👑 ההורים:</span>
+          <strong id="victoryScore1" style="font-size: 1.4rem;">0</strong>
+        </div>
+        <div class="team-pill team-kids" style="padding: 10px 20px; font-size: 1.1rem;">
+          <span>🚀 הילדים:</span>
+          <strong id="victoryScore2" style="font-size: 1.4rem;">0</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button type="button" class="start-btn" id="exploreAlbumBtn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);">
+          📖 פתחו את אלבום הזיכרונות
+        </button>
+        <button type="button" class="start-btn" id="playAgainBtn" style="flex: 1;">
+          🔄 שחקו שוב
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/deck_data.js"></script>
+  <script src="game.js?v=20261026a"></script>
+</body>
+</html>
