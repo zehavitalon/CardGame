@@ -22,6 +22,7 @@
       --gold: #f5d061;
       --gold-light: #ffea9f;
       --gold-dark: #b89328;
+      --casino-red: #b91c1c;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border-card: rgba(245, 208, 97, 0.25);
@@ -43,7 +44,7 @@
 
     /* Dashboard Header */
     .dashboard-header {
-      background: linear-gradient(180deg, rgba(245, 208, 97, 0.08) 0%, rgba(10, 13, 20, 0) 100%);
+      background: linear-gradient(180deg, rgba(185, 28, 28, 0.12) 0%, rgba(10, 13, 20, 0) 100%);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       padding: 30px 24px 20px;
       text-align: center;
@@ -53,11 +54,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(245, 208, 97, 0.12);
-      border: 1px solid var(--border-card);
+      background: rgba(185, 28, 28, 0.18);
+      border: 1px solid rgba(185, 28, 28, 0.4);
       padding: 6px 14px;
       border-radius: 20px;
-      color: var(--gold-light);
+      color: #fca5a5;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 12px;
@@ -76,7 +77,7 @@
     .subtitle {
       color: var(--text-muted);
       font-size: 1.05rem;
-      max-width: 750px;
+      max-width: 780px;
       margin: 0 auto 20px;
       line-height: 1.5;
     }
@@ -105,13 +106,15 @@
     }
 
     .btn-gold {
-      background: linear-gradient(135deg, #f5d061, #e6b422);
-      color: #0a0d14;
-      box-shadow: 0 4px 15px rgba(245, 208, 97, 0.35);
+      background: linear-gradient(135deg, #b91c1c, #dc2626);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
+      border: 1px solid rgba(254, 240, 138, 0.4);
     }
     .btn-gold:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(245, 208, 97, 0.5);
+      box-shadow: 0 6px 22px rgba(220, 38, 38, 0.55);
+      background: linear-gradient(135deg, #dc2626, #ef4444);
     }
 
     .btn-outline {
@@ -143,7 +146,7 @@
       transition: transform 0.2s;
     }
     .stat-card:hover {
-      border-color: var(--gold);
+      border-color: var(--casino-red);
       transform: translateY(-2px);
     }
     .stat-num {
@@ -192,8 +195,8 @@
       transition: all 0.2s;
     }
     .search-input:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 15px rgba(245, 208, 97, 0.2);
+      border-color: var(--casino-red);
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.25);
     }
 
     .search-icon {
@@ -228,8 +231,8 @@
       background: rgba(255, 255, 255, 0.1);
     }
     .filter-btn.active {
-      background: #3b82f6;
-      border-color: #60a5fa;
+      background: #b91c1c;
+      border-color: #ef4444;
       color: #fff;
       font-weight: 600;
     }
@@ -310,7 +313,7 @@
       object-fit: fill;
     }
 
-    /* DIAGONAL CORNERS FOR REGULAR CARDS */
+    /* DIAGONAL CORNERS FOR REGULAR CARDS (1-52) */
     .card-corner-top-right {
       position: absolute;
       top: 8px;
@@ -340,7 +343,7 @@
       letter-spacing: -0.3px;
     }
 
-    /* JOKER STYLING: NO SERIAL NUMBERS, ONLY STAR ★ */
+    /* JOKER STYLING: NO FLOATING DIVS! Single star inside SVG frame */
     .joker-front-box {
       width: 100%;
       height: 100%;
@@ -350,28 +353,6 @@
       justify-content: center;
       background: #ffffff;
       position: relative;
-    }
-
-    .joker-corner-star-tr {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      font-size: 16px;
-      font-weight: 800;
-      z-index: 10;
-      line-height: 1;
-      pointer-events: none;
-    }
-
-    .joker-corner-star-bl {
-      position: absolute;
-      bottom: 8px;
-      left: 10px;
-      font-size: 16px;
-      font-weight: 800;
-      z-index: 10;
-      line-height: 1;
-      pointer-events: none;
     }
 
     .joker-art-wrap {
@@ -407,7 +388,7 @@
     }
 
     .flip-btn-pill {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       color: #fef08a;
       border: 1px solid rgba(245, 208, 97, 0.4);
       padding: 4px 12px;
@@ -425,110 +406,95 @@
       color: #0f172a;
     }
 
-    /* BACK FACE: Luxury QR Medallion */
+    /* BACK FACE: AUTHENTIC CASINO RED PLAYING CARD BACK */
     .card-back {
-      background: radial-gradient(circle at center, #1e293b 0%, #090e17 100%);
+      background-color: #ffffff;
       transform: rotateY(180deg);
-      border: 7px solid #ffffff;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 10px 10px;
       position: relative;
-    }
-
-    .back-ornate-outer {
-      position: absolute;
-      inset: 4px;
-      border: 1pt solid rgba(212, 175, 55, 0.4);
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
-    .back-ornate-inner {
-      position: absolute;
-      inset: 8px;
-      border: 0.5pt solid rgba(212, 175, 55, 0.25);
-      pointer-events: none;
-    }
-
-    .back-meta-box {
-      z-index: 5;
-      text-align: center;
-      max-width: 90%;
-    }
-
-    .back-num-tag {
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--gold);
-      background: rgba(212, 175, 55, 0.15);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      padding: 2px 10px;
-      border-radius: 12px;
-      display: inline-block;
-      margin-bottom: 4px;
-    }
-
-    .back-card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.25;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .back-category-tag {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* Filigree Medallion with REAL QR Code */
-    .filigree-ring {
-      position: relative;
-      width: 108px;
-      height: 108px;
-      border-radius: 50%;
-      border: 2px solid #d4af37;
-      box-shadow: 0 0 16px rgba(212, 175, 55, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #ffffff;
-      z-index: 5;
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     }
 
-    .qr-img {
-      width: 82px;
-      height: 82px;
+    .card-back-red-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .card-back-red-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Central White Medallion Housing the Barcode/QR */
+    .card-back-qr-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 74px;
+      height: 74px;
+      background: #ffffff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .card-back-qr-center img {
+      width: 68px;
+      height: 68px;
       display: block;
       object-fit: contain;
     }
 
-    .back-footer-wrap {
-      z-index: 5;
-      text-align: center;
+    .card-back-top-pill {
+      position: absolute;
+      top: 14px;
+      z-index: 10;
+      background: rgba(127, 29, 29, 0.95);
+      border: 1px solid #fde047;
+      color: #fef08a;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      letter-spacing: 0.3px;
+    }
+
+    .card-back-footer-actions {
+      position: absolute;
+      bottom: 12px;
+      z-index: 10;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       gap: 6px;
-      width: 100%;
+      align-items: center;
     }
 
     .test-media-link {
-      background: linear-gradient(135deg, rgba(245, 208, 97, 0.25), rgba(245, 208, 97, 0.1));
+      background: rgba(15, 23, 42, 0.92);
       border: 1px solid var(--gold);
       color: var(--gold-light);
-      padding: 3px 12px;
+      padding: 4px 10px;
       border-radius: 16px;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       font-weight: 700;
       text-decoration: none;
       display: inline-flex;
@@ -549,8 +515,8 @@
     <div class="badge">🎴 חפיסת 54 קלפי פוקר אוניברסליים • CardGame</div>
     <h1>לוח ניהול ותצוגת הקלפים האוניברסליים</h1>
     <p class="subtitle">
-      תצוגה דו-צדדית אינטראקטיבית (חזית וגב) • לכל קלף יש QR אמיתי המציג מדיה בלעדית בסריקה!<br>
-      שני הג'וקרים זהים לחלוטין וצבעוניים, כוללים כוכב קלאסי ★ ללא מספרים, ואיור ליצן חצר עומד אותנטי.
+      גב הקלפים מעוצב כגב פוקר קלאסי אדום אותנטי, כשהברקוד (QR) משולב בהרמוניה בחלק האדום הפנימי.<br>
+      הג'וקרים כוללים כוכב יחיד בפינה הימנית העליונה בתוך המסגרת: <strong>כוכב אדום</strong> לג'וקר 53 ו-<strong>כוכב צהוב</strong> לג'וקר 54.
     </p>
 
     <!-- Top Action Buttons -->
@@ -560,8 +526,8 @@
         <span id="flipAllText">הפוך את כל הקלפים לגב</span>
       </button>
 
-      <a href="index.html" class="btn btn-outline" target="_blank">
-        📱 פתח נגן מדיה לבדיקה (index.html)
+      <a href="https://zehavitalon.github.io/CardGame/index.html?card=1" class="btn btn-outline" target="_blank">
+        📱 פתח נגן מדיה חי (GitHub Pages)
       </a>
 
       <a href="universal_print.html" class="btn btn-outline" target="_blank">
@@ -597,7 +563,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-num" id="statJoker">2</div>
-        <div class="stat-label">ג'וקרים צבעוניים 🃏</div>
+        <div class="stat-label">ג'וקרים (אדום/צהוב) 🃏</div>
       </div>
     </div>
   </header>
@@ -638,8 +604,8 @@
   </main>
 
   <script>
-    // 1. Direct embedded fallback deck (guarantees cards ALWAYS render offline and under file://)
-    const EMBEDDED_DECK = [{"id": 1, "number": 1, "cid": "Ac", "suit": "c", "suit_name": "תלתן", "rank": "A", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_1.mp3", "qr_file": "assets/qr/qr_card_1.png", "year": 1808, "year_display": "1808", "title": "בטהובן – הסימפוניה החמישית", "description": "המוטיב המפורסם ביותר בתולדות המוזיקה הקלאסית (טה-טה-טה-טאאאם!).", "hint": "האזינו לפתיחה העוצמתית... באיזו שנה הושלמה יצירת מופת זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=1"}, {"id": 2, "number": 2, "cid": "2c", "suit": "c", "suit_name": "תלתן", "rank": "2", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_2.mp3", "qr_file": "assets/qr/qr_card_2.png", "year": 1787, "year_display": "1787", "title": "מוצרט – מוזיקת לילה זעירה", "description": "הסרנדה האלגנטית מס' 13 למיתרים בסול מז'ור מאת וולפגנג אמדאוס מוצרט.", "hint": "האזינו לסרנדה העליזה... באיזו שנה הלחין מוצרט יצירה קלאסית זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=2"}, {"id": 3, "number": 3, "cid": "3c", "suit": "c", "suit_name": "תלתן", "rank": "3", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_3.mp3", "qr_file": "assets/qr/qr_card_3.png", "year": 1723, "year_display": "1723", "title": "ויוואלדי – ארבע העונות: אביב", "description": "קונצ'רטו מס' 1 במי מז'ור מתוך יצירתו פורצת הדרך של אנטוניו ויוואלדי.", "hint": "האזינו לציוצי הציפורים בכינור... באיזו שנה נוצר קונצ'רטו האביב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=3"}, {"id": 4, "number": 4, "cid": "4c", "suit": "c", "suit_name": "תלתן", "rank": "4", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_4.mp3", "qr_file": "assets/qr/qr_card_4.png", "year": 1902, "year_display": "1902", "title": "סקוט ג'ופלין – The Entertainer", "description": "נעימת הרגטיים הקלאסית שהפכה לסמל התרבות של ראשית המאה ה-20.", "hint": "האזינו למקצב הרגטיים לפסנתר... באיזו שנה פורסם הלהיט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=4"}, {"id": 5, "number": 5, "cid": "5c", "suit": "c", "suit_name": "תלתן", "rank": "5", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_5.mp3", "qr_file": "assets/qr/qr_card_5.png", "year": 1680, "year_display": "1680", "title": "יוהאן פכלבל – קנון ברה מז'ור", "description": "היצירה הבארוקית המפורסמת ביותר בעולם עם מהלך האקורדים הנצחי.", "hint": "האזינו להרמוניה המרגיעה... מאיזו תקופה בתקופת הבארוק שיר זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=5"}, {"id": 6, "number": 6, "cid": "6c", "suit": "c", "suit_name": "תלתן", "rank": "6", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_6.mp3", "qr_file": "assets/qr/qr_card_6.png", "year": 1876, "year_display": "1876", "title": "צ'ייקובסקי – אגם הברבורים", "description": "נושא הברבור הנוגה והמרגש מתוך הבלט המפורסם בעולם.", "hint": "האזינו לצליל האבוב הענוג... באיזו שנה נכתב הבלט הרוסי האגדי?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=6"}, {"id": 7, "number": 7, "cid": "7c", "suit": "c", "suit_name": "תלתן", "rank": "7", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_7.mp3", "qr_file": "assets/qr/qr_card_7.png", "year": 1725, "year_display": "1725", "title": "יוהאן סבסטיאן באך – מנואט בסול מז'ור", "description": "המנואט המפורסם מספר התווים של אנה מגדלנה באך.", "hint": "האזינו לצליל המקלדת העדין... באיזו שנה הופיע מנואט מוכר זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=7"}, {"id": 8, "number": 8, "cid": "8c", "suit": "c", "suit_name": "תלתן", "rank": "8", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_8.mp3", "qr_file": "assets/qr/qr_card_8.png", "year": 1875, "year_display": "1875", "title": "ז'ורז' ביזה – כרמן: הבנרה", "description": "האריה המפורסמת 'L'amour est un oiseau rebelle' מתוך האופרה כרמן.", "hint": "האזינו למקצב ההבנרה הספרדי... באיזו שנה עלתה האופרה בפריז?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=8"}, {"id": 9, "number": 9, "cid": "9c", "suit": "c", "suit_name": "תלתן", "rank": "9", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_9.mp3", "qr_file": "assets/qr/qr_card_9.png", "year": 1868, "year_display": "1868", "title": "יוהנס ברהמס – שיר ערש", "description": "שיר הערש המוכר ביותר בעולם שהרדים מיליארדי ילדים לאורך הדורות.", "hint": "האזינו לשיר הערש הנודע... באיזו שנה הקדיש ברהמס את היצירה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=9"}, {"id": 10, "number": 10, "cid": "Tc", "suit": "c", "suit_name": "תלתן", "rank": "10", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_10.mp3", "qr_file": "assets/qr/qr_card_10.png", "year": 1866, "year_display": "1866", "title": "יוהאן שטראוס – הדנובה הכחולה", "description": "ואלס וינאי מלכותי שהפך להמנון הבלתי-רשמי של אוסטריה.", "hint": "האזינו לצעדי הואלס הסוחפים... באיזו שנה הולחן ואלס הדנובה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=10"}, {"id": 11, "number": 11, "cid": "Jc", "suit": "c", "suit_name": "תלתן", "rank": "J", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_11.mp3", "qr_file": "assets/qr/qr_card_11.png", "year": 1829, "year_display": "1829", "title": "ג'ואקינו רוסיני – וילהלם טל", "description": "פתיחת האופרה וילהלם טל עם קצב דהירת הסוסים הנודע.", "hint": "האזינו לדהירה המלהיבה... באיזו שנה הוצגה האופרה לראשונה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=11"}, {"id": 12, "number": 12, "cid": "Qc", "suit": "c", "suit_name": "תלתן", "rank": "Q", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_12.mp3", "qr_file": "assets/qr/qr_card_12.png", "year": 1832, "year_display": "1832", "title": "פרדריק שופן – נוקטורן במי-במול מז'ור", "description": "הנוקטורן אופוס 9 מס' 2 – סמל הרומנטיקה לפסנתר מאת שופן.", "hint": "האזינו למלודיה הרומנטית... באיזו שנה פורסם נוקטורן אהוב זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=12"}, {"id": 13, "number": 13, "cid": "Kc", "suit": "c", "suit_name": "תלתן", "rank": "K", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_13.mp3", "qr_file": "assets/qr/qr_card_13.png", "year": 1875, "year_display": "1875", "title": "אדוורד גריג – בוקר (פר גינט)", "description": "מצב רוח בוקר מתוך הסוויטה הנורווגית פר גינט.", "hint": "האזינו לזריחת השמש בצלילים... באיזו שנה נוצרה המוזיקה לפר גינט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=13"}, {"id": 14, "number": 14, "cid": "Ad", "suit": "d", "suit_name": "יהלום", "rank": "A", "color": "red", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_14.mp3", "qr_file": "assets/qr/qr_card_14.png", "year": 1905, "year_display": "1905", "title": "קלוד דביסי – אור ירח (Clair de Lune)", "description": "הפנינה האימפרסיוניסטית העדינה והקסומה מתוך הסוויטה הברגמסקית.", "hint": "האזינו לאור הירח הקסום... באיזו שנה פורסם קטע אימפרסיוניסטי זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=14"}, {"id": 15, "number": 15, "cid": "2d", "suit": "d", "suit_name": "יהלום", "rank": "2", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_15.mp4", "qr_file": "assets/qr/qr_card_15.png", "year": 1969, "year_display": "1969", "title": "נחיתת אפולו 11 על הירח", "description": "האדם הראשון מציב את כף רגלו על אדמת הירח (ניל ארמסטרונג ובאז אולדרין).", "hint": "צפו ברגע ההיסטורי של נחיתת החללית... באיזו שנה נכבש הירח?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=15"}, {"id": 16, "number": 16, "cid": "3d", "suit": "d", "suit_name": "יהלום", "rank": "3", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_16.mp4", "qr_file": "assets/qr/qr_card_16.png", "year": 1903, "year_display": "1903", "title": "הטיסה הממונעת הראשונה (האחים רייט)", "description": "אורוויל ווילבור רייט ממריאים לראשונה בכלי טיס ממונע בקיטי הוק.", "hint": "צפו במטוס הפרימיטיבי ממריא... באיזו שנה נולדה התעופה המודרנית?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=16"}, {"id": 17, "number": 17, "cid": "4d", "suit": "d", "suit_name": "יהלום", "rank": "4", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_17.mp4", "qr_file": "assets/qr/qr_card_17.png", "year": 1919, "year_display": "1919", "title": "ליקוי החמה שאישר את תורת היחסות", "description": "משלחת אדינגטון מצלמת את כפיפת קרני האור ומוכיחה את התאוריה של איינשטיין.", "hint": "צפו בליקוי החמה הקוסמי... באיזו שנה אושרה תורת היחסות?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=17"}, {"id": 18, "number": 18, "cid": "5d", "suit": "d", "suit_name": "יהלום", "rank": "5", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_18.mp4", "qr_file": "assets/qr/qr_card_18.png", "year": 1829, "year_display": "1829", "title": "רכבת הקיטור ההיסטורית – The Rocket", "description": "הקטר של רוברט סטיבנסון מנצח בניסויי ריינהיל וסולל את מהפכת הרכבות.", "hint": "צפו בקטר הקיטור השועט... באיזו שנה החלה עידן הרכבות?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=18"}, {"id": 19, "number": 19, "cid": "6d", "suit": "d", "suit_name": "יהלום", "rank": "6", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_19.mp4", "qr_file": "assets/qr/qr_card_19.png", "year": 1972, "year_display": "1972", "title": "צילום כדור הארץ – הגולה הכחולה (The Blue Marble)", "description": "צוות אפולו 17 לוכד את התמונה המלאה המפורסמת ביותר של כדור הארץ ממעמקי החלל.", "hint": "צפו בכדור הארץ המרחף בבדידות... באיזו שנה צולמה הגולה הכחולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=19"}, {"id": 20, "number": 20, "cid": "7d", "suit": "d", "suit_name": "יהלום", "rank": "7", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_20.mp4", "qr_file": "assets/qr/qr_card_20.png", "year": 1960, "year_display": "1960", "title": "צלילה לתהום מריאנה (שקע צ'לנג'ר)", "description": "הבתיסקף 'טריאסטה' מגיעה לקרקעית העמוקה ביותר של כדור הארץ (10,911 מטר).", "hint": "צפו בצוללת החודרת למעמקים... באיזו שנה נכבש המקום העמוק בעולם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=20"}, {"id": 21, "number": 21, "cid": "8d", "suit": "d", "suit_name": "יהלום", "rank": "8", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_21.mp4", "qr_file": "assets/qr/qr_card_21.png", "year": 1924, "year_display": "1924", "title": "גילוי גלקסיות מחוץ לשביל החלב (אדווין האבל)", "description": "האסטרונום האבל מוכיח שגלקסיית אנדרומדה נמצאת מחוץ לשביל החלב והיקום עצום.", "hint": "צפו בספירלת הגלקסיה המסתחררת... באיזו שנה התגלה היקום הרחב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=21"}, {"id": 22, "number": 22, "cid": "9d", "suit": "d", "suit_name": "יהלום", "rank": "9", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_22.mp4", "qr_file": "assets/qr/qr_card_22.png", "year": 1896, "year_display": "1896", "title": "חידוש המשחקים האולימפיים באתונה", "description": "המשחקים האולימפיים המודרניים הראשונים ביוזמת פייר דה קוברטן באצטדיון פאנאתינאיקו.", "hint": "צפו באצנים החוצים את קו הסיום... באיזו שנה חודשה האולימפיאדה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=22"}, {"id": 23, "number": 23, "cid": "Td", "suit": "d", "suit_name": "יהלום", "rank": "10", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_23.mp4", "qr_file": "assets/qr/qr_card_23.png", "year": 1936, "year_display": "1936", "title": "המסע הראשון של הלפיד האולימפי", "description": "המסורת של מרוץ הלפיד מאולימפיה ועד לקלחת האולימפית מתקיימת לראשונה.", "hint": "צפו באש האולימפית הניצתת... באיזו שנה נולד מרוץ הלפיד?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=23"}, {"id": 24, "number": 24, "cid": "Jd", "suit": "d", "suit_name": "יהלום", "rank": "J", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_24.mp4", "qr_file": "assets/qr/qr_card_24.png", "year": 1937, "year_display": "1937", "title": "פתיחת גשר שער הזהב בסן פרנסיסקו", "description": "אחד מפלאי ההנדסה הגדולים בעולם נחנך מעל מצר שער הזהב בקליפורניה.", "hint": "צפו במיתרי הגשר הכתומים מול השקיעה... באיזו שנה נפתח הגשר המפורסם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=24"}, {"id": 25, "number": 25, "cid": "Qd", "suit": "d", "suit_name": "יהלום", "rank": "Q", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_25.mp4", "qr_file": "assets/qr/qr_card_25.png", "year": 1883, "year_display": "1883", "title": "התפרצות הר הגעש קרקטואה", "description": "אחת ההתפרצויות הגעשיות העוצמתיות בהיסטוריה, שצליליה נשמעו במרחק אלפי קילומטרים.", "hint": "צפו בלבה ובאפר המתפרצים... באיזו שנה ארעה ההתפרצות הגדולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=25"}, {"id": 26, "number": 26, "cid": "Kd", "suit": "d", "suit_name": "יהלום", "rank": "K", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_26.mp4", "qr_file": "assets/qr/qr_card_26.png", "year": 1783, "year_display": "1783", "title": "הטיסה הראשונה בכדור פורח (האחים מונגולפייה)", "description": "לראשונה בהיסטוריה בני אדם עולים לאוויר בכדור פורח מלא אוויר חם בפריז.", "hint": "צפו בכדור הפורח עולה אל על... מאיזו שנה החל האדם לרחף בשמיים?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=26"}, {"id": 27, "number": 27, "cid": "Ah", "suit": "h", "suit_name": "לב", "rank": "A", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_27.mp4", "qr_file": "assets/qr/qr_card_27.png", "year": 1964, "year_display": "1964", "title": "השקת רכבת הקליע – שינקנסן ביפן", "description": "רכבת המהירה הראשונה בעולם מתחילה לפעול בקו טוקיו-אוסקה לקראת אולימפיאדת טוקיו.", "hint": "צפו ברכבת הקליע חולפת מול הר פוג'י... באיזו שנה הושק השינקנסן?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=27"}, {"id": 28, "number": 28, "cid": "2h", "suit": "h", "suit_name": "לב", "rank": "2", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_28.mp4", "qr_file": "assets/qr/qr_card_28.png", "year": 1519, "year_display": "1519", "title": "מסע הקפת העולם של פרדיננד מגלן", "description": "צי האוניות יוצא מספרד למסע הימי הראשון שמקיף את כדור הארץ ומוכיח את עגלגלותו.", "hint": "צפו בספינת המפרש החוצה אוקיינוסים... באיזו שנה יצא מגלן למסעו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=28"}, {"id": 29, "number": 29, "cid": "3h", "suit": "h", "suit_name": "לב", "rank": "3", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_29.jpg", "qr_file": "assets/qr/qr_card_29.png", "year": -2560, "year_display": "2560 לפנה\"ס", "title": "הפירמידה הגדולה של גיזה", "description": "הפלא היחיד משבעת פלאי תבל של העולם העתיק שעדיין עומד על תילו במצרים.", "hint": "התבוננו בפירמידות העתיקות... מאיזו שנה לפני הספירה נבנה פלא זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=29"}, {"id": 30, "number": 30, "cid": "4h", "suit": "h", "suit_name": "לב", "rank": "4", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_30.jpg", "qr_file": "assets/qr/qr_card_30.png", "year": 1889, "year_display": "1889", "title": "מגדל אייפל בפריז", "description": "המבנה האיקוני של גוסטב אייפל שנבנה לכבוד התערוכה העולמית של פריז.", "hint": "התבוננו במגדל הברזל המפורסם... באיזו שנה נחנך מגדל אייפל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=30"}, {"id": 31, "number": 31, "cid": "5h", "suit": "h", "suit_name": "לב", "rank": "5", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_31.jpg", "qr_file": "assets/qr/qr_card_31.png", "year": 80, "year_display": "80 לספירה", "title": "הקולוסיאום ברומא", "description": "אמפיתיאטרון פלביום הענק במרכז רומא, סמל העוצמה של האימפריה הרומית.", "hint": "התבוננו בקשתות האבן העתיקות... באיזו שנה נחנך הקולוסיאום?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=31"}, {"id": 32, "number": 32, "cid": "6h", "suit": "h", "suit_name": "לב", "rank": "6", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_32.jpg", "qr_file": "assets/qr/qr_card_32.png", "year": 1632, "year_display": "1632", "title": "הטאג' מאהל בהודו", "description": "מונומנט השיש הלבן המרהיב שנבנה על ידי הקיסר שאה ג'האן לזכר אשתו מומתאז מאהל.", "hint": "התבוננו בארמון השיש הלבן... באיזו שנה החלה בניית הטאג' מאהל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=32"}, {"id": 33, "number": 33, "cid": "7h", "suit": "h", "suit_name": "לב", "rank": "7", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_33.jpg", "qr_file": "assets/qr/qr_card_33.png", "year": 1886, "year_display": "1886", "title": "פסל החירות בניו יורק", "description": "מתנת העם הצרפתי לארצות הברית לכבוד יובל המאה לעצמאותה, פרי יצירתו של ברתולדי.", "hint": "התבוננו בלפיד החירות... באיזו שנה הוקם הפסל בנמל ניו יורק?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=33"}, {"id": 34, "number": 34, "cid": "8h", "suit": "h", "suit_name": "לב", "rank": "8", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_34.jpg", "qr_file": "assets/qr/qr_card_34.png", "year": -700, "year_display": "700 לפנה\"ס", "title": "החומה הגדולה של סין", "description": "מערך הביצורים הארוך בעולם הנמתח לאורך אלפי קילומטרים על רכסי ההרים.", "hint": "התבוננו בחומה המתפתלת... מאיזו תקופה החלה בניית החומה הגדולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=34"}, {"id": 35, "number": 35, "cid": "9h", "suit": "h", "suit_name": "לב", "rank": "9", "color": "red", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_35.jpg", "qr_file": "assets/qr/qr_card_35.png", "year": 1440, "year_display": "1440", "title": "המצאת דפוס גוטנברג", "description": "יוהנס גוטנברג ממציא את הדפוס המודרני עם אותיות מתכת מיטלטלות ומחולל מהפכת מידע.", "hint": "התבוננו במכבש הדפוס... באיזו שנה המציא גוטנברג את הדפוס?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=35"}, {"id": 36, "number": 36, "cid": "Th", "suit": "h", "suit_name": "לב", "rank": "10", "color": "red", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_36.jpg", "qr_file": "assets/qr/qr_card_36.png", "year": 1928, "year_display": "1928", "title": "גילוי הפניצילין (אלכסנדר פלמינג)", "description": "התרופה האנטיביוטית הראשונה שהצילה מאות מיליוני בני אדם ממחלות זיהומיות.", "hint": "התבוננו בצלחת הפטרי... באיזו שנה גילה פלמינג את הפניצילין?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=36"}, {"id": 37, "number": 37, "cid": "Jh", "suit": "h", "suit_name": "לב", "rank": "J", "color": "red", "category": "photo", "category_name": "מדע וחלל 🖼️", "media_type": "picture", "media_file": "assets/images/image_37.jpg", "qr_file": "assets/qr/qr_card_37.png", "year": 1990, "year_display": "1990", "title": "טלסקופ החלל האבל", "description": "הטלסקופ האופטי הראשון ששוגר למסלול סביב כדור הארץ ושינה את הבנתנו על היקום.", "hint": "התבוננו בטלסקופ הצופה לגלקסיות... באיזו שנה שוגר האבל לחלל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=37"}, {"id": 38, "number": 38, "cid": "Qh", "suit": "h", "suit_name": "לב", "rank": "Q", "color": "red", "category": "photo", "category_name": "יצירת מופת 🖼️", "media_type": "picture", "media_file": "assets/images/image_38.jpg", "qr_file": "assets/qr/qr_card_38.png", "year": 1503, "year_display": "1503", "title": "המונה ליזה (לאונרדו דה וינצ'י)", "description": "הדיוקן המפורסם בעולם עם החיוך המסתורי המוצג במוזיאון הלובר בפריז.", "hint": "התבוננו בדיוקן המפורסם בעולם... באיזו שנה החל דה וינצ'י לצייר את המונה ליזה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=38"}, {"id": 39, "number": 39, "cid": "Kh", "suit": "h", "suit_name": "לב", "rank": "K", "color": "red", "category": "photo", "category_name": "ארכיאולוגיה 🖼️", "media_type": "picture", "media_file": "assets/images/image_39.jpg", "qr_file": "assets/qr/qr_card_39.png", "year": -196, "year_display": "196 לפנה\"ס", "title": "אבן הרוזטה", "description": "לוח האבן שהכיל טקסט בשלושה כתבים שונים ואפשר את פיענוח כתב החרטומים המצרי העתיק.", "hint": "התבוננו בלוח החרטומים העתיק... מאיזו שנה לפני הספירה נוצר לוח זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=39"}, {"id": 40, "number": 40, "cid": "As", "suit": "s", "suit_name": "עלה", "rank": "A", "color": "black", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_40.jpg", "qr_file": "assets/qr/qr_card_40.png", "year": 1859, "year_display": "1859", "title": "מגדל השעון ביג בן בלונדון", "description": "המגדל המפורסם של ארמון וסטמינסטר בלונדון שצלצול פעמונו נשמע ברחבי בריטניה.", "hint": "התבוננו במחוגי השעון של לונדון... באיזו שנה החל השעון לתקתק?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=40"}, {"id": 41, "number": 41, "cid": "2s", "suit": "s", "suit_name": "עלה", "rank": "2", "color": "black", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_41.jpg", "qr_file": "assets/qr/qr_card_41.png", "year": 1879, "year_display": "1879", "title": "המצאת נורת החשמל (תומאס אדיסון)", "description": "הנורה החשמלית המסחרית הראשונה שהאירה את העולם ושינתה את שגרת האנושות לנצח.", "hint": "התבוננו בחוט הלהט המאיר... באיזו שנה הדליק אדיסון את האור?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=41"}, {"id": 42, "number": 42, "cid": "3s", "suit": "s", "suit_name": "עלה", "rank": "3", "color": "black", "category": "photo", "category_name": "מסע עולמי 🖼️", "media_type": "picture", "media_file": "assets/images/image_42.jpg", "qr_file": "assets/qr/qr_card_42.png", "year": 1953, "year_display": "1953", "title": "כיבוש פסגת האוורסט (הילרי ונורגיי)", "description": "סר אדמונד הילרי וטנזינג נורגיי מגיעים לראשונה בהיסטוריה לפסגת ההר הגבוה בעולם.", "hint": "התבוננו ברכסי השלג של גג העולם... באיזו שנה נכבש האוורסט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=42"}, {"id": 43, "number": 43, "cid": "4s", "suit": "s", "suit_name": "עלה", "rank": "4", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_43.png", "year": 1863, "year_display": "1863", "title": "נאום גטיסברג – אברהם לינקולן", "quote": "ממשל של העם, בידי העם, למען העם, לא יכלה מן הארץ.", "description": "הנאום המכונן של נשיא ארצות הברית במהלך מלחמת האזרחים האמריקאית.", "hint": "קראו את המילים האלמותיות... באיזו שנה נישא נאום גטיסברג?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=43"}, {"id": 44, "number": 44, "cid": "5s", "suit": "s", "suit_name": "עלה", "rank": "5", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_44.png", "year": 1905, "year_display": "1905", "title": "תורת היחסות – אלברט איינשטיין", "quote": "דמיון חשוב יותר מידע. ידע הוא מוגבל, בעוד הדמיון חובק את העולם כולו.", "description": "דבריו של הפיזיקאי הדגול בשנה המופלאה (Annus Mirabilis) שבה שינה את פני המדע.", "hint": "קראו את תובנתו של המדען הדגול... באיזו שנה פרסם איינשטיין את מאמריו המהפכניים?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=44"}, {"id": 45, "number": 45, "cid": "6s", "suit": "s", "suit_name": "עלה", "rank": "6", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_45.png", "year": 1963, "year_display": "1963", "title": "מרטין לותר קינג – יש לי חלום (I Have a Dream)", "quote": "יש לי חלום שארבעת ילדיי יחיו יום אחד באומה שבה לא יישפטו לפי צבע עורם, אלא לפי אופיים.", "description": "הנאום ההיסטורי למרגלות אנדרטת לינקולן בוושינגטון ששינה את פני המאבק לזכויות האזרח.", "hint": "קראו את מילות התקווה... באיזו שנה נישא נאום 'יש לי חלום'?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=45"}, {"id": 46, "number": 46, "cid": "7s", "suit": "s", "suit_name": "עלה", "rank": "7", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_46.png", "year": 1940, "year_display": "1940", "title": "וינסטון צ'רצ'יל – שעתם היפה ביותר", "quote": "מעולם לא חבו רבים כל כך, חוב גדול כל כך, למעטים כל כך.", "description": "דבריו של ראש ממשלת בריטניה לטייסי חיל האוויר המלכותי בשיא הקרב על בריטניה.", "hint": "קראו את מילות הנחישות... באיזו שנת מלחמה נאמרו מילים אלו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=46"}, {"id": 47, "number": 47, "cid": "8s", "suit": "s", "suit_name": "עלה", "rank": "8", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_47.png", "year": 1776, "year_display": "1776", "title": "הכרזת העצמאות של ארצות הברית", "quote": "מקובלות עלינו אמיתות אלו כמוכחות מאליהן: שכל בני האדם נבראו שווים, ובוראם העניק להם זכויות שאינן ניתנות לשלילה, ובהן החיים, החירות והחתירה לאושר.", "description": "המסמך המכונן שנכתב בידי תומאס ג'פרסון ואושר בפילדלפיה ב-4 ביולי.", "hint": "קראו את יסודות החירות... באיזו שנה נחתמה הכרזת העצמאות של ארה\"ב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=47"}, {"id": 48, "number": 48, "cid": "9s", "suit": "s", "suit_name": "עלה", "rank": "9", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_48.png", "year": 1969, "year_display": "1969", "title": "ניל ארמסטרונג – צעד קטן לאדם", "quote": "זהו צעד קטן לאדם, אבל זינוק ענק לאנושות.", "description": "המילים הראשונות שנאמרו על פני עולם אחר בשידור ישיר מים השלווה על הירח.", "hint": "קראו את המילים ששודרו מהירח... באיזו שנה נאמרו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=48"}, {"id": 49, "number": 49, "cid": "Ts", "suit": "s", "suit_name": "עלה", "rank": "10", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_49.png", "year": -399, "year_display": "399 לפנה\"ס", "title": "סוקרטס – דע את עצמך", "quote": "חיים ללא חקירה אינם שווים לחיותם. חוכמה אמיתית היא לדעת שאינך יודע דבר.", "description": "תורת החיים של הפילוסוף היווני סוקרטס מאתונה העתיקה.", "hint": "קראו את חוכמת יוון העתיקה... מאיזו שנה לפני הספירה פילוסופיה זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=49"}, {"id": 50, "number": 50, "cid": "Js", "suit": "s", "suit_name": "עלה", "rank": "J", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_50.png", "year": 1948, "year_display": "1948", "title": "ההכרזה לכל באי עולם בדבר זכויות האדם", "quote": "כל בני האדם נולדו בני חורין ושווים בערכם ובזכויותיהם. כולם חוננו בתבונה ובמצפון, וחובתם לנהוג איש ברעהו ברוח של אחווה.", "description": "מסמך היסוד של האו\"ם שהתקבל בפריז לאחר מלחמת העולם השנייה.", "hint": "קראו את אמנת האנושות... באיזו שנת מפנה אומצה הכרזת זכויות האדם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=50"}, {"id": 51, "number": 51, "cid": "Qs", "suit": "s", "suit_name": "עלה", "rank": "Q", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_51.png", "year": 1601, "year_display": "1601", "title": "ויליאם שייקספיר – המלט", "quote": "להיות או לא להיות, זו השאלה. מה אצילי יותר בנפש: לשאת את חיצי הגורל, או לקחת נשק כנגד ים של ייסורים?", "description": "המונולוג הנודע ביותר בספרות העולמית מתוך הטרגדיה השייקספירית.", "hint": "קראו את שאלת הקיום של המלט... מאיזו שנה נכתב מחזה מופת זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=51"}, {"id": 52, "number": 52, "cid": "Ks", "suit": "s", "suit_name": "עלה", "rank": "K", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_52.png", "year": 1633, "year_display": "1633", "title": "גלילאו גליליי – ואף על פי כן נוע תנוע", "quote": "ואף על פי כן נוע תנוע! (E pur si muove) – האמת המדעית אינה תלויה בדעת הרוב או בסמכות.", "description": "אמרתו המיוחסת של גלילאו לאחר משפט האינקוויזיציה ברומא על תנועת כדור הארץ סביב השמש.", "hint": "קראו את אמרת המדען העז... באיזו שנה עמד גלילאו למשפט ברומא?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=52"}, {"id": 53, "number": 53, "isJoker": true, "suit": "joker", "suit_name": "ג'וקר", "rank": "★", "color": "red", "category": "joker", "category_name": "ג'וקר חופשי 🃏", "media_type": "joker", "media_file": "assets/joker_standing_color.svg", "qr_file": "assets/qr/qr_card_53.png", "year": 0, "year_display": "על-זמני", "title": "ג'וקר צבעוני – קלף חופשי (Wildcard)", "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.", "description": "ליצן החצר הקלאסי. מאפשר לשחקן להגן על הרצף או לגשר על פני כל פער שנים במשחק.", "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=53"}, {"id": 54, "number": 54, "isJoker": true, "suit": "joker", "suit_name": "ג'וקר", "rank": "★", "color": "red", "category": "joker", "category_name": "ג'וקר חופשי 🃏", "media_type": "joker", "media_file": "assets/joker_standing_color.svg", "qr_file": "assets/qr/qr_card_54.png", "year": 0, "year_display": "על-זמני", "title": "ג'וקר צבעוני – קלף חופשי (Wildcard)", "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.", "description": "ליצן החצר הקלאסי הצבעוני. קלף על-זמני שיכול להשתלב בכל נקודה בהיסטוריה.", "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=54"}];
+    // Embedded deck guarantees cards ALWAYS render offline and under file://
+    const EMBEDDED_DECK = [{"id": 1, "number": 1, "cid": "Ac", "suit": "c", "suit_name": "תלתן", "rank": "A", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_1.mp3", "qr_file": "assets/qr/qr_card_1.png", "year": 1808, "year_display": "1808", "title": "בטהובן – הסימפוניה החמישית", "description": "המוטיב המפורסם ביותר בתולדות המוזיקה הקלאסית (טה-טה-טה-טאאאם!).", "hint": "האזינו לפתיחה העוצמתית... באיזו שנה הושלמה יצירת מופת זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=1"}, {"id": 2, "number": 2, "cid": "2c", "suit": "c", "suit_name": "תלתן", "rank": "2", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_2.mp3", "qr_file": "assets/qr/qr_card_2.png", "year": 1787, "year_display": "1787", "title": "מוצרט – מוזיקת לילה זעירה", "description": "הסרנדה האלגנטית מס' 13 למיתרים בסול מז'ור מאת וולפגנג אמדאוס מוצרט.", "hint": "האזינו לסרנדה העליזה... באיזו שנה הלחין מוצרט יצירה קלאסית זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=2"}, {"id": 3, "number": 3, "cid": "3c", "suit": "c", "suit_name": "תלתן", "rank": "3", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_3.mp3", "qr_file": "assets/qr/qr_card_3.png", "year": 1723, "year_display": "1723", "title": "ויוואלדי – ארבע העונות: אביב", "description": "קונצ'רטו מס' 1 במי מז'ור מתוך יצירתו פורצת הדרך של אנטוניו ויוואלדי.", "hint": "האזינו לציוצי הציפורים בכינור... באיזו שנה נוצר קונצ'רטו האביב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=3"}, {"id": 4, "number": 4, "cid": "4c", "suit": "c", "suit_name": "תלתן", "rank": "4", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_4.mp3", "qr_file": "assets/qr/qr_card_4.png", "year": 1902, "year_display": "1902", "title": "סקוט ג'ופלין – The Entertainer", "description": "נעימת הרגטיים הקלאסית שהפכה לסמל התרבות של ראשית המאה ה-20.", "hint": "האזינו למקצב הרגטיים לפסנתר... באיזו שנה פורסם הלהיט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=4"}, {"id": 5, "number": 5, "cid": "5c", "suit": "c", "suit_name": "תלתן", "rank": "5", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_5.mp3", "qr_file": "assets/qr/qr_card_5.png", "year": 1680, "year_display": "1680", "title": "יוהאן פכלבל – קנון ברה מז'ור", "description": "היצירה הבארוקית המפורסמת ביותר בעולם עם מהלך האקורדים הנצחי.", "hint": "האזינו להרמוניה המרגיעה... מאיזו תקופה בתקופת הבארוק שיר זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=5"}, {"id": 6, "number": 6, "cid": "6c", "suit": "c", "suit_name": "תלתן", "rank": "6", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_6.mp3", "qr_file": "assets/qr/qr_card_6.png", "year": 1876, "year_display": "1876", "title": "צ'ייקובסקי – אגם הברבורים", "description": "נושא הברבור הנוגה והמרגש מתוך הבלט המפורסם בעולם.", "hint": "האזינו לצליל האבוב הענוג... באיזו שנה נכתב הבלט הרוסי האגדי?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=6"}, {"id": 7, "number": 7, "cid": "7c", "suit": "c", "suit_name": "תלתן", "rank": "7", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_7.mp3", "qr_file": "assets/qr/qr_card_7.png", "year": 1725, "year_display": "1725", "title": "יוהאן סבסטיאן באך – מנואט בסול מז'ור", "description": "המנואט המפורסם מספר התווים של אנה מגדלנה באך.", "hint": "האזינו לצליל המקלדת העדין... באיזו שנה הופיע מנואט מוכר זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=7"}, {"id": 8, "number": 8, "cid": "8c", "suit": "c", "suit_name": "תלתן", "rank": "8", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_8.mp3", "qr_file": "assets/qr/qr_card_8.png", "year": 1875, "year_display": "1875", "title": "ז'ורז' ביזה – כרמן: הבנרה", "description": "האריה המפורסמת 'L'amour est un oiseau rebelle' מתוך האופרה כרמן.", "hint": "האזינו למקצב ההבנרה הספרדי... באיזו שנה עלתה האופרה בפריז?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=8"}, {"id": 9, "number": 9, "cid": "9c", "suit": "c", "suit_name": "תלתן", "rank": "9", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_9.mp3", "qr_file": "assets/qr/qr_card_9.png", "year": 1868, "year_display": "1868", "title": "יוהנס ברהמס – שיר ערש", "description": "שיר הערש המוכר ביותר בעולם שהרדים מיליארדי ילדים לאורך הדורות.", "hint": "האזינו לשיר הערש הנודע... באיזו שנה הקדיש ברהמס את היצירה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=9"}, {"id": 10, "number": 10, "cid": "Tc", "suit": "c", "suit_name": "תלתן", "rank": "10", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_10.mp3", "qr_file": "assets/qr/qr_card_10.png", "year": 1866, "year_display": "1866", "title": "יוהאן שטראוס – הדנובה הכחולה", "description": "ואלס וינאי מלכותי שהפך להמנון הבלתי-רשמי של אוסטריה.", "hint": "האזינו לצעדי הואלס הסוחפים... באיזו שנה הולחן ואלס הדנובה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=10"}, {"id": 11, "number": 11, "cid": "Jc", "suit": "c", "suit_name": "תלתן", "rank": "J", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_11.mp3", "qr_file": "assets/qr/qr_card_11.png", "year": 1829, "year_display": "1829", "title": "ג'ואקינו רוסיני – וילהלם טל", "description": "פתיחת האופרה וילהלם טל עם קצב דהירת הסוסים הנודע.", "hint": "האזינו לדהירה המלהיבה... באיזו שנה הוצגה האופרה לראשונה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=11"}, {"id": 12, "number": 12, "cid": "Qc", "suit": "c", "suit_name": "תלתן", "rank": "Q", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_12.mp3", "qr_file": "assets/qr/qr_card_12.png", "year": 1832, "year_display": "1832", "title": "פרדריק שופן – נוקטורן במי-במול מז'ור", "description": "הנוקטורן אופוס 9 מס' 2 – סמל הרומנטיקה לפסנתר מאת שופן.", "hint": "האזינו למלודיה הרומנטית... באיזו שנה פורסם נוקטורן אהוב זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=12"}, {"id": 13, "number": 13, "cid": "Kc", "suit": "c", "suit_name": "תלתן", "rank": "K", "color": "black", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_13.mp3", "qr_file": "assets/qr/qr_card_13.png", "year": 1875, "year_display": "1875", "title": "אדוורד גריג – בוקר (פר גינט)", "description": "מצב רוח בוקר מתוך הסוויטה הנורווגית פר גינט.", "hint": "האזינו לזריחת השמש בצלילים... באיזו שנה נוצרה המוזיקה לפר גינט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=13"}, {"id": 14, "number": 14, "cid": "Ad", "suit": "d", "suit_name": "יהלום", "rank": "A", "color": "red", "category": "audio", "category_name": "נעימת שמע 🎵", "media_type": "audio", "media_file": "assets/audio/audio_14.mp3", "qr_file": "assets/qr/qr_card_14.png", "year": 1905, "year_display": "1905", "title": "קלוד דביסי – אור ירח (Clair de Lune)", "description": "הפנינה האימפרסיוניסטית העדינה והקסומה מתוך הסוויטה הברגמסקית.", "hint": "האזינו לאור הירח הקסום... באיזו שנה פורסם קטע אימפרסיוניסטי זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=14"}, {"id": 15, "number": 15, "cid": "2d", "suit": "d", "suit_name": "יהלום", "rank": "2", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_15.mp4", "qr_file": "assets/qr/qr_card_15.png", "year": 1969, "year_display": "1969", "title": "נחיתת אפולו 11 על הירח", "description": "האדם הראשון מציב את כף רגלו על אדמת הירח (ניל ארמסטרונג ובאז אולדרין).", "hint": "צפו ברגע ההיסטורי של נחיתת החללית... באיזו שנה נכבש הירח?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=15"}, {"id": 16, "number": 16, "cid": "3d", "suit": "d", "suit_name": "יהלום", "rank": "3", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_16.mp4", "qr_file": "assets/qr/qr_card_16.png", "year": 1903, "year_display": "1903", "title": "הטיסה הממונעת הראשונה (האחים רייט)", "description": "אורוויל ווילבור רייט ממריאים לראשונה בכלי טיס ממונע בקיטי הוק.", "hint": "צפו במטוס הפרימיטיבי ממריא... באיזו שנה נולדה התעופה המודרנית?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=16"}, {"id": 17, "number": 17, "cid": "4d", "suit": "d", "suit_name": "יהלום", "rank": "4", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_17.mp4", "qr_file": "assets/qr/qr_card_17.png", "year": 1919, "year_display": "1919", "title": "ליקוי החמה שאישר את תורת היחסות", "description": "משלחת אדינגטון מצלמת את כפיפת קרני האור ומוכיחה את התאוריה של איינשטיין.", "hint": "צפו בליקוי החמה הקוסמי... באיזו שנה אושרה תורת היחסות?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=17"}, {"id": 18, "number": 18, "cid": "5d", "suit": "d", "suit_name": "יהלום", "rank": "5", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_18.mp4", "qr_file": "assets/qr/qr_card_18.png", "year": 1829, "year_display": "1829", "title": "רכבת הקיטור ההיסטורית – The Rocket", "description": "הקטר של רוברט סטיבנסון מנצח בניסויי ריינהיל וסולל את מהפכת הרכבות.", "hint": "צפו בקטר הקיטור השועט... באיזו שנה החלה עידן הרכבות?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=18"}, {"id": 19, "number": 19, "cid": "6d", "suit": "d", "suit_name": "יהלום", "rank": "6", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_19.mp4", "qr_file": "assets/qr/qr_card_19.png", "year": 1972, "year_display": "1972", "title": "צילום כדור הארץ – הגולה הכחולה (The Blue Marble)", "description": "צוות אפולו 17 לוכד את התמונה המלאה המפורסמת ביותר של כדור הארץ ממעמקי החלל.", "hint": "צפו בכדור הארץ המרחף בבדידות... באיזו שנה צולמה הגולה הכחולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=19"}, {"id": 20, "number": 20, "cid": "7d", "suit": "d", "suit_name": "יהלום", "rank": "7", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_20.mp4", "qr_file": "assets/qr/qr_card_20.png", "year": 1960, "year_display": "1960", "title": "צלילה לתהום מריאנה (שקע צ'לנג'ר)", "description": "הבתיסקף 'טריאסטה' מגיעה לקרקעית העמוקה ביותר של כדור הארץ (10,911 מטר).", "hint": "צפו בצוללת החודרת למעמקים... באיזו שנה נכבש המקום העמוק בעולם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=20"}, {"id": 21, "number": 21, "cid": "8d", "suit": "d", "suit_name": "יהלום", "rank": "8", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_21.mp4", "qr_file": "assets/qr/qr_card_21.png", "year": 1924, "year_display": "1924", "title": "גילוי גלקסיות מחוץ לשביל החלב (אדווין האבל)", "description": "האסטרונום האבל מוכיח שגלקסיית אנדרומדה נמצאת מחוץ לשביל החלב והיקום עצום.", "hint": "צפו בספירלת הגלקסיה המסתחררת... באיזו שנה התגלה היקום הרחב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=21"}, {"id": 22, "number": 22, "cid": "9d", "suit": "d", "suit_name": "יהלום", "rank": "9", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_22.mp4", "qr_file": "assets/qr/qr_card_22.png", "year": 1896, "year_display": "1896", "title": "חידוש המשחקים האולימפיים באתונה", "description": "המשחקים האולימפיים המודרניים הראשונים ביוזמת פייר דה קוברטן באצטדיון פאנאתינאיקו.", "hint": "צפו באצנים החוצים את קו הסיום... באיזו שנה חודשה האולימפיאדה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=22"}, {"id": 23, "number": 23, "cid": "Td", "suit": "d", "suit_name": "יהלום", "rank": "10", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_23.mp4", "qr_file": "assets/qr/qr_card_23.png", "year": 1936, "year_display": "1936", "title": "המסע הראשון של הלפיד האולימפי", "description": "המסורת של מרוץ הלפיד מאולימפיה ועד לקלחת האולימפית מתקיימת לראשונה.", "hint": "צפו באש האולימפית הניצתת... באיזו שנה נולד מרוץ הלפיד?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=23"}, {"id": 24, "number": 24, "cid": "Jd", "suit": "d", "suit_name": "יהלום", "rank": "J", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_24.mp4", "qr_file": "assets/qr/qr_card_24.png", "year": 1937, "year_display": "1937", "title": "פתיחת גשר שער הזהב בסן פרנסיסקו", "description": "אחד מפלאי ההנדסה הגדולים בעולם נחנך מעל מצר שער הזהב בקליפורניה.", "hint": "צפו במיתרי הגשר הכתומים מול השקיעה... באיזו שנה נפתח הגשר המפורסם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=24"}, {"id": 25, "number": 25, "cid": "Qd", "suit": "d", "suit_name": "יהלום", "rank": "Q", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_25.mp4", "qr_file": "assets/qr/qr_card_25.png", "year": 1883, "year_display": "1883", "title": "התפרצות הר הגעש קרקטואה", "description": "אחת ההתפרצויות הגעשיות העוצמתיות בהיסטוריה, שצליליה נשמעו במרחק אלפי קילומטרים.", "hint": "צפו בלבה ובאפר המתפרצים... באיזו שנה ארעה ההתפרצות הגדולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=25"}, {"id": 26, "number": 26, "cid": "Kd", "suit": "d", "suit_name": "יהלום", "rank": "K", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_26.mp4", "qr_file": "assets/qr/qr_card_26.png", "year": 1783, "year_display": "1783", "title": "הטיסה הראשונה בכדור פורח (האחים מונגולפייה)", "description": "לראשונה בהיסטוריה בני אדם עולים לאוויר בכדור פורח מלא אוויר חם בפריז.", "hint": "צפו בכדור הפורח עולה אל על... מאיזו שנה החל האדם לרחף בשמיים?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=26"}, {"id": 27, "number": 27, "cid": "Ah", "suit": "h", "suit_name": "לב", "rank": "A", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_27.mp4", "qr_file": "assets/qr/qr_card_27.png", "year": 1964, "year_display": "1964", "title": "השקת רכבת הקליע – שינקנסן ביפן", "description": "רכבת המהירה הראשונה בעולם מתחילה לפעול בקו טוקיו-אוסקה לקראת אולימפיאדת טוקיו.", "hint": "צפו ברכבת הקליע חולפת מול הר פוג'י... באיזו שנה הושק השינקנסן?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=27"}, {"id": 28, "number": 28, "cid": "2h", "suit": "h", "suit_name": "לב", "rank": "2", "color": "red", "category": "video", "category_name": "סרטון היסטורי 🎬", "media_type": "video", "media_file": "assets/videos/video_28.mp4", "qr_file": "assets/qr/qr_card_28.png", "year": 1519, "year_display": "1519", "title": "מסע הקפת העולם של פרדיננד מגלן", "description": "צי האוניות יוצא מספרד למסע הימי הראשון שמקיף את כדור הארץ ומוכיח את עגלגלותו.", "hint": "צפו בספינת המפרש החוצה אוקיינוסים... באיזו שנה יצא מגלן למסעו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=28"}, {"id": 29, "number": 29, "cid": "3h", "suit": "h", "suit_name": "לב", "rank": "3", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_29.jpg", "qr_file": "assets/qr/qr_card_29.png", "year": -2560, "year_display": "2560 לפנה\"ס", "title": "הפירמידה הגדולה של גיזה", "description": "הפלא היחיד משבעת פלאי תבל של העולם העתיק שעדיין עומד על תילו במצרים.", "hint": "התבוננו בפירמידות העתיקות... מאיזו שנה לפני הספירה נבנה פלא זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=29"}, {"id": 30, "number": 30, "cid": "4h", "suit": "h", "suit_name": "לב", "rank": "4", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_30.jpg", "qr_file": "assets/qr/qr_card_30.png", "year": 1889, "year_display": "1889", "title": "מגדל אייפל בפריז", "description": "המבנה האיקוני של גוסטב אייפל שנבנה לכבוד התערוכה העולמית של פריז.", "hint": "התבוננו במגדל הברזל המפורסם... באיזו שנה נחנך מגדל אייפל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=30"}, {"id": 31, "number": 31, "cid": "5h", "suit": "h", "suit_name": "לב", "rank": "5", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_31.jpg", "qr_file": "assets/qr/qr_card_31.png", "year": 80, "year_display": "80 לספירה", "title": "הקולוסיאום ברומא", "description": "אמפיתיאטרון פלביום הענק במרכז רומא, סמל העוצמה של האימפריה הרומית.", "hint": "התבוננו בקשתות האבן העתיקות... באיזו שנה נחנך הקולוסיאום?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=31"}, {"id": 32, "number": 32, "cid": "6h", "suit": "h", "suit_name": "לב", "rank": "6", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_32.jpg", "qr_file": "assets/qr/qr_card_32.png", "year": 1632, "year_display": "1632", "title": "הטאג' מאהל בהודו", "description": "מונומנט השיש הלבן המרהיב שנבנה על ידי הקיסר שאה ג'האן לזכר אשתו מומתאז מאהל.", "hint": "התבוננו בארמון השיש הלבן... באיזו שנה החלה בניית הטאג' מאהל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=32"}, {"id": 33, "number": 33, "cid": "7h", "suit": "h", "suit_name": "לב", "rank": "7", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_33.jpg", "qr_file": "assets/qr/qr_card_33.png", "year": 1886, "year_display": "1886", "title": "פסל החירות בניו יורק", "description": "מתנת העם הצרפתי לארצות הברית לכבוד יובל המאה לעצמאותה, פרי יצירתו של ברתולדי.", "hint": "התבוננו בלפיד החירות... באיזו שנה הוקם הפסל בנמל ניו יורק?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=33"}, {"id": 34, "number": 34, "cid": "8h", "suit": "h", "suit_name": "לב", "rank": "8", "color": "red", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_34.jpg", "qr_file": "assets/qr/qr_card_34.png", "year": -700, "year_display": "700 לפנה\"ס", "title": "החומה הגדולה של סין", "description": "מערך הביצורים הארוך בעולם הנמתח לאורך אלפי קילומטרים על רכסי ההרים.", "hint": "התבוננו בחומה המתפתלת... מאיזו תקופה החלה בניית החומה הגדולה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=34"}, {"id": 35, "number": 35, "cid": "9h", "suit": "h", "suit_name": "לב", "rank": "9", "color": "red", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_35.jpg", "qr_file": "assets/qr/qr_card_35.png", "year": 1440, "year_display": "1440", "title": "המצאת דפוס גוטנברג", "description": "יוהנס גוטנברג ממציא את הדפוס המודרני עם אותיות מתכת מיטלטלות ומחולל מהפכת מידע.", "hint": "התבוננו במכבש הדפוס... באיזו שנה המציא גוטנברג את הדפוס?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=35"}, {"id": 36, "number": 36, "cid": "Th", "suit": "h", "suit_name": "לב", "rank": "10", "color": "red", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_36.jpg", "qr_file": "assets/qr/qr_card_36.png", "year": 1928, "year_display": "1928", "title": "גילוי הפניצילין (אלכסנדר פלמינג)", "description": "התרופה האנטיביוטית הראשונה שהצילה מאות מיליוני בני אדם ממחלות זיהומיות.", "hint": "התבוננו בצלחת הפטרי... באיזו שנה גילה פלמינג את הפניצילין?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=36"}, {"id": 37, "number": 37, "cid": "Jh", "suit": "h", "suit_name": "לב", "rank": "J", "color": "red", "category": "photo", "category_name": "מדע וחלל 🖼️", "media_type": "picture", "media_file": "assets/images/image_37.jpg", "qr_file": "assets/qr/qr_card_37.png", "year": 1990, "year_display": "1990", "title": "טלסקופ החלל האבל", "description": "הטלסקופ האופטי הראשון ששוגר למסלול סביב כדור הארץ ושינה את הבנתנו על היקום.", "hint": "התבוננו בטלסקופ הצופה לגלקסיות... באיזו שנה שוגר האבל לחלל?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=37"}, {"id": 38, "number": 38, "cid": "Qh", "suit": "h", "suit_name": "לב", "rank": "Q", "color": "red", "category": "photo", "category_name": "יצירת מופת 🖼️", "media_type": "picture", "media_file": "assets/images/image_38.jpg", "qr_file": "assets/qr/qr_card_38.png", "year": 1503, "year_display": "1503", "title": "המונה ליזה (לאונרדו דה וינצ'י)", "description": "הדיוקן המפורסם בעולם עם החיוך המסתורי המוצג במוזיאון הלובר בפריז.", "hint": "התבוננו בדיוקן המפורסם בעולם... באיזו שנה החל דה וינצ'י לצייר את המונה ליזה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=38"}, {"id": 39, "number": 39, "cid": "Kh", "suit": "h", "suit_name": "לב", "rank": "K", "color": "red", "category": "photo", "category_name": "ארכיאולוגיה 🖼️", "media_type": "picture", "media_file": "assets/images/image_39.jpg", "qr_file": "assets/qr/qr_card_39.png", "year": -196, "year_display": "196 לפנה\"ס", "title": "אבן הרוזטה", "description": "לוח האבן שהכיל טקסט בשלושה כתבים שונים ואפשר את פיענוח כתב החרטומים המצרי העתיק.", "hint": "התבוננו בלוח החרטומים העתיק... מאיזו שנה לפני הספירה נוצר לוח זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=39"}, {"id": 40, "number": 40, "cid": "As", "suit": "s", "suit_name": "עלה", "rank": "A", "color": "black", "category": "photo", "category_name": "פלא עולם 🖼️", "media_type": "picture", "media_file": "assets/images/image_40.jpg", "qr_file": "assets/qr/qr_card_40.png", "year": 1859, "year_display": "1859", "title": "מגדל השעון ביג בן בלונדון", "description": "המגדל המפורסם של ארמון וסטמינסטר בלונדון שצלצול פעמונו נשמע ברחבי בריטניה.", "hint": "התבוננו במחוגי השעון של לונדון... באיזו שנה החל השעון לתקתק?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=40"}, {"id": 41, "number": 41, "cid": "2s", "suit": "s", "suit_name": "עלה", "rank": "2", "color": "black", "category": "photo", "category_name": "תגלית היסטורית 🖼️", "media_type": "picture", "media_file": "assets/images/image_41.jpg", "qr_file": "assets/qr/qr_card_41.png", "year": 1879, "year_display": "1879", "title": "המצאת נורת החשמל (תומאס אדיסון)", "description": "הנורה החשמלית המסחרית הראשונה שהאירה את העולם ושינתה את שגרת האנושות לנצח.", "hint": "התבוננו בחוט הלהט המאיר... באיזו שנה הדליק אדיסון את האור?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=41"}, {"id": 42, "number": 42, "cid": "3s", "suit": "s", "suit_name": "עלה", "rank": "3", "color": "black", "category": "photo", "category_name": "מסע עולמי 🖼️", "media_type": "picture", "media_file": "assets/images/image_42.jpg", "qr_file": "assets/qr/qr_card_42.png", "year": 1953, "year_display": "1953", "title": "כיבוש פסגת האוורסט (הילרי ונורגיי)", "description": "סר אדמונד הילרי וטנזינג נורגיי מגיעים לראשונה בהיסטוריה לפסגת ההר הגבוה בעולם.", "hint": "התבוננו ברכסי השלג של גג העולם... באיזו שנה נכבש האוורסט?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=42"}, {"id": 43, "number": 43, "cid": "4s", "suit": "s", "suit_name": "עלה", "rank": "4", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_43.png", "year": 1863, "year_display": "1863", "title": "נאום גטיסברג – אברהם לינקולן", "quote": "ממשל של העם, בידי העם, למען העם, לא יכלה מן הארץ.", "description": "הנאום המכונן של נשיא ארצות הברית במהלך מלחמת האזרחים האמריקאית.", "hint": "קראו את המילים האלמותיות... באיזו שנה נישא נאום גטיסברג?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=43"}, {"id": 44, "number": 44, "cid": "5s", "suit": "s", "suit_name": "עלה", "rank": "5", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_44.png", "year": 1905, "year_display": "1905", "title": "תורת היחסות – אלברט איינשטיין", "quote": "דמיון חשוב יותר מידע. ידע הוא מוגבל, בעוד הדמיון חובק את העולם כולו.", "description": "דבריו של הפיזיקאי הדגול בשנה המופלאה (Annus Mirabilis) שבה שינה את פני המדע.", "hint": "קראו את תובנתו של המדען הדגול... באיזו שנה פרסם איינשטיין את מאמריו המהפכניים?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=44"}, {"id": 45, "number": 45, "cid": "6s", "suit": "s", "suit_name": "עלה", "rank": "6", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_45.png", "year": 1963, "year_display": "1963", "title": "מרטין לותר קינג – יש לי חלום (I Have a Dream)", "quote": "יש לי חלום שארבעת ילדיי יחיו יום אחד באומה שבה לא יישפטו לפי צבע עורם, אלא לפי אופיים.", "description": "הנאום ההיסטורי למרגלות אנדרטת לינקולן בוושינגטון ששינה את פני המאבק לזכויות האזרח.", "hint": "קראו את מילות התקווה... באיזו שנה נישא נאום 'יש לי חלום'?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=45"}, {"id": 46, "number": 46, "cid": "7s", "suit": "s", "suit_name": "עלה", "rank": "7", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_46.png", "year": 1940, "year_display": "1940", "title": "וינסטון צ'רצ'יל – שעתם היפה ביותר", "quote": "מעולם לא חבו רבים כל כך, חוב גדול כל כך, למעטים כל כך.", "description": "דבריו של ראש ממשלת בריטניה לטייסי חיל האוויר המלכותי בשיא הקרב על בריטניה.", "hint": "קראו את מילות הנחישות... באיזו שנת מלחמה נאמרו מילים אלו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=46"}, {"id": 47, "number": 47, "cid": "8s", "suit": "s", "suit_name": "עלה", "rank": "8", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_47.png", "year": 1776, "year_display": "1776", "title": "הכרזת העצמאות של ארצות הברית", "quote": "מקובלות עלינו אמיתות אלו כמוכחות מאליהן: שכל בני האדם נבראו שווים, ובוראם העניק להם זכויות שאינן ניתנות לשלילה, ובהן החיים, החירות והחתירה לאושר.", "description": "המסמך המכונן שנכתב בידי תומאס ג'פרסון ואושר בפילדלפיה ב-4 ביולי.", "hint": "קראו את יסודות החירות... באיזו שנה נחתמה הכרזת העצמאות של ארה\"ב?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=47"}, {"id": 48, "number": 48, "cid": "9s", "suit": "s", "suit_name": "עלה", "rank": "9", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_48.png", "year": 1969, "year_display": "1969", "title": "ניל ארמסטרונג – צעד קטן לאדם", "quote": "זהו צעד קטן לאדם, אבל זינוק ענק לאנושות.", "description": "המילים הראשונות שנאמרו על פני עולם אחר בשידור ישיר מים השלווה על הירח.", "hint": "קראו את המילים ששודרו מהירח... באיזו שנה נאמרו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=48"}, {"id": 49, "number": 49, "cid": "Ts", "suit": "s", "suit_name": "עלה", "rank": "10", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_49.png", "year": -399, "year_display": "399 לפנה\"ס", "title": "סוקרטס – דע את עצמך", "quote": "חיים ללא חקירה אינם שווים לחיותם. חוכמה אמיתית היא לדעת שאינך יודע דבר.", "description": "תורת החיים של הפילוסוף היווני סוקרטס מאתונה העתיקה.", "hint": "קראו את חוכמת יוון העתיקה... מאיזו שנה לפני הספירה פילוסופיה זו?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=49"}, {"id": 50, "number": 50, "cid": "Js", "suit": "s", "suit_name": "עלה", "rank": "J", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_50.png", "year": 1948, "year_display": "1948", "title": "ההכרזה לכל באי עולם בדבר זכויות האדם", "quote": "כל בני האדם נולדו בני חורין ושווים בערכם ובזכויותיהם. כולם חוננו בתבונה ובמצפון, וחובתם לנהוג איש ברעהו ברוח של אחווה.", "description": "מסמך היסוד של האו\"ם שהתקבל בפריז לאחר מלחמת העולם השנייה.", "hint": "קראו את אמנת האנושות... באיזו שנת מפנה אומצה הכרזת זכויות האדם?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=50"}, {"id": 51, "number": 51, "cid": "Qs", "suit": "s", "suit_name": "עלה", "rank": "Q", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_51.png", "year": 1601, "year_display": "1601", "title": "ויליאם שייקספיר – המלט", "quote": "להיות או לא להיות, זו השאלה. מה אצילי יותר בנפש: לשאת את חיצי הגורל, או לקחת נשק כנגד ים של ייסורים?", "description": "המונולוג הנודע ביותר בספרות העולמית מתוך הטרגדיה השייקספירית.", "hint": "קראו את שאלת הקיום של המלט... מאיזו שנה נכתב מחזה מופת זה?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=51"}, {"id": 52, "number": 52, "cid": "Ks", "suit": "s", "suit_name": "עלה", "rank": "K", "color": "black", "category": "text", "category_name": "ציטוט היסטורי 📜", "media_type": "text", "media_file": "", "qr_file": "assets/qr/qr_card_52.png", "year": 1633, "year_display": "1633", "title": "גלילאו גליליי – ואף על פי כן נוע תנוע", "quote": "ואף על פי כן נוע תנוע! (E pur si muove) – האמת המדעית אינה תלויה בדעת הרוב או בסמכות.", "description": "אמרתו המיוחסת של גלילאו לאחר משפט האינקוויזיציה ברומא על תנועת כדור הארץ סביב השמש.", "hint": "קראו את אמרת המדען העז... באיזו שנה עמד גלילאו למשפט ברומא?", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=52"}, {"id": 53, "number": 53, "isJoker": true, "suit": "joker", "suit_name": "ג'וקר", "rank": "★", "color": "red", "category": "joker", "category_name": "ג'וקר חופשי 🃏", "media_type": "joker", "media_file": "assets/joker_red_star.svg", "qr_file": "assets/qr/qr_card_53.png", "year": 0, "year_display": "על-זמני", "title": "ג'וקר צבעוני (כוכב אדום)", "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.", "description": "ליצן החצר הקלאסי הצבעוני עם כוכב אדום יחיד. קלף חופשי ללא הגבלת שנה.", "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=53", "star_color": "red"}, {"id": 54, "number": 54, "isJoker": true, "suit": "joker", "suit_name": "ג'וקר", "rank": "★", "color": "red", "category": "joker", "category_name": "ג'וקר חופשי 🃏", "media_type": "joker", "media_file": "assets/joker_yellow_star.svg", "qr_file": "assets/qr/qr_card_54.png", "year": 0, "year_display": "על-זמני", "title": "ג'וקר צבעוני (כוכב צהוב)", "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.", "description": "ליצן החצר הקלאסי הצבעוני עם כוכב צהוב יחיד. קלף חופשי ללא הגבלת שנה.", "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.", "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=54", "star_color": "yellow"}];
 
     let allFlipped = false;
     let currentSuitFilter = 'all';
@@ -657,15 +623,11 @@
       if (!container) return;
 
       container.innerHTML = cardsToRender.map(card => {
-        const isRed = card.color === 'red' || card.isJoker;
-        const jokerColorStyle = 'color: #dc2626;';
-
+        // FRONT FACE
         const frontHTML = card.isJoker ? `
-          <div class="joker-front-box" style="${jokerColorStyle}">
-            <div class="joker-corner-star-tr" style="${jokerColorStyle}">★</div>
-            <div class="joker-corner-star-bl" style="${jokerColorStyle}">★</div>
+          <div class="joker-front-box">
             <div class="joker-art-wrap">
-              <img src="${card.media_file}" alt="ג'וקר" loading="lazy">
+              <img src="${card.media_file}" alt="${card.title}" loading="lazy">
             </div>
             <div class="card-flip-action-bar">
               <button class="flip-btn-pill" onclick="toggleCardFlip(${card.id}, event)">הפוך לגב 🔄</button>
@@ -682,28 +644,27 @@
           </div>
         `;
 
-        const numLabel = card.isJoker ? "ג'וקר חופשי ★" : "קלף #" + card.id;
+        // BACK FACE: AUTHENTIC RED CARD BACK WITH INTEGRATED BARCODE/QR
+        const numLabel = card.isJoker ? (card.id === 53 ? "ג'וקר (כוכב אדום)" : "ג'וקר (כוכב צהוב)") : "קלף #" + card.id;
+        const liveScanUrl = card.live_url || `https://zehavitalon.github.io/CardGame/index.html?card=${card.id}`;
 
         const backHTML = `
-          <div class="back-ornate-outer"></div>
-          <div class="back-ornate-inner"></div>
+          <div class="card-back-red-canvas">
+            <img class="card-back-red-svg" src="assets/card_back_red.svg" alt="גב קלף אדום סטנדרטי">
+            
+            <div class="card-back-top-pill">${numLabel}</div>
 
-          <div class="back-meta-box">
-            <div class="back-num-tag">${numLabel}</div>
-            <div class="back-card-title">${card.title}</div>
-            <div class="back-category-tag">${card.category_name}</div>
-          </div>
+            <div class="card-back-qr-center">
+              <img src="${card.qr_file}" alt="QR #${card.id}" loading="lazy">
+            </div>
 
-          <div class="filigree-ring">
-            <img class="qr-img" src="${card.qr_file}" alt="QR #${card.id}" loading="lazy">
-          </div>
-
-          <div class="back-footer-wrap">
-            <a href="index.html?card=${card.id}" target="_blank" class="test-media-link" onclick="event.stopPropagation()">
-              <span>📱</span>
-              <span>בדיקת מדיה</span>
-            </a>
-            <button class="flip-btn-pill" onclick="toggleCardFlip(${card.id}, event)">הפוך לחזית 🔄</button>
+            <div class="card-back-footer-actions">
+              <a href="${liveScanUrl}" target="_blank" class="test-media-link" onclick="event.stopPropagation()">
+                <span>📱</span>
+                <span>בדיקת מדיה</span>
+              </a>
+              <button class="flip-btn-pill" onclick="toggleCardFlip(${card.id}, event)">הפוך לחזית 🔄</button>
+            </div>
           </div>
         `;
 

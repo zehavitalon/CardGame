@@ -512,8 +512,8 @@
       { num: 52, cid: 'Ks', suit: 's', title: 'מלך עלה' },
 
       // JOKERS (53-54)
-      { num: 53, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר צבעוני' },
-      { num: 54, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר צבעוני' }
+      { num: 53, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר (כוכב אדום)', media_file: 'assets/joker_red_star.svg' },
+      { num: 54, isJoker: true, suit: 'joker', color: 'red', title: 'ג\'וקר (כוכב צהוב)', media_file: 'assets/joker_yellow_star.svg' }
     ];
 
     function getJokerVectorSVG() {
@@ -547,14 +547,11 @@
 
       grid.innerHTML = filtered.map(card => {
         if (card.isJoker) {
-          const colorStyle = card.color === 'red' ? 'color: #dc2626;' : 'color: #0f172a;';
-          const jokerImg = card.color === 'red' ? 'assets/joker_standing_color.svg' : 'assets/joker_standing_black.svg';
+          const jokerImg = card.num === 53 ? 'assets/joker_red_star.svg' : 'assets/joker_yellow_star.svg';
           return `
-            <div class="card-preview-item" title="${card.title} (${card.color === 'red' ? 'אדום' : 'שחור'})">
-              <div class="preview-joker" style="${colorStyle}">
-                <div class="preview-corner-tr" style="font-size: 14px;">★</div>
-                <div class="preview-corner-bl" style="font-size: 14px;">★</div>
-                <img src="${jokerImg}" alt="ג'וקר" style="width: 100%; height: 100%; object-fit: fill; display: block;">
+            <div class="card-preview-item" title="${card.title}">
+              <div class="preview-joker" style="position: relative;">
+                <img src="${jokerImg}" alt="${card.title}" style="width: 100%; height: 100%; object-fit: fill; display: block;">
               </div>
             </div>
           `;

@@ -1060,15 +1060,16 @@
     "category": "joker",
     "category_name": "ג'וקר חופשי 🃏",
     "media_type": "joker",
-    "media_file": "assets/joker_standing_color.svg",
+    "media_file": "assets/joker_red_star.svg",
     "qr_file": "assets/qr/qr_card_53.png",
     "year": 0,
     "year_display": "על-זמני",
-    "title": "ג'וקר צבעוני – קלף חופשי (Wildcard)",
+    "title": "ג'וקר צבעוני (כוכב אדום)",
     "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.",
-    "description": "ליצן החצר הקלאסי. מאפשר לשחקן להגן על הרצף או לגשר על פני כל פער שנים במשחק.",
+    "description": "ליצן החצר הקלאסי הצבעוני עם כוכב אדום יחיד. קלף חופשי ללא הגבלת שנה.",
     "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.",
-    "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=53"
+    "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=53",
+    "star_color": "red"
   },
   {
     "id": 54,
@@ -1081,14 +1082,15 @@
     "category": "joker",
     "category_name": "ג'וקר חופשי 🃏",
     "media_type": "joker",
-    "media_file": "assets/joker_standing_color.svg",
+    "media_file": "assets/joker_yellow_star.svg",
     "qr_file": "assets/qr/qr_card_54.png",
     "year": 0,
     "year_display": "על-זמני",
-    "title": "ג'וקר צבעוני – קלף חופשי (Wildcard)",
+    "title": "ג'וקר צבעוני (כוכב צהוב)",
     "quote": "★ קלף ג'וקר חופשי! ★\nקלף על-זמני זה יכול להיכנס בכל מקום על ציר הזמן ללא הגבלת שנה.",
-    "description": "ליצן החצר הקלאסי הצבעוני. קלף על-זמני שיכול להשתלב בכל נקודה בהיסטוריה.",
+    "description": "ליצן החצר הקלאסי הצבעוני עם כוכב צהוב יחיד. קלף חופשי ללא הגבלת שנה.",
     "hint": "זהו קלף ג'וקר חופשי! מקמו אותו בכל מקום שתרצו על ציר הזמן.",
-    "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=54"
+    "live_url": "https://zehavitalon.github.io/CardGame/index.html?card=54",
+    "star_color": "yellow"
   }
 ]

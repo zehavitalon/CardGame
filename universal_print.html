@@ -381,6 +381,51 @@
         border-color: #cbd5e1 !important;
       }
     }
+  
+    /* STANDARD CASINO RED CARD BACK FOR PRINT */
+    .card-back-red-print {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 3.5mm;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-back-red-asset {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+    }
+
+    .qr-print-medallion {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 25mm;
+      height: 25mm;
+      background: #ffffff;
+      border-radius: 2mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .qr-print-medallion .qr-print-img {
+      width: 23mm;
+      height: 23mm;
+      display: block;
+      object-fit: contain;
+    }
+
   </style>
 </head>
 <body>
@@ -471,8 +516,8 @@
       { num: 52, cid: 'Ks', title: 'מלך עלה' },
 
       // JOKERS (53-54)
-      { num: 53, isJoker: true, color: 'red', title: 'ג\'וקר צבעוני' },
-      { num: 54, isJoker: true, color: 'red', title: 'ג\'וקר צבעוני' }
+      { num: 53, isJoker: true, color: 'red', star: 'red', title: 'ג\'וקר (כוכב אדום)', media_file: 'assets/joker_red_star.svg' },
+      { num: 54, isJoker: true, color: 'red', star: 'yellow', title: 'ג\'וקר (כוכב צהוב)', media_file: 'assets/joker_yellow_star.svg' }
     ];
 
     function getJokerVectorSVG(color) {
@@ -528,20 +573,12 @@
 
     function generateCardFrontHTML(card) {
       if (card.isJoker) {
-        const colorStyle = card.color === 'red' ? 'color: #dc2626;' : 'color: #0f172a;';
-        const jokerImg = card.color === 'red' ? 'assets/joker_standing_color.svg' : 'assets/joker_standing_black.svg';
+        const jokerSvg = card.num === 53 ? 'assets/joker_red_star.svg' : 'assets/joker_yellow_star.svg';
         return `
           <div class="card-cell">
-            <div class="card-inner-poker joker-card-box" style="${colorStyle}">
-              <!-- 1. TOP-RIGHT: STAR (NO SERIAL NUMBER ON JOKER) -->
-              <div class="card-corner-top-right" style="font-size: 13pt;">★</div>
-
-              <!-- 2. BOTTOM-LEFT: STAR (NO SERIAL NUMBER ON JOKER) -->
-              <div class="card-corner-bottom-left" style="font-size: 13pt;">★</div>
-
-              <!-- Authentic Standing Jester Center Artwork -->
-              <div class="joker-center-container" style="width: 100%; height: 100%;">
-                <img src="${jokerImg}" alt="ג'וקר" style="width: 100%; height: 100%; object-fit: fill; display: block;">
+            <div class="card-inner-poker joker-card-box">
+              <div class="joker-center-container" style="width: 100%; height: 100%; position: absolute; inset: 0;">
+                <img src="${jokerSvg}" alt="${card.title}" style="width: 100%; height: 100%; object-fit: fill; display: block;">
               </div>
             </div>
           </div>
@@ -565,20 +602,13 @@
     }
 
     function generateCardBackHTML(card) {
-      const isJoker = card.isJoker;
-      const numTag = isJoker ? '★ ג\'וקר חופשי ★' : 'קלף #' + card.num;
-      const title = card.title || (isJoker ? 'ג\'וקר' : 'קלף פוקר');
       return `
         <div class="card-cell">
-          <div class="card-inner-poker card-back">
-            <div class="back-ornate-frame"></div>
-            <div class="back-ornate-inner"></div>
-
-            <div class="filigree-ring">
+          <div class="card-inner-poker card-back-red-print">
+            <img class="card-back-red-asset" src="assets/card_back_red.svg" alt="גב פוקר אדום">
+            <div class="qr-print-medallion">
               <img class="qr-print-img" src="assets/qr/qr_card_${card.num}.png" alt="QR #${card.num}">
             </div>
-
-            <div class="back-brand-text">★ MYSTERY KEY ★</div>
           </div>
         </div>
       `;
