@@ -1,60 +1,80 @@
 <svg viewBox="0 0 240 334" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Classic Playing Card Diamond Lattice Pattern -->
-    <pattern id="casinoLattice" width="10" height="10" patternUnits="userSpaceOnUse">
+    <!-- Classic Diamond Lattice Pattern -->
+    <pattern id="casinoLatticeRed" width="10" height="10" patternUnits="userSpaceOnUse">
       <path d="M 5,0 L 10,5 L 5,10 L 0,5 Z" fill="none" stroke="#991b1b" stroke-width="0.75"/>
       <circle cx="5" cy="5" r="0.8" fill="#fde047" fill-opacity="0.6"/>
     </pattern>
 
-    <!-- Symmetrical Corner Filigree Group -->
-    <g id="cornerOrnament">
+    <!-- Symmetrical Corner Filigree -->
+    <g id="cornerOrnamentRed">
       <path d="M 0,0 C 15,2 25,12 28,28 C 22,25 15,25 10,28 C 8,20 2,15 0,0 Z" fill="#fde047" fill-opacity="0.85"/>
       <path d="M 0,0 C 8,1 14,7 16,16 C 12,14 8,14 5,16 C 4,11 1,8 0,0 Z" fill="#ffffff"/>
       <circle cx="16" cy="16" r="2" fill="#fde047"/>
     </g>
 
-    <!-- Symmetrical Edge Palmette Group -->
-    <g id="edgePalmette">
+    <!-- Edge Palmette Group -->
+    <g id="edgePalmetteRed">
       <path d="M 0,-15 C 8,-8 8,8 0,15 C -8,8 -8,-8 0,-15 Z" fill="#7f1d1d"/>
       <path d="M 0,-12 C 5,-6 5,6 0,12 C -5,6 -5,-6 0,-12 Z" fill="#fde047" fill-opacity="0.8"/>
       <circle cx="0" cy="0" r="2.5" fill="#ffffff"/>
     </g>
+
+    <!-- Radial Petals for Medallion Halo -->
+    <g id="petalRingRed">
+      <circle cx="0" cy="-56" r="3" fill="#fde047"/>
+      <circle cx="0" cy="-53" r="1.5" fill="#ffffff"/>
+    </g>
   </defs>
 
-  <!-- 1. White Outer Card Border (Classic Poker Margin) -->
+  <!-- 1. White Outer Card Border -->
   <rect x="0" y="0" width="240" height="334" rx="10" fill="#ffffff"/>
 
   <!-- 2. Inner Red Field (Classic Casino Red) -->
   <rect x="8" y="8" width="224" height="318" rx="6" fill="#b91c1c"/>
 
   <!-- 3. Diamond Lattice Engraved Texture -->
-  <rect x="8" y="8" width="224" height="318" rx="6" fill="url(#casinoLattice)"/>
+  <rect x="8" y="8" width="224" height="318" rx="6" fill="url(#casinoLatticeRed)"/>
 
-  <!-- 4. Double Inner White/Gold Framing Lines -->
+  <!-- 4. Symmetrical White & Gold Framing Lines -->
   <rect x="12" y="12" width="216" height="310" rx="5" fill="none" stroke="#ffffff" stroke-width="1.4"/>
   <rect x="15" y="15" width="210" height="304" rx="4" fill="none" stroke="#fde047" stroke-width="0.8"/>
   <rect x="17" y="17" width="206" height="298" rx="3" fill="none" stroke="#7f1d1d" stroke-width="0.6"/>
 
   <!-- 5. Four Symmetrical Corner Ornaments -->
-  <g transform="translate(18, 18)"><use href="#cornerOrnament"/></g>
-  <g transform="translate(222, 18) scale(-1, 1)"><use href="#cornerOrnament"/></g>
-  <g transform="translate(18, 316) scale(1, -1)"><use href="#cornerOrnament"/></g>
-  <g transform="translate(222, 316) scale(-1, -1)"><use href="#cornerOrnament"/></g>
+  <g transform="translate(18, 18)"><use href="#cornerOrnamentRed"/></g>
+  <g transform="translate(222, 18) scale(-1, 1)"><use href="#cornerOrnamentRed"/></g>
+  <g transform="translate(18, 316) scale(1, -1)"><use href="#cornerOrnamentRed"/></g>
+  <g transform="translate(222, 316) scale(-1, -1)"><use href="#cornerOrnamentRed"/></g>
 
   <!-- 6. Symmetrical Side Palmettes -->
-  <g transform="translate(120, 28)"><use href="#edgePalmette"/></g>
-  <g transform="translate(120, 306)"><use href="#edgePalmette"/></g>
-  <g transform="translate(27, 167) rotate(90)"><use href="#edgePalmette"/></g>
-  <g transform="translate(213, 167) rotate(90)"><use href="#edgePalmette"/></g>
+  <g transform="translate(120, 28)"><use href="#edgePalmetteRed"/></g>
+  <g transform="translate(120, 306)"><use href="#edgePalmetteRed"/></g>
+  <g transform="translate(27, 167) rotate(90)"><use href="#edgePalmetteRed"/></g>
+  <g transform="translate(213, 167) rotate(90)"><use href="#edgePalmetteRed"/></g>
 
-  <!-- 7. Central Symmetrical Baroque Medallion -->
-  <!-- Outer Filigree Sunburst Rays -->
+  <!-- 7. CENTRAL BAROQUE MEDALLION WITH CIRCULAR QR HOUSING -->
   <g transform="translate(120, 167)">
-    <circle cx="0" cy="0" r="56" fill="#7f1d1d" stroke="#fde047" stroke-width="1.5"/>
-    <circle cx="0" cy="0" r="52" fill="#b91c1c" stroke="#ffffff" stroke-width="1"/>
+    <!-- Radial halo points -->
+    <g transform="rotate(0)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(30)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(60)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(90)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(120)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(150)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(180)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(210)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(240)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(270)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(300)"><use href="#petalRingRed"/></g>
+    <g transform="rotate(330)"><use href="#petalRingRed"/></g>
+
+    <circle cx="0" cy="0" r="54" fill="#7f1d1d" stroke="#fde047" stroke-width="2"/>
+    <circle cx="0" cy="0" r="50" fill="#b91c1c" stroke="#ffffff" stroke-width="1.2"/>
+    <circle cx="0" cy="0" r="46" fill="#7f1d1d" stroke="#fde047" stroke-width="1" stroke-dasharray="2,2"/>
     
-    <!-- White Inner Medallion Housing the Barcode/QR -->
-    <rect x="-42" y="-42" width="84" height="84" rx="8" fill="#ffffff" stroke="#fde047" stroke-width="1.8"/>
-    <rect x="-40" y="-40" width="80" height="80" rx="6" fill="#ffffff" stroke="#b91c1c" stroke-width="0.8"/>
+    <!-- White Circular Aperture Housing the QR Code -->
+    <circle cx="0" cy="0" r="42" fill="#ffffff" stroke="#fde047" stroke-width="2"/>
+    <circle cx="0" cy="0" r="40" fill="#ffffff" stroke="#b91c1c" stroke-width="0.8"/>
   </g>
 </svg>

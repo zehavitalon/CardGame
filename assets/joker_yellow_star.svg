@@ -35,8 +35,11 @@
     <text x="0" y="44" font-family="'Playfair Display', Georgia, serif" font-size="12" font-weight="800" fill="#dc2626" text-anchor="middle">R</text>
   </g>
 
-  <!-- SINGLE CORNER STAR (TOP-RIGHT ONLY, CLEANLY INSIDE INNER FRAME) -->
+    <!-- TWO CORNER STARS (DIAGONAL: TOP-RIGHT AND BOTTOM-LEFT, CLEANLY INSIDE INNER FRAME) -->
   <g transform="translate(210, 30)">
+    <path d="M 0,-8 L 2.4,-2.4 L 8.3,-1.6 L 4,2.7 L 5,8.7 L 0,5.9 L -5,8.7 L -4,2.7 L -8.3,-1.6 L -2.4,-2.4 Z" fill="#f59e0b" stroke="#92400e" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(30, 304) rotate(180)">
     <path d="M 0,-8 L 2.4,-2.4 L 8.3,-1.6 L 4,2.7 L 5,8.7 L 0,5.9 L -5,8.7 L -4,2.7 L -8.3,-1.6 L -2.4,-2.4 Z" fill="#f59e0b" stroke="#92400e" stroke-width="0.8"/>
   </g>
 

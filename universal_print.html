@@ -412,16 +412,17 @@
       width: 25mm;
       height: 25mm;
       background: #ffffff;
-      border-radius: 2mm;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 5;
+      box-shadow: 0 0 0 0.4mm #d4af37;
     }
 
     .qr-print-medallion .qr-print-img {
-      width: 23mm;
-      height: 23mm;
+      width: 18mm;
+      height: 18mm;
       display: block;
       object-fit: contain;
     }
@@ -605,7 +606,7 @@
       return `
         <div class="card-cell">
           <div class="card-inner-poker card-back-red-print">
-            <img class="card-back-red-asset" src="assets/card_back_red.svg" alt="גב פוקר אדום">
+            <img class="card-back-red-asset" src="assets/card_back_blue_gold.svg" alt="גב פוקר אדום">
             <div class="qr-print-medallion">
               <img class="qr-print-img" src="assets/qr/qr_card_${card.num}.png" alt="QR #${card.num}">
             </div>
