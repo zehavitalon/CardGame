@@ -1,4 +1,4 @@
-﻿# CardGame Guidelines & Operations Rules
+# CardGame Guidelines & Operations Rules
 
 ## 1. Project Separation
 - `c:\Users\zehavit\OneDrive\מסמכים\37` is strictly reserved for the personal 37th anniversary project. NEVER add or modify files in `37` for generic card game development.
@@ -17,9 +17,12 @@
   - Symmetrical circular gold medallion framing the central QR code with a white circular base.
   - Option to toggle to Classic Casino Red (`assets/card_back_red.svg`), which also features the circular medallion.
 
-## 3. Client Onboarding & Privacy Rules
-- Clients submit files via Google Form or structured cloud folder with standard naming: `[CardNum]_[Year]_[Title].[ext]`.
-- Media mapping: 52 cards arranged chronologically by year (earliest to latest).
-- Privacy: Never expose one client's media to another. Use secret UUID URLs and optional 4-digit PIN protection.
-- Retention: Guaranteed 3-5 years cloud hosting included in base product; full offline digital backup (ZIP) provided to client upon delivery.
+## 3. Product Architecture & Client Self-Service Model
+- Physical Product: 100% generic standard 54-card deck printed in bulk from inventory. Never custom-printed per client.
+- QR Codes on Cards: Generic and static (`https://[Domain]/index.html?card=[1-54]`).
+- Client Onboarding: Self-service via website portal. Clients enter their unique Game Code / PIN and upload media/years directly (no manual file transmission, forms, or manual data entry for the operator).
+- Device Authentication: Scanning players enter the Game Code once upon initial scan; session persists in browser LocalStorage.
+- Privacy & Isolation: Each client's media is isolated by their unique Game Code / partition.
+- Retention: 3-5 years cloud hosting included in base product; client can download full digital archive (ZIP) anytime.
 - Hosting: Free via Cloudflare Pages + Cloudflare R2 (10 GB free forever, zero egress fees).
+
