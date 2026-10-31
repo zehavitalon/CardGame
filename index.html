@@ -513,9 +513,63 @@
       border-radius: 14px;
       padding: 12px 18px;
       text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      line-height: 1.5;
+    /* Code Modal */
+    .code-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .code-modal-overlay.open {
+      display: flex;
+    }
+    .code-modal-box {
+      background: #121624;
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .code-modal-box h3 {
+      font-size: 1.3rem;
+      color: #fff;
+    }
+    .code-input-lg {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: var(--gold-light);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      outline: none;
+    }
+    .code-input-lg:focus {
+      border-color: var(--gold);
+    }
+    .deck-pill-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(245, 208, 97, 0.08);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
     }
   </style>
 </head>
@@ -532,12 +586,42 @@
         <span>משחק ציר הזמן • נגן המדיה</span>
       </div>
       <div class="nav-links">
+        <button class="nav-btn" onclick="openCodeModal()">
+          <span>🔑</span>
+          <span>קוד משחק</span>
+        </button>
+        <a href="builder.html" class="nav-btn" style="background: rgba(245, 208, 97, 0.2); color: #fff; border-color: var(--gold);">
+          <span>🎴</span>
+          <span>עיצוב חפיסה</span>
+        </a>
         <a href="dashboard.html" class="nav-btn">
           <span>🂠</span>
-          <span>לוח הקלפים</span>
+          <span>לוח 54</span>
         </a>
       </div>
     </header>
+
+    <!-- Active Deck Indicator Bar -->
+    <div class="deck-pill-bar" id="activeDeckBar">
+      <span id="activeDeckLabel">✨ חפיסה פעילה: טריוויה אוניברסלית</span>
+      <button class="nav-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="openCodeModal()">החלף 🔄</button>
+    </div>
+
+    <!-- Game Code Modal -->
+    <div class="code-modal-overlay" id="codeModalOverlay">
+      <div class="code-modal-box">
+        <h3>🔑 הזנת קוד משחק אישי</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">
+          הזינו את קוד החפיסה שקיבלתם בערכה או בפורטל (למשל: FAMILY-2026) כדי לסנכרן את התמונות והזיכרונות של המשפחה:
+        </p>
+        <input type="text" id="deckCodeInput" class="code-input-lg" placeholder="FAMILY-2026">
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button class="nav-btn" style="padding: 10px 18px; font-size: 0.9rem;" onclick="activateCodeFromModal()">הפעל חפיסה ✨</button>
+          <button class="nav-btn" style="padding: 10px 18px; font-size: 0.9rem; background: rgba(255,255,255,0.08);" onclick="switchToUniversalDeck()">טריוויה כללית</button>
+          <button class="nav-btn" style="padding: 10px 14px; font-size: 0.9rem; background: none; border: none; color: var(--text-muted);" onclick="closeCodeModal()">סגור</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Quick Card Switcher -->
     <section class="card-selector-bar">
@@ -589,6 +673,82 @@
   <script>
     let currentCard = null;
     let isRevealed = false;
+    let activeDeckMode = 'universal'; // 'universal' or custom code
+
+    // Check for active custom deck
+    function getActiveDeck() {
+      const generic = window.DECK_DATA || [];
+      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
+      
+      let customDeck = null;
+      if (savedCode) {
+        const raw = localStorage.getItem('TIMELINE_DECK_' + savedCode);
+        if (raw) {
+          try { customDeck = JSON.parse(raw); } catch (e) {}
+        }
+      }
+      if (!customDeck) {
+        const activeRaw = localStorage.getItem('ACTIVE_CUSTOM_DECK');
+        if (activeRaw) {
+          try { customDeck = JSON.parse(activeRaw); } catch (e) {}
+        }
+      }
+
+      if (customDeck && Array.isArray(customDeck) && customDeck.length > 0) {
+        activeDeckMode = savedCode || 'חפיסה אישית';
+        updateDeckIndicator(activeDeckMode);
+        // Merge custom cards over generic deck as fallback
+        return generic.map((genCard, idx) => {
+          const cust = customDeck[idx];
+          if (cust && cust.isCustomized && (cust.year || cust.title || cust.media_file)) {
+            return {
+              ...genCard,
+              ...cust,
+              isCustom: true
+            };
+          }
+          return genCard;
+        });
+      }
+
+      activeDeckMode = 'universal';
+      updateDeckIndicator(null);
+      return generic;
+    }
+
+    function updateDeckIndicator(code) {
+      const lbl = document.getElementById('activeDeckLabel');
+      if (lbl) {
+        if (code && code !== 'universal') {
+          lbl.innerHTML = `✨ <strong>חפיסה פעילה:</strong> ${code}`;
+        } else {
+          lbl.innerHTML = `🌍 <strong>חפיסה פעילה:</strong> טריוויה אוניברסלית`;
+        }
+      }
+    }
+
+    // Modal Game Code handling
+    function openCodeModal() {
+      document.getElementById('codeModalOverlay').classList.add('open');
+      const cur = localStorage.getItem('ACTIVE_DECK_CODE') || '';
+      document.getElementById('deckCodeInput').value = cur;
+    }
+    function closeCodeModal() {
+      document.getElementById('codeModalOverlay').classList.remove('open');
+    }
+    function activateCodeFromModal() {
+      const code = document.getElementById('deckCodeInput').value.trim().toUpperCase();
+      if (!code) return;
+      localStorage.setItem('ACTIVE_DECK_CODE', code);
+      closeCodeModal();
+      initPage();
+    }
+    function switchToUniversalDeck() {
+      localStorage.removeItem('ACTIVE_DECK_CODE');
+      localStorage.removeItem('ACTIVE_CUSTOM_DECK');
+      closeCodeModal();
+      initPage();
+    }
 
     // Parse URL parameter ?card=X
     function getCardIdFromURL() {
@@ -600,13 +760,14 @@
     }
 
     function initPage() {
-      const deck = window.DECK_DATA || [];
+      const deck = getActiveDeck();
       const select = document.getElementById('cardSelect');
 
       // Populate card select dropdown
       select.innerHTML = deck.map(c => {
         const star = c.isJoker ? '★ ' : '';
-        return `<option value="${c.id}">${star}קלף #${c.id} (${c.suit_name} ${c.rank || ''}) – ${c.category_name}</option>`;
+        const customPill = c.isCustom ? ' ✨' : '';
+        return `<option value="${c.id}">${star}קלף #${c.id} (${c.suit_name} ${c.rank || ''}) – ${c.title || c.category_name}${customPill}</option>`;
       }).join('');
 
       const targetId = getCardIdFromURL();
@@ -620,7 +781,7 @@
     }
 
     function loadCard(cardId) {
-      const deck = window.DECK_DATA || [];
+      const deck = getActiveDeck();
       currentCard = deck.find(c => c.id === cardId) || deck[0];
       if (!currentCard) return;
 
@@ -630,15 +791,18 @@
 
       // Badge
       const suitSymbol = currentCard.isJoker ? '★' : getSuitSymbol(currentCard.suit);
-      document.getElementById('cardBadge').innerHTML = `קלף #${currentCard.id} • ${currentCard.suit_name} ${suitSymbol} • ${currentCard.category_name}`;
+      const customBadge = currentCard.isCustom ? ' • 💖 זיכרון אישי' : ` • ${currentCard.category_name}`;
+      document.getElementById('cardBadge').innerHTML = `קלף #${currentCard.id} • ${currentCard.suit_name} ${suitSymbol}${customBadge}`;
 
       // Prompt and Subtext
       document.getElementById('mysteryPrompt').textContent = currentCard.hint || 'התבוננו ונסו לנחש את השנה...';
-      document.getElementById('mysterySubtext').textContent = 'באיזו שנה בהיסטוריה התרחש או נוצר אירוע זה?';
+      document.getElementById('mysterySubtext').textContent = currentCard.isCustom 
+        ? 'באיזו שנה התרחש אירוע מרגש זה בתולדות המשפחה?' 
+        : 'באיזו שנה בהיסטוריה התרחש או נוצר אירוע זה?';
 
       // Reveal box contents
-      document.getElementById('revealedYear').textContent = currentCard.year_display || currentCard.year;
-      document.getElementById('revealedTitle').textContent = currentCard.title;
+      document.getElementById('revealedYear').textContent = currentCard.year_display || currentCard.year || 'טרם הוגדר';
+      document.getElementById('revealedTitle').textContent = currentCard.title || 'אירוע משפחתי';
       document.getElementById('revealedDesc').textContent = currentCard.description || '';
 
       // Media Container Rendering
@@ -683,7 +847,7 @@
             <video class="video-player" id="videoEl" src="${currentCard.media_file}" controls playsinline preload="auto"></video>
           </div>
         `;
-      } else if (currentCard.media_type === 'image' || currentCard.media_type === 'picture') {
+      } else if (currentCard.media_type === 'image' || currentCard.media_type === 'picture' || currentCard.media_type === 'photo') {
         container.innerHTML = `
           <div class="image-view">
             <img class="mystery-img" src="${currentCard.media_file}" alt="${currentCard.title}" loading="lazy">

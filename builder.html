@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פורטל עיצוב חפיסת זיכרונות אישית • 54 קלפים</title>
+
+  <!-- Vector Playing Cards Engine -->
+  <script src="cardmeister.js"></script>
+  <!-- Universal Default Deck Data -->
+  <script src="assets/deck_data.js"></script>
+  <!-- Client-side ZIP bundle generators -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-surface: #121624;
+      --bg-card: rgba(22, 28, 45, 0.88);
+      --bg-card-hover: rgba(30, 39, 64, 0.95);
+      --gold: #f5d061;
+      --gold-light: #ffea9f;
+      --gold-dark: #b89328;
+      --casino-red: #dc2626;
+      --casino-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-card: rgba(245, 208, 97, 0.25);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --shadow-luxury: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 208, 97, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Rubik', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: 80px;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(150px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.15;
+    }
+    .glow-gold {
+      top: -150px;
+      right: -100px;
+      background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    }
+    .glow-red {
+      bottom: -150px;
+      left: -100px;
+      background: radial-gradient(circle, #b91c1c 0%, transparent 70%);
+    }
+
+    /* Header & Branding */
+    header.portal-header {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(180deg, rgba(22, 28, 45, 0.95) 0%, rgba(10, 13, 20, 0.8) 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(14px);
+      padding: 24px 20px 20px;
+      text-align: center;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 208, 97, 0.12);
+      border: 1px solid var(--border-card);
+      padding: 5px 14px;
+      border-radius: 20px;
+      color: var(--gold-light);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    h1.portal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      background: linear-gradient(135deg, #ffffff 40%, var(--gold-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .portal-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 680px;
+      margin: 0 auto 16px;
+      line-height: 1.5;
+    }
+
+    /* Game Code & Session Bar */
+    .session-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-card);
+      border-radius: 30px;
+      padding: 8px 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .session-label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      width: 160px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .session-input:focus {
+      border-color: var(--gold);
+    }
+
+    /* Progress & Stats Section */
+    .stats-container {
+      max-width: 1100px;
+      margin: 20px auto 0;
+      padding: 0 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .progress-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow-luxury);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .progress-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .progress-info {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .progress-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .progress-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #b89328, var(--gold));
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 12px rgba(245, 208, 97, 0.5);
+    }
+
+    /* Badges Pill Row */
+    .stats-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill strong {
+      color: #fff;
+    }
+
+    /* Actions Toolbar */
+    .toolbar {
+      max-width: 1100px;
+      margin: 18px auto 0;
+      padding: 0 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s ease;
+      text-decoration: none;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #d4af37);
+      color: #0f172a;
+      box-shadow: 0 4px 15px rgba(245, 208, 97, 0.25);
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 208, 97, 0.45);
+    }
+
+    .btn-magic {
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .btn-magic:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: rgba(220, 38, 38, 0.3);
+    }
+
+    /* Era / Suit Filter Tabs */
+    .filter-tabs {
+      max-width: 1100px;
+      margin: 24px auto 14px;
+      padding: 0 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: relative;
+      z-index: 2;
+    }
+    .filter-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .tab-btn.active {
+      background: rgba(245, 208, 97, 0.15);
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+
+    /* 54 Cards Grid */
+    main.cards-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .deck-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .deck-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      background: var(--bg-card-hover);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .deck-card.is-filled {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .deck-card.is-filled::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: var(--casino-green);
+    }
+
+    .card-top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-num-badge {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      background: rgba(245, 208, 97, 0.15);
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+
+    .card-status-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-empty {
+      color: var(--text-muted);
+    }
+    .status-filled {
+      color: var(--casino-green);
+    }
+
+    /* Card Mini Preview Box */
+    .card-preview-mini {
+      height: 110px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .card-preview-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-preview-mini .empty-icon {
+      font-size: 1.8rem;
+      opacity: 0.35;
+      margin-bottom: 4px;
+    }
+    .card-preview-mini .empty-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-meta-year {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-meta-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-window {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 28, 45, 0.8);
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-card-id {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .modal-card-suit {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .close-modal-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .close-modal-btn:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-label span.req {
+      color: #ef4444;
+    }
+
+    .form-input, .form-textarea {
+      background: rgba(10, 13, 20, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: 'Rubik', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    /* Media Uploader Area */
+    .dropzone-box {
+      border: 2px dashed rgba(245, 208, 97, 0.35);
+      background: rgba(10, 13, 20, 0.6);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .dropzone-box:hover {
+      border-color: var(--gold);
+      background: rgba(245, 208, 97, 0.05);
+    }
+
+    .dropzone-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropzone-icon {
+      font-size: 2.2rem;
+    }
+
+    .dropzone-prompt {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .dropzone-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .modal-preview-box {
+      margin-top: 10px;
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: 220px;
+      display: none;
+      position: relative;
+      background: #000;
+    }
+    .modal-preview-box img, .modal-preview-box video {
+      width: 100%;
+      height: 100%;
+      max-height: 220px;
+      object-fit: contain;
+    }
+    .modal-preview-box audio {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 28, 45, 0.8);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .modal-nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      h1.portal-title {
+        font-size: 1.6rem;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar-group {
+        justify-content: center;
+      }
+      main.cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow glow-gold"></div>
+  <div class="ambient-glow glow-red"></div>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-badge">✨ פורטל הלקוח הרשמי • חפיסת הזיכרונות</div>
+    <h1 class="portal-title">עיצוב חפיסת ציר הזמן שלך</h1>
+    <p class="portal-desc">
+      מלאו את 54 הקלפים בשנים, תמונות, הקלטות ורגעים אישיים. כל שינוי נשמר אוטומטית במכשירכם.
+    </p>
+
+    <!-- Session Game Code Bar -->
+    <div class="session-bar">
+      <div class="session-label">
+        <span>🔑</span>
+        <span>קוד חפיסה אישי:</span>
+      </div>
+      <input type="text" id="gameCodeInput" class="session-input" placeholder="למשל: FAMILY-2026" onchange="updateGameCode()">
+      <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem;" onclick="generateRandomCode()">קוד חדש 🎲</button>
+    </div>
+  </header>
+
+  <!-- Progress Stats -->
+  <section class="stats-container">
+    <div class="progress-card">
+      <div class="progress-top-row">
+        <div class="progress-info">
+          <span class="progress-num" id="statCompletedNum">0/54</span>
+          <span class="progress-text" id="statCompletedPct">(0% מהחפיסה הושלמו)</span>
+        </div>
+        <div class="stats-pills">
+          <div class="stat-pill">🖼️ תמונות: <strong id="statPhotos">0</strong></div>
+          <div class="stat-pill">🎬 סרטונים: <strong id="statVideos">0</strong></div>
+          <div class="stat-pill">🎵 הקלטות: <strong id="statAudio">0</strong></div>
+          <div class="stat-pill">📜 ציטוטים: <strong id="statQuotes">0</strong></div>
+        </div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Actions Toolbar -->
+  <section class="toolbar">
+    <div class="toolbar-group">
+      <button class="btn btn-magic" onclick="autoFillGenericTrivia()">
+        <span>🪄</span>
+        <span>השלמה אוטומטית מטריוויה</span>
+      </button>
+      <button class="btn btn-gold" onclick="exportZipArchive()">
+        <span>📦</span>
+        <span>הורדת ארכיון זיכרונות (ZIP)</span>
+      </button>
+    </div>
+
+    <div class="toolbar-group">
+      <label class="btn btn-outline" style="cursor: pointer; margin: 0;">
+        <span>📂</span>
+        <span>טעינת גיבוי (JSON)</span>
+        <input type="file" id="backupFileInput" accept=".json" style="display: none;" onchange="importBackupJSON(event)">
+      </label>
+      <a href="index.html" class="btn btn-outline" id="playNowBtn">
+        <span>📱</span>
+        <span>שחק עכשיו בחפיסה</span>
+      </a>
+      <button class="btn btn-danger" onclick="resetCurrentDeck()">
+        <span>🗑️</span>
+        <span>איפוס</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Suit / Era Filter Tabs -->
+  <div class="filter-tabs" id="filterTabs">
+    <button class="tab-btn active" data-suit="all" onclick="filterBySuit('all')">הכל (54)</button>
+    <button class="tab-btn" data-suit="c" onclick="filterBySuit('c')">♣ תלתן (1-13) • ילדות ונעורים</button>
+    <button class="tab-btn" data-suit="d" onclick="filterBySuit('d')">♦ יהלום (14-26) • בגרות ולימודים</button>
+    <button class="tab-btn" data-suit="h" onclick="filterBySuit('h')">♥ לב (27-39) • אהבה ומשפחה</button>
+    <button class="tab-btn" data-suit="s" onclick="filterBySuit('s')">♠ עלה (40-52) • טיולים והישגים</button>
+    <button class="tab-btn" data-suit="joker" onclick="filterBySuit('joker')">★ ג'וקרים (53-54) • ברכות חופשיות</button>
+  </div>
+
+  <!-- 54 Cards Grid -->
+  <main class="cards-grid" id="cardsGridContainer">
+    <!-- Populated by JS -->
+  </main>
+
+  <!-- Card Editor Modal -->
+  <div class="modal-overlay" id="editModalOverlay">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-card-id" id="modalCardNum">קלף #1</span>
+          <span class="modal-card-suit" id="modalCardSuit">(תלתן A)</span>
+        </div>
+        <button class="close-modal-btn" onclick="closeEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">שנה <span class="req">*</span></label>
+            <input type="number" id="modalYearInput" class="form-input" placeholder="למשל: 1985">
+          </div>
+          <div class="form-group">
+            <label class="form-label">כותרת האירוע <span class="req">*</span></label>
+            <input type="text" id="modalTitleInput" class="form-input" placeholder="למשל: יום החתונה בירושלים">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">רמז לשחקנים (מוצג לפני חשיפת השנה)</label>
+          <input type="text" id="modalHintInput" class="form-input" placeholder="למשל: באיזה עשור נפגשנו לראשונה באוניברסיטה?">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">סיפור קצר / תיאור</label>
+          <textarea id="modalDescInput" class="form-textarea" placeholder="מה קרה באותו יום מרגש? מי מופיע בתמונה?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">סוג מדיה</label>
+          <select id="modalMediaTypeSelect" class="form-input" onchange="onMediaTypeChange()">
+            <option value="photo">🖼️ תמונה (תמונה משפחתית)</option>
+            <option value="video">🎬 סרטון (סרטון קצר / ברכה)</option>
+            <option value="audio">🎵 הקלטת קול / שיר אהוב</option>
+            <option value="text">📜 ציטוט / זיכרון טקסט בלבד</option>
+          </select>
+        </div>
+
+        <!-- File Upload Area -->
+        <div class="form-group" id="modalUploadGroup">
+          <label class="form-label">העלאת קובץ מדיה</label>
+          <div class="dropzone-box" onclick="document.getElementById('modalFileInput').click()">
+            <input type="file" id="modalFileInput" style="display: none;" onchange="handleFileUpload(event)">
+            <div class="dropzone-inner">
+              <span class="dropzone-icon">📤</span>
+              <span class="dropzone-prompt">לחצו להעלאת קובץ מהטלפון או גררו לכאן</span>
+              <span class="dropzone-sub">תומך בתמונות (JPG, PNG, WebP), סרטונים (MP4) והקלטות (MP3, WAV)</span>
+            </div>
+          </div>
+          <!-- Preview Box -->
+          <div class="modal-preview-box" id="modalPreviewBox"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="modal-nav-btns">
+          <button class="btn btn-outline" onclick="navigateCard(-1)">⬅ קודם</button>
+          <button class="btn btn-outline" onclick="navigateCard(1)">הבא ➡</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-danger" onclick="clearCurrentCardContent()">מחק קלף</button>
+          <button class="btn btn-gold" onclick="saveCurrentCardModal()">שמור קלף ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastNotification">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">הקלף נשמר בהצלחה!</span>
+  </div>
+
+  <script>
+    // System Constants & Storage Keys
+    const STORAGE_KEY_PREFIX = 'TIMELINE_DECK_';
+    let currentCode = 'FAMILY-2026';
+    let currentSuit = 'all';
+    let activeCardIndex = 0; // 0 to 53
+    let clientDeck = [];
+
+    // Initialize 54 cards template based on Universal Deck
+    function initClientDeck() {
+      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
+      if (savedCode) {
+        currentCode = savedCode;
+      }
+      document.getElementById('gameCodeInput').value = currentCode;
+
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
+      if (raw) {
+        try {
+          clientDeck = JSON.parse(raw);
+        } catch (e) {
+          console.error('Error loading saved deck', e);
+          createBlankDeck();
+        }
+      } else {
+        createBlankDeck();
+      }
+
+      renderGrid();
+      updateStats();
+    }
+
+    function createBlankDeck() {
+      const base = window.DECK_DATA || [];
+      clientDeck = base.map(c => ({
+        id: c.id,
+        number: c.number || c.id,
+        cid: c.cid || '',
+        suit: c.suit,
+        suit_name: c.suit_name,
+        rank: c.rank || '',
+        color: c.color || 'black',
+        isJoker: !!c.isJoker,
+        category: c.category || 'photo',
+        category_name: c.category_name || 'זיכרון אישי',
+        // User custom fields:
+        isCustomized: false,
+        year: '',
+        year_display: '',
+        title: '',
+        hint: '',
+        description: '',
+        media_type: 'photo',
+        media_file: '', // Base64 data URL or relative URL
+        media_name: ''
+      }));
+      saveDeck();
+    }
+
+    function saveDeck() {
+      localStorage.setItem(STORAGE_KEY_PREFIX + currentCode, JSON.stringify(clientDeck));
+      // Also register this deck as the currently active custom deck for index.html player
+      localStorage.setItem('ACTIVE_CUSTOM_DECK', JSON.stringify(clientDeck));
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      updateStats();
+    }
+
+    function updateGameCode() {
+      const val = document.getElementById('gameCodeInput').value.trim();
+      if (!val) return;
+      currentCode = val.toUpperCase().replace(/\s+/g, '-');
+      document.getElementById('gameCodeInput').value = currentCode;
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
+      if (raw) {
+        try {
+          clientDeck = JSON.parse(raw);
+          showToast('✅', `נטענה חפיסה קיימת: ${currentCode}`);
+        } catch (e) {
+          createBlankDeck();
+        }
+      } else {
+        createBlankDeck();
+        showToast('🆕', `נוצרה חפיסה חדשה: ${currentCode}`);
+      }
+      renderGrid();
+    }
+
+    function generateRandomCode() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      currentCode = `MEMORIES-${num}`;
+      document.getElementById('gameCodeInput').value = currentCode;
+      updateGameCode();
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('cardsGridContainer');
+      let filtered = clientDeck;
+      if (currentSuit !== 'all') {
+        filtered = filtered.filter(c => c.suit === currentSuit);
+      }
+
+      container.innerHTML = filtered.map((c, idx) => {
+        const globalIdx = clientDeck.findIndex(item => item.id === c.id);
+        const isFilled = c.isCustomized && (c.year || c.title || c.media_file);
+        const cardTitle = c.title ? escapeHtml(c.title) : 'טרם הוגדר';
+        const cardYear = c.year ? c.year : (c.isJoker ? 'על-זמני' : '----');
+        
+        // Thumbnail preview
+        let previewHtml = '';
+        if (c.media_file && c.media_type === 'photo') {
+          previewHtml = `<img src="${c.media_file}" alt="${cardTitle}" loading="lazy">`;
+        } else if (c.media_file && c.media_type === 'video') {
+          previewHtml = `<div class="empty-icon">🎬</div><div class="empty-text">סרטון מצורף</div>`;
+        } else if (c.media_file && c.media_type === 'audio') {
+          previewHtml = `<div class="empty-icon">🎵</div><div class="empty-text">הקלטת קול</div>`;
+        } else if (c.media_type === 'text') {
+          previewHtml = `<div class="empty-icon">📜</div><div class="empty-text">ציטוט טקסט</div>`;
+        } else {
+          previewHtml = `<div class="empty-icon">📷</div><div class="empty-text">לחצו להוספת זיכרון</div>`;
+        }
+
+        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
+        const cardRank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
+
+        return `
+          <div class="deck-card ${isFilled ? 'is-filled' : ''}" onclick="openEditModal(${globalIdx})">
+            <div class="card-top-header">
+              <span class="card-num-badge">#${c.id} • ${c.suit_name} ${suitSymbol}</span>
+              <span class="card-status-badge ${isFilled ? 'status-filled' : 'status-empty'}">
+                ${isFilled ? '✅ מוכן' : '⚪ ריק'}
+              </span>
+            </div>
+
+            <div class="card-preview-mini">
+              ${previewHtml}
+            </div>
+
+            <div class="card-meta">
+              <div class="card-meta-year">${cardYear}</div>
+              <div class="card-meta-title">${cardTitle}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getSuitSymbol(suit) {
+      if (suit === 'c') return '♣';
+      if (suit === 'd') return '♦';
+      if (suit === 'h') return '♥';
+      if (suit === 's') return '♠';
+      return '★';
+    }
+
+    function filterBySuit(suit) {
+      currentSuit = suit;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.suit === suit);
+      });
+      renderGrid();
+    }
+
+    function updateStats() {
+      const completed = clientDeck.filter(c => c.isCustomized && (c.year || c.title || c.media_file)).length;
+      const pct = Math.round((completed / 54) * 100);
+
+      document.getElementById('statCompletedNum').textContent = `${completed}/54`;
+      document.getElementById('statCompletedPct').textContent = `(${pct}% מהחפיסה הושלמו)`;
+      document.getElementById('progressBarFill').style.width = `${pct}%`;
+
+      const photos = clientDeck.filter(c => c.isCustomized && c.media_type === 'photo' && c.media_file).length;
+      const videos = clientDeck.filter(c => c.isCustomized && c.media_type === 'video' && c.media_file).length;
+      const audio = clientDeck.filter(c => c.isCustomized && c.media_type === 'audio' && c.media_file).length;
+      const quotes = clientDeck.filter(c => c.isCustomized && (c.media_type === 'text' || (!c.media_file && c.description))).length;
+
+      document.getElementById('statPhotos').textContent = photos;
+      document.getElementById('statVideos').textContent = videos;
+      document.getElementById('statAudio').textContent = audio;
+      document.getElementById('statQuotes').textContent = quotes;
+    }
+
+    // Modal Operations
+    function openEditModal(index) {
+      activeCardIndex = index;
+      const card = clientDeck[index];
+      if (!card) return;
+
+      const suitSymbol = card.isJoker ? '★' : getSuitSymbol(card.suit);
+      document.getElementById('modalCardNum').textContent = `קלף #${card.id}`;
+      document.getElementById('modalCardSuit').textContent = `(${card.suit_name} ${suitSymbol} ${card.rank || ''})`;
+
+      document.getElementById('modalYearInput').value = card.year || '';
+      document.getElementById('modalTitleInput').value = card.title || '';
+      document.getElementById('modalHintInput').value = card.hint || '';
+      document.getElementById('modalDescInput').value = card.description || '';
+      document.getElementById('modalMediaTypeSelect').value = card.media_type || 'photo';
+
+      renderModalPreview(card);
+      onMediaTypeChange();
+
+      document.getElementById('editModalOverlay').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModalOverlay').classList.remove('open');
+    }
+
+    function renderModalPreview(card) {
+      const box = document.getElementById('modalPreviewBox');
+      box.innerHTML = '';
+      if (!card.media_file) {
+        box.style.display = 'none';
+        return;
+      }
+
+      box.style.display = 'block';
+      if (card.media_type === 'photo') {
+        box.innerHTML = `<img src="${card.media_file}" alt="תצוגה מקדימה">`;
+      } else if (card.media_type === 'video') {
+        box.innerHTML = `<video src="${card.media_file}" controls></video>`;
+      } else if (card.media_type === 'audio') {
+        box.innerHTML = `<audio src="${card.media_file}" controls></audio>`;
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function onMediaTypeChange() {
+      const type = document.getElementById('modalMediaTypeSelect').value;
+      const uploadGrp = document.getElementById('modalUploadGroup');
+      if (type === 'text') {
+        uploadGrp.style.display = 'none';
+      } else {
+        uploadGrp.style.display = 'flex';
+      }
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const card = clientDeck[activeCardIndex];
+      card.media_name = file.name;
+
+      // Auto-detect type
+      if (file.type.startsWith('image/')) {
+        card.media_type = 'photo';
+        document.getElementById('modalMediaTypeSelect').value = 'photo';
+        // Compress and convert to lightweight JPEG/WebP
+        compressImage(file, (dataUrl) => {
+          card.media_file = dataUrl;
+          renderModalPreview(card);
+          showToast('📸', 'התמונה נטענה ועברה דחיסה מותאמת');
+        });
+      } else if (file.type.startsWith('video/')) {
+        card.media_type = 'video';
+        document.getElementById('modalMediaTypeSelect').value = 'video';
+        readFileAsDataURL(file, (dataUrl) => {
+          card.media_file = dataUrl;
+          renderModalPreview(card);
+          showToast('🎬', 'הסרטון נטען בהצלחה');
+        });
+      } else if (file.type.startsWith('audio/')) {
+        card.media_type = 'audio';
+        document.getElementById('modalMediaTypeSelect').value = 'audio';
+        readFileAsDataURL(file, (dataUrl) => {
+          card.media_file = dataUrl;
+          renderModalPreview(card);
+          showToast('🎵', 'ההקלטה נטענה בהצלחה');
+        });
+      }
+    }
+
+    function readFileAsDataURL(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (e) => callback(e.target.result);
+      reader.readAsDataURL(file);
+    }
+
+    // Automatic Client-Side Image Compression to ~250KB WebP/JPEG
+    function compressImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Export compressed JPEG
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          callback(dataUrl);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveCurrentCardModal() {
+      const card = clientDeck[activeCardIndex];
+      card.year = document.getElementById('modalYearInput').value.trim();
+      card.year_display = card.year || (card.isJoker ? 'על-זמני' : '');
+      card.title = document.getElementById('modalTitleInput').value.trim();
+      card.hint = document.getElementById('modalHintInput').value.trim();
+      card.description = document.getElementById('modalDescInput').value.trim();
+      card.media_type = document.getElementById('modalMediaTypeSelect').value;
+      card.isCustomized = true;
+
+      saveDeck();
+      renderGrid();
+      closeEditModal();
+      showToast('✨', `קלף #${card.id} נשמר בהצלחה!`);
+    }
+
+    function clearCurrentCardContent() {
+      if (!confirm('האם אתם בטוחים שברצונכם לאפס את התוכן של קלף זה?')) return;
+      const base = (window.DECK_DATA || [])[activeCardIndex] || {};
+      clientDeck[activeCardIndex] = {
+        ...clientDeck[activeCardIndex],
+        isCustomized: false,
+        year: '',
+        year_display: '',
+        title: '',
+        hint: '',
+        description: '',
+        media_file: '',
+        media_name: ''
+      };
+      saveDeck();
+      renderGrid();
+      closeEditModal();
+      showToast('🗑️', 'תוכן הקלף אופס.');
+    }
+
+    function navigateCard(delta) {
+      saveCurrentCardModal();
+      let next = activeCardIndex + delta;
+      if (next < 0) next = 53;
+      if (next > 53) next = 0;
+      openEditModal(next);
+    }
+
+    // Magic Hybrid Auto-Fill: Fills uncustomized cards with universal trivia
+    function autoFillGenericTrivia() {
+      if (!confirm('קסם הטריוויה ההיברידי:\nהאם להשלים את כל הקלפים שעדיין ריקים בשאלות טריוויה היסטוריות מרתקות מתוך החפיסה האוניברסלית?')) {
+        return;
+      }
+
+      const generic = window.DECK_DATA || [];
+      let filledCount = 0;
+
+      clientDeck.forEach((c, idx) => {
+        if (!c.isCustomized || (!c.year && !c.title && !c.media_file)) {
+          const gen = generic[idx];
+          if (gen) {
+            c.year = gen.year;
+            c.year_display = gen.year_display;
+            c.title = gen.title;
+            c.hint = gen.hint;
+            c.description = gen.description;
+            c.media_type = gen.media_type;
+            c.media_file = gen.media_file;
+            c.isCustomized = true;
+            filledCount++;
+          }
+        }
+      });
+
+      saveDeck();
+      renderGrid();
+      showToast('🪄', `הושלמו אוטומטית ${filledCount} קלפים בשאלות טריוויה!`);
+    }
+
+    // Export entire deck as a downloadable ZIP package
+    async function exportZipArchive() {
+      showToast('📦', 'מכין קובץ ZIP להורדה, אנא המתינו...');
+      const zip = new JSZip();
+
+      // Folder structure
+      const mediaFolder = zip.folder("media");
+
+      // Clean metadata JSON
+      const cleanDeck = clientDeck.map(c => {
+        const copy = { ...c };
+        // If data URL, extract file and save as standalone file in ZIP
+        if (copy.media_file && copy.media_file.startsWith('data:')) {
+          const ext = copy.media_file.split(';')[0].split('/')[1] || 'bin';
+          const filename = `card_${copy.id}.${ext === 'jpeg' ? 'jpg' : ext}`;
+          const base64Data = copy.media_file.split(',')[1];
+          mediaFolder.file(filename, base64Data, { base64: true });
+          copy.media_file = `media/${filename}`;
+        }
+        return copy;
+      });
+
+      zip.file("deck_data.js", `window.DECK_DATA = ${JSON.stringify(cleanDeck, null, 2)};\n`);
+      zip.file("deck_data.json", JSON.stringify(cleanDeck, null, 2));
+      zip.file("README.txt", `חפיסת זיכרונות אישית • קוד: ${currentCode}\nנוצר ב: ${new Date().toLocaleDateString('he-IL')}\nהחפיסה מכילה 54 קלפי משחק מוכנים.`);
+
+      // Generate ZIP blob and trigger download
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `Memories_Deck_${currentCode}.zip`);
+      showToast('🎉', 'קובץ ה-ZIP הורד בהצלחה למחשבכם!');
+    }
+
+    // Import Backup JSON
+    function importBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (Array.isArray(imported) && imported.length > 0) {
+            clientDeck = imported;
+            saveDeck();
+            renderGrid();
+            showToast('✅', 'הגיבוי נטען בהצלחה!');
+          }
+        } catch (err) {
+          alert('שגיאה בקריאת קובץ ה-JSON');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetCurrentDeck() {
+      if (!confirm('האם אתם בטוחים שברצונכם לאפס את כל 54 הקלפים בחפיסה זו? פעולה זו אינה ניתנת לביטול!')) return;
+      createBlankDeck();
+      renderGrid();
+      showToast('🗑️', 'החפיסה אופסה לחלוטין.');
+    }
+
+    function showToast(icon, msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Kickoff on load
+    window.addEventListener('DOMContentLoaded', initClientDeck);
+  </script>
+</body>
+</html>
