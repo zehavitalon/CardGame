@@ -876,6 +876,10 @@
       loadCard(parseInt(newId, 10));
     }
 
+    function getActiveDeck() {
+      return (activeDeckList && activeDeckList.length > 0) ? activeDeckList : (window.DECK_DATA || []);
+    }
+
     function loadCard(cardId) {
       const deck = getActiveDeck();
       currentCard = deck.find(c => c.id === cardId) || deck[0];
