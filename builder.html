@@ -781,6 +781,10 @@
         <span>טעינת גיבוי (JSON)</span>
         <input type="file" id="backupFileInput" accept=".json" style="display: none;" onchange="importBackupJSON(event)">
       </label>
+      <button class="btn btn-outline" onclick="openPrintableCheatSheet()">
+        <span>🖨️</span>
+        <span>מפתח שנים להדפסה</span>
+      </button>
       <a href="index.html" class="btn btn-outline" id="playNowBtn">
         <span>📱</span>
         <span>שחק עכשיו בחפיסה</span>
@@ -885,6 +889,29 @@
     <span id="toastMsg">הקלף נשמר בהצלחה!</span>
   </div>
 
+  <!-- Printable Cheat Sheet Modal -->
+  <div class="modal-overlay" id="cheatSheetModalOverlay">
+    <div class="modal-window" style="max-width: 780px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-card-id">🖨️ מפתח שנים לכל 54 הקלפים</span>
+          <span class="modal-card-suit" id="cheatSheetCode">(חפיסה פעילה)</span>
+        </div>
+        <button class="close-modal-btn" onclick="closeCheatSheetModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">
+          זהו מפתח הפתרונות המלא המסודר לפי מספר הקלף (1 עד 54). ניתן להדפיס דף זה, לקפל ולהניח בקופסת הקלפים כרפרנס לשופט או למשפחה בתום המשחק:
+        </p>
+        <div id="cheatSheetTableContainer"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeCheatSheetModal()">סגור</button>
+        <button class="btn btn-gold" onclick="printCheatSheet()">הדפס דף פתרונות 🖨️</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // System Constants & Storage Keys
     const STORAGE_KEY_PREFIX = 'TIMELINE_DECK_';
@@ -893,22 +920,82 @@
     let activeCardIndex = 0; // 0 to 53
     let clientDeck = [];
 
-    // Initialize 54 cards template based on Universal Deck
-    function initClientDeck() {
+    // --- Robust Persistent Storage Layer (IndexedDB with LocalStorage Fallback) ---
+    const DB_NAME = 'CardGameMemoriesDB';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'decks';
+
+    function openIDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function idbGet(key) {
+      const db = await openIDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+
+    async function idbSet(key, value) {
+      const db = await openIDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.put(value, key);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(false);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    // Initialize 54 cards template based on Universal Deck (survives all session reloads)
+    async function initClientDeck() {
       const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
       if (savedCode) {
         currentCode = savedCode;
       }
       document.getElementById('gameCodeInput').value = currentCode;
 
-      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
-      if (raw) {
-        try {
-          clientDeck = JSON.parse(raw);
-        } catch (e) {
-          console.error('Error loading saved deck', e);
-          createBlankDeck();
+      // 1. Try IndexedDB first (no 5MB limit, stores all high-res photos safely)
+      let loaded = await idbGet(STORAGE_KEY_PREFIX + currentCode);
+
+      // 2. Fallback to localStorage if not found
+      if (!loaded) {
+        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
+        if (raw) {
+          try { loaded = JSON.parse(raw); } catch (e) {}
         }
+      }
+
+      if (loaded && Array.isArray(loaded) && loaded.length > 0) {
+        clientDeck = loaded;
       } else {
         createBlankDeck();
       }
@@ -944,34 +1031,159 @@
       saveDeck();
     }
 
-    function saveDeck() {
-      localStorage.setItem(STORAGE_KEY_PREFIX + currentCode, JSON.stringify(clientDeck));
-      // Also register this deck as the currently active custom deck for index.html player
-      localStorage.setItem('ACTIVE_CUSTOM_DECK', JSON.stringify(clientDeck));
+    async function saveDeck() {
+      // 1. Save full deck into IndexedDB (virtually unlimited quota)
+      await idbSet(STORAGE_KEY_PREFIX + currentCode, clientDeck);
+      await idbSet('ACTIVE_CUSTOM_DECK', clientDeck);
+
+      // 2. Save active deck code
       localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+
+      // 3. Mirror in localStorage with quota error protection
+      try {
+        localStorage.setItem(STORAGE_KEY_PREFIX + currentCode, JSON.stringify(clientDeck));
+        localStorage.setItem('ACTIVE_CUSTOM_DECK', JSON.stringify(clientDeck));
+      } catch (quotaErr) {
+        console.warn('LocalStorage quota exceeded. Data safely stored in IndexedDB.', quotaErr);
+      }
       updateStats();
     }
 
-    function updateGameCode() {
+    async function updateGameCode() {
       const val = document.getElementById('gameCodeInput').value.trim();
       if (!val) return;
       currentCode = val.toUpperCase().replace(/\s+/g, '-');
       document.getElementById('gameCodeInput').value = currentCode;
       localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
       
-      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
-      if (raw) {
-        try {
-          clientDeck = JSON.parse(raw);
-          showToast('✅', `נטענה חפיסה קיימת: ${currentCode}`);
-        } catch (e) {
-          createBlankDeck();
+      // Try IndexedDB first
+      let loaded = await idbGet(STORAGE_KEY_PREFIX + currentCode);
+      if (!loaded) {
+        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
+        if (raw) {
+          try { loaded = JSON.parse(raw); } catch (e) {}
         }
+      }
+
+      if (loaded && Array.isArray(loaded) && loaded.length > 0) {
+        clientDeck = loaded;
+        showToast('✅', `נטענה חפיסה קיימת: ${currentCode}`);
       } else {
         createBlankDeck();
         showToast('🆕', `נוצרה חפיסה חדשה: ${currentCode}`);
       }
       renderGrid();
+    }
+
+    function generateRandomCode() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      currentCode = `MEMORIES-${num}`;
+      document.getElementById('gameCodeInput').value = currentCode;
+      updateGameCode();
+    }
+
+    // --- Printable Cheat Sheet Operations ---
+    function openPrintableCheatSheet() {
+      document.getElementById('cheatSheetCode').textContent = `(קוד: ${currentCode})`;
+      const container = document.getElementById('cheatSheetTableContainer');
+      
+      let rows = clientDeck.map(c => {
+        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
+        const rank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
+        const year = c.year || (c.isJoker ? 'על-זמני' : 'טרם הוגדר');
+        const title = c.title ? escapeHtml(c.title) : (c.isCustomized ? 'ללא כותרת' : '(ריק)');
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <td style="padding: 6px 10px; font-weight: 700; color: var(--gold-light);">#${c.id}</td>
+            <td style="padding: 6px 10px;">${c.suit_name} ${suitSymbol} ${rank}</td>
+            <td style="padding: 6px 10px; font-weight: 700; color: #fff;">${year}</td>
+            <td style="padding: 6px 10px; color: var(--text-muted);">${title}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.85rem;">
+          <thead>
+            <tr style="background: rgba(255,255,255,0.05); color: var(--gold); border-bottom: 1px solid var(--border-card);">
+              <th style="padding: 8px 10px;">מס'</th>
+              <th style="padding: 8px 10px;">קלף פוקר</th>
+              <th style="padding: 8px 10px;">שנה</th>
+              <th style="padding: 8px 10px;">כותרת האירוע / הזיכרון</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('cheatSheetModalOverlay').classList.add('open');
+    }
+
+    function closeCheatSheetModal() {
+      document.getElementById('cheatSheetModalOverlay').classList.remove('open');
+    }
+
+    function printCheatSheet() {
+      const win = window.open('', '_blank');
+      let rows = clientDeck.map(c => {
+        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
+        const rank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
+        const year = c.year || (c.isJoker ? 'על-זמני' : '----');
+        const title = c.title ? escapeHtml(c.title) : '';
+        return `
+          <tr>
+            <td><strong>#${c.id}</strong></td>
+            <td>${c.suit_name} ${suitSymbol} ${rank}</td>
+            <td><strong style="font-size: 1.1em;">${year}</strong></td>
+            <td>${title}</td>
+          </tr>
+        `;
+      }).join('');
+
+      win.document.write(`
+        <!DOCTYPE html>
+        <html lang="he" dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <title>מפתח שנים • חפיסת הזיכרונות ${currentCode}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #111; }
+            h1 { font-size: 1.5rem; margin-bottom: 4px; }
+            p { color: #555; margin-bottom: 16px; font-size: 0.9rem; }
+            table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+            th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: right; }
+            th { background: #f0f0f0; }
+            @media print {
+              body { padding: 0; }
+              @page { margin: 12mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>🎴 מפתח שנים מלא • חפיסת הזיכרונות (${currentCode})</h1>
+          <p>דף פתרונות רשמי לקופסת הקלפים • ממוין כרונולוגית לפי מספר קלף (1 עד 54)</p>
+          <table>
+            <thead>
+              <tr>
+                <th>מספר</th>
+                <th>קלף פוקר</th>
+                <th>שנה</th>
+                <th>כותרת האירוע</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      win.document.close();
     }
 
     function generateRandomCode() {
