@@ -604,23 +604,9 @@
     <!-- Active Deck Indicator Bar -->
     <div class="deck-pill-bar" id="activeDeckBar">
       <span id="activeDeckLabel">✨ חפיסה פעילה: טריוויה אוניברסלית</span>
-      <button class="nav-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="openCodeModal()">החלף 🔄</button>
-    </div>
-
-    <!-- Active Table Timeline Bar (Revealed Cards History) -->
-    <div class="deck-pill-bar" id="revealedTimelineBar" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); margin-top: 6px;">
-      <span id="revealedTimelineLabel">📋 <strong>ציר הזמן שעל השולחן:</strong> <span id="revealedCount" style="color: var(--gold-light); font-weight: 700;">0</span> קלפים נחשפו</span>
-      <button class="nav-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="toggleRevealedDrawer()">הצג ציר זמן 📜</button>
-    </div>
-
-    <!-- Revealed Cards Drawer / Chain -->
-    <div id="revealedDrawer" style="display: none; background: rgba(18, 24, 38, 0.95); border: 1px solid var(--border-card); border-radius: 14px; padding: 14px; margin-top: 6px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 0.85rem; font-weight: 700; color: var(--gold-light);">שרשרת הקלפים שנחשפו על השולחן (לפי סדר השנים):</span>
-        <button class="nav-btn" style="padding: 2px 6px; font-size: 0.72rem; background: none; border: none; color: var(--text-muted);" onclick="clearRevealedHistory()">איפוס שולחן 🔄</button>
-      </div>
-      <div id="revealedChainContainer" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px;">
-        <span style="color: var(--text-muted); font-size: 0.8rem;">טרם נחשפו קלפים במשחק הנוכחי. סרקו קלף וחשפו את שנתו!</span>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button class="nav-btn" style="padding: 3px 8px; font-size: 0.75rem;" onclick="openCodeModal()">קוד חפיסה 🔑</button>
+        <button class="nav-btn" style="padding: 3px 8px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;" onclick="resetScannedCards()">איפוס משחק 🔄</button>
       </div>
     </div>
 
@@ -665,6 +651,11 @@
 
       <!-- Reveal Year Section -->
       <section class="reveal-section">
+        <!-- Status notice if card was already revealed -->
+        <div id="alreadyRevealedNotice" style="display: none; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px; font-size: 0.92rem; font-weight: 700; text-align: center;">
+          ✅ קלף זה כבר נחשף ונמצא על השולחן!
+        </div>
+
         <button class="reveal-btn" id="revealBtn" onclick="toggleReveal()">
           <span>🔍</span>
           <span>חשוף את השנה ופרטי הקלף</span>
@@ -732,6 +723,13 @@
 
     // Check for active custom deck (survives session restarts via IndexedDB)
     async function loadActiveDeck() {
+      // Auto-sync deck code from URL if provided (?deck=CODE or ?code=CODE)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlDeck = urlParams.get('deck') || urlParams.get('code');
+      if (urlDeck) {
+        localStorage.setItem('ACTIVE_DECK_CODE', urlDeck.trim().toUpperCase());
+      }
+
       const generic = window.DECK_DATA || [];
       const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
       
@@ -810,75 +808,42 @@
       await initPage();
     }
 
-    // --- Active Table Revealed Timeline ---
-    function loadRevealedHistory() {
-      const raw = sessionStorage.getItem('REVEALED_TIMELINE_CARDS');
-      if (raw) {
-        try { revealedCards = JSON.parse(raw); } catch (e) {}
-      }
-      renderRevealedChain();
+    // --- Active Game Session Scanned/Revealed Tracking ---
+    // Cards scanned and revealed on the table during this session
+    function getRevealedStorageKey() {
+      const code = localStorage.getItem('ACTIVE_DECK_CODE') || 'UNIVERSAL';
+      return 'TIMELINE_REVEALED_' + code;
     }
 
-    function recordRevealedCard(card) {
-      if (!card) return;
-      const exists = revealedCards.some(c => c.id === card.id);
-      if (!exists) {
-        revealedCards.push({
-          id: card.id,
-          year: card.year_display || card.year || (card.isJoker ? 'על-זמני' : '----'),
-          rawYear: parseInt(card.year, 10) || 0,
-          title: card.title || 'אירוע',
-          suit: card.suit,
-          rank: card.rank,
-          suit_name: card.suit_name,
-          isJoker: !!card.isJoker
-        });
-        // Sort chronologically by card ID (the 1..54 sequence is strictly chronological!)
-        revealedCards.sort((a, b) => a.id - b.id);
-        sessionStorage.setItem('REVEALED_TIMELINE_CARDS', JSON.stringify(revealedCards));
-        renderRevealedChain();
+    function getRevealedCardIds() {
+      const raw = localStorage.getItem(getRevealedStorageKey());
+      if (!raw) return [];
+      try {
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        return [];
       }
     }
 
-    function renderRevealedChain() {
-      const countEl = document.getElementById('revealedCount');
-      if (countEl) countEl.textContent = revealedCards.length;
+    function isCardRevealed(cardId) {
+      return getRevealedCardIds().includes(cardId);
+    }
 
-      const container = document.getElementById('revealedChainContainer');
-      if (!container) return;
-
-      if (revealedCards.length === 0) {
-        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">טרם נחשפו קלפים במשחק הנוכחי. סרקו קלף וחשפו את שנתו!</span>`;
-        return;
+    function markCardRevealed(cardId) {
+      const list = getRevealedCardIds();
+      if (!list.includes(cardId)) {
+        list.push(cardId);
+        localStorage.setItem(getRevealedStorageKey(), JSON.stringify(list));
       }
-
-      container.innerHTML = revealedCards.map((c, i) => {
-        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
-        const arrow = (i < revealedCards.length - 1) ? `<span style="color: var(--gold); font-weight: 700; align-self: center;">➔</span>` : '';
-        return `
-          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-            <div onclick="changeCard(${c.id})" style="cursor: pointer; background: rgba(245, 208, 97, 0.12); border: 1px solid var(--border-card); border-radius: 10px; padding: 6px 10px; text-align: center; min-width: 90px; transition: transform 0.2s;">
-              <div style="font-size: 0.75rem; color: var(--gold-light); font-weight: 700;">#${c.id} ${c.suit_name} ${suitSymbol}</div>
-              <div style="font-size: 1rem; font-weight: 800; color: #fff;">${c.year}</div>
-              <div style="font-size: 0.72rem; color: var(--text-muted); max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.title}</div>
-            </div>
-            ${arrow}
-          </div>
-        `;
-      }).join('');
     }
 
-    function toggleRevealedDrawer() {
-      const drawer = document.getElementById('revealedDrawer');
-      if (!drawer) return;
-      drawer.style.display = (drawer.style.display === 'none') ? 'block' : 'none';
-    }
-
-    function clearRevealedHistory() {
-      if (!confirm('האם לאפס את רשימת הקלפים שנחשפו על השולחן?')) return;
-      revealedCards = [];
-      sessionStorage.removeItem('REVEALED_TIMELINE_CARDS');
-      renderRevealedChain();
+    function resetScannedCards() {
+      if (!confirm('האם לאפס את סריקות הקלפים ולהתחיל משחק חדש? כל הקלפים יחזרו למצב מסתורין.')) return;
+      localStorage.removeItem(getRevealedStorageKey());
+      if (currentCard) {
+        loadCard(currentCard.id);
+      }
     }
 
     // Parse URL parameter ?card=X
@@ -892,7 +857,6 @@
 
     async function initPage() {
       const deck = await loadActiveDeck();
-      loadRevealedHistory();
       const select = document.getElementById('cardSelect');
 
       // Populate card select dropdown
@@ -917,9 +881,27 @@
       currentCard = deck.find(c => c.id === cardId) || deck[0];
       if (!currentCard) return;
 
-      isRevealed = false;
-      document.getElementById('revealedBox').classList.remove('show');
-      document.getElementById('revealBtn').innerHTML = '<span>🔍</span><span>חשוף את השנה ופרטי הקלף</span>';
+      const alreadyRevealed = isCardRevealed(currentCard.id);
+      const notice = document.getElementById('alreadyRevealedNotice');
+      const box = document.getElementById('revealedBox');
+      const btn = document.getElementById('revealBtn');
+
+      if (alreadyRevealed) {
+        // SECOND SCAN (OR RE-SCAN): Show immediately with year visible!
+        isRevealed = true;
+        box.classList.add('show');
+        if (notice) {
+          notice.style.display = 'block';
+          notice.innerHTML = `✅ <strong>קלף זה כבר נחשף על השולחן!</strong> (שנת ${currentCard.year_display || currentCard.year || ''})`;
+        }
+        btn.innerHTML = '<span>🔒</span><span>הסתר שנה לניחוש חוזר</span>';
+      } else {
+        // FIRST SCAN: Mystery mode! Year is hidden until revealed
+        isRevealed = false;
+        box.classList.remove('show');
+        if (notice) notice.style.display = 'none';
+        btn.innerHTML = '<span>🔍</span><span>חשוף את השנה ופרטי הקלף</span>';
+      }
 
       // Badge
       const suitSymbol = currentCard.isJoker ? '★' : getSuitSymbol(currentCard.suit);
@@ -1017,13 +999,19 @@
       isRevealed = !isRevealed;
       const box = document.getElementById('revealedBox');
       const btn = document.getElementById('revealBtn');
+      const notice = document.getElementById('alreadyRevealedNotice');
       if (isRevealed) {
         box.classList.add('show');
         btn.innerHTML = '<span>🔒</span><span>הסתר את השנה</span>';
-        recordRevealedCard(currentCard);
+        markCardRevealed(currentCard.id);
+        if (notice) {
+          notice.style.display = 'block';
+          notice.innerHTML = `✅ <strong>קלף זה נחשף והוסף לשולחן!</strong> (שנת ${currentCard.year_display || currentCard.year || ''})`;
+        }
       } else {
         box.classList.remove('show');
         btn.innerHTML = '<span>🔍</span><span>חשוף את השנה ופרטי הקלף</span>';
+        if (notice) notice.style.display = 'none';
       }
     }
 
