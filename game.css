@@ -445,6 +445,50 @@ html, body {
   100% { height: 28px; }
 }
 
+/* Option A: Inline Stage Verdict Banner (Positioned directly below cinema screen) */
+.stage-verdict {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  animation: verdict-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--trans-smooth);
+}
+
+@keyframes verdict-appear {
+  0% { transform: scale(0.96) translateY(-4px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.stage-verdict.verdict-correct {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1.5px solid var(--accent-green);
+  color: #34d399;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+}
+
+.stage-verdict.verdict-wrong {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1.5px solid var(--accent-red);
+  color: #f87171;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+}
+
+.stage-verdict .verdict-icon {
+  font-size: 1.3rem;
+}
+
+.stage-verdict .verdict-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 /* Card Mystery Prompt Content (Horizontal Strip below Cinema Screen) */
 .stage-card-info {
   width: 100%;
@@ -1323,6 +1367,21 @@ html, body {
     height: clamp(150px, 25vh, 230px);
     min-height: 140px;
     border-radius: 10px;
+  }
+
+  .stage-verdict {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    gap: 8px;
+    border-radius: 10px;
+  }
+
+  .stage-verdict .verdict-icon {
+    font-size: 1.1rem;
+  }
+
+  .stage-verdict .verdict-text {
+    font-size: 0.9rem;
   }
 
   .covered-emblem {

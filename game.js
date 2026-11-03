@@ -50,6 +50,9 @@
     
     // Mystery Cinema Stage
     stageCardItem: document.getElementById('stageCardItem'),
+    stageVerdict: document.getElementById('stageVerdict'),
+    verdictIcon: document.getElementById('verdictIcon'),
+    verdictText: document.getElementById('verdictText'),
     stageCategory: document.getElementById('stageCategory'),
     stagePrompt: document.getElementById('stagePrompt'),
     stageInstructions: document.getElementById('stageInstructions'),
@@ -345,6 +348,7 @@
   }
 
   function renderMysteryStageCovered(card) {
+    if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
     elements.nextCardBtn.style.display = 'none';
     elements.playToggleBtn.style.display = 'none';
     elements.dragHintPill.style.display = 'none';
@@ -682,10 +686,16 @@
     const nextTeamName = gameConfig.currentTeam === 1 ? gameConfig.team2Name : gameConfig.team1Name;
     const revealedTitle = formatRevealedTitle(card);
     
-    if (card.year === 'JOKER') {
-      showToast(`✨ הפתעה! זהו קלף ג'וקר על-זמני - נקודה בטוחה ל${teamName}!`, 'toast-correct', 0);
-    } else {
-      showToast(`✨ בול! ${card.year} - נקודה ל${teamName}!`, 'toast-correct', 0);
+    // Option A: Short, clean inline verdict banner directly below the cinema screen
+    if (elements.stageVerdict) {
+      elements.stageVerdict.className = 'stage-verdict verdict-correct';
+      elements.verdictIcon.textContent = '✨';
+      if (card.year === 'JOKER') {
+        elements.verdictText.textContent = `בול! ג'וקר על-זמני • נקודה ל${teamName}!`;
+      } else {
+        elements.verdictText.textContent = `בול! השנה היא ${card.year} • נקודה ל${teamName}!`;
+      }
+      elements.stageVerdict.style.display = 'flex';
     }
 
     updateUI();
@@ -695,18 +705,12 @@
     if (timelineCards.length >= gameConfig.targetCards) {
       setTimeout(showVictoryScreen, 1200);
     } else {
-      // DO NOT STOP AUDIO OR VIDEO! Let it play to the end!
       elements.dragHintPill.style.display = 'none';
       elements.activateCardBtn.style.display = 'none';
       if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
       
       elements.stagePrompt.textContent = `${revealedTitle} ✅`;
-      
-      if (isAudioPlaying || card.media_type === 'video') {
-        elements.stageInstructions.textContent = 'כל הכבוד! הקלף שובץ בהצלחה. המדיה ממשיכה לפעול כדי שתוכלו ליהנות ממנה עד הסוף 🎶. מתי שתרצו, לחצו על הכפתור כדי להמשיך לקלף הבא!';
-      } else {
-        elements.stageInstructions.textContent = 'כל הכבוד! הקלף שובץ בהצלחה בציר הזמן. לחצו מתי שתרצו כדי לעבור לתור הבא!';
-      }
+      elements.stageInstructions.textContent = ''; // Removed verbose paragraphs
 
       elements.nextCardBtn.innerHTML = `<span>עברו לקלף הבא (תור ${nextTeamName})</span> <span>⬅️</span>`;
       elements.nextCardBtn.style.display = 'inline-flex';
@@ -716,11 +720,13 @@
   function handleIncorrectPlacement(card, slotIndex) {
     playErrorBuzz();
     
-    // CRITICAL: DO NOT STOP AUDIO OR VIDEO! Even on incorrect placement, let them finish playing!
-    const correctSlot = findCorrectSlotIndex(card);
-    const correctSlotLabel = getSlotDescription(correctSlot);
-    
-    showToast(`❌ לא מדויק! השנה היא ${card.year} (מתאים ${correctSlotLabel}). הקלף חוזר לתחתית החפיסה 🔄`, 'toast-wrong', 0);
+    // Option A: Short, clean error banner directly below cinema screen indicating the correct year!
+    if (elements.stageVerdict) {
+      elements.stageVerdict.className = 'stage-verdict verdict-wrong';
+      elements.verdictIcon.textContent = '❌';
+      elements.verdictText.textContent = `לא מדויק. השנה הנכונה היא ${card.year}`;
+      elements.stageVerdict.style.display = 'flex';
+    }
 
     // Recycle card to the bottom of the draw deck
     drawDeck.push(card);
@@ -738,12 +744,7 @@
 
     const revealedTitle = formatRevealedTitle(card);
     elements.stagePrompt.textContent = `${revealedTitle} 🔄`;
-    
-    if (isAudioPlaying || card.media_type === 'video') {
-      elements.stageInstructions.textContent = `לא מדויק הפעם! השנה היא ${card.year}. המדיה ממשיכה להתנגן כדי שתוכלו ליהנות ממנה 🎶. הקלף ירד לתחתית החפיסה ותהיה הזדמנות שנייה. מתי שתרצו, לחצו על הכפתור כדי לעבור לתור של ${nextTeamName}.`;
-    } else {
-      elements.stageInstructions.textContent = `לא מדויק הפעם! השנה היא ${card.year}. הקלף ירד לתחתית החפיסה ותהיה הזדמנות שנייה. לחצו למטה כדי לעבור לתור של ${nextTeamName}.`;
-    }
+    elements.stageInstructions.textContent = ''; // Removed verbose paragraphs
 
     elements.nextCardBtn.innerHTML = `<span>עברו לתור הבא (תור ${nextTeamName})</span> <span>⬅️</span>`;
     elements.nextCardBtn.style.display = 'inline-flex';
@@ -752,6 +753,7 @@
   function proceedToNextCard() {
     clearTimeout(toastTimer);
     elements.toastVerdict.classList.remove('show');
+    if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
     stopAudio();
     if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
     if (elements.coupleTag) elements.coupleTag.style.display = 'none';
