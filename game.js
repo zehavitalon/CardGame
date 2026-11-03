@@ -672,6 +672,16 @@
     return cardYear >= prevYear && cardYear <= nextYear;
   }
 
+  function formatTeamDative(name) {
+    if (!name) return '';
+    if (name.includes('הורים')) return 'להורים';
+    if (name.includes('ילדים')) return 'לילדים';
+    if (name === 'חיים') return 'לחיים';
+    if (name === 'זהבית') return 'לזהבית';
+    if (name.startsWith('ה')) return 'ל' + name.slice(1);
+    return 'ל' + name;
+  }
+
   function handleCorrectPlacement(card, slotIndex) {
     playSuccessChime();
     
@@ -691,9 +701,9 @@
       elements.stageVerdict.className = 'stage-verdict verdict-correct';
       elements.verdictIcon.textContent = '✨';
       if (card.year === 'JOKER') {
-        elements.verdictText.textContent = `בול! ג'וקר על-זמני • נקודה ל${teamName}!`;
+        elements.verdictText.textContent = `בול! ג'וקר על-זמני • נקודה ${formatTeamDative(teamName)}!`;
       } else {
-        elements.verdictText.textContent = `בול! השנה היא ${card.year} • נקודה ל${teamName}!`;
+        elements.verdictText.textContent = `בול! השנה היא ${card.year} • נקודה ${formatTeamDative(teamName)}!`;
       }
       elements.stageVerdict.style.display = 'flex';
     }
