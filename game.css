@@ -940,6 +940,8 @@ html, body {
   opacity: 1;
   visibility: visible;
   transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-overlay.hidden {
@@ -958,6 +960,7 @@ html, body {
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(245, 208, 97, 0.15);
   text-align: center;
   animation: modal-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
 }
 
 @keyframes modal-enter {
@@ -1099,6 +1102,8 @@ html, body {
 .toast-verdict.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .toast-verdict.toast-correct {
@@ -1124,7 +1129,352 @@ html, body {
     --card-h: 168px;
   }
   .mystery-card-container {
-    gap: 20px;
+    gap: 16px;
     padding: 16px 20px;
+  }
+}
+
+/* Mobile & Tablet Portrait (< 768px) */
+@media (max-width: 768px) {
+  :root {
+    --card-w: 96px;
+    --card-h: 136px;
+  }
+
+  /* Setup & Victory Modals on Mobile */
+  .modal-overlay {
+    padding: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-dialog {
+    padding: 14px 10px;
+    border-radius: 16px;
+    margin: auto;
+    max-width: min(440px, 100%);
+    max-height: 94dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    margin-bottom: 6px;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .modal-desc {
+    display: none;
+  }
+
+  .setup-group {
+    margin-bottom: 8px;
+  }
+
+  .setup-label {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .option-grid {
+    gap: 5px;
+  }
+
+  .option-card {
+    padding: 6px 2px;
+    border-radius: 8px;
+  }
+
+  .option-icon {
+    font-size: 1.15rem;
+    margin-bottom: 2px;
+  }
+
+  .option-title {
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .option-sub {
+    display: none;
+  }
+
+  .start-btn {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 13px 16px;
+    font-size: 1.1rem;
+    margin-top: 10px;
+    box-shadow: 0 4px 20px rgba(245, 208, 97, 0.6);
+  }
+
+  /* Game Header */
+  .game-header {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .header-left {
+    order: 1;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+
+  .header-right {
+    order: 2;
+  }
+
+  .team-scoreboard {
+    gap: 6px;
+  }
+
+  .team-pill {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+
+  .team-icon {
+    font-size: 1.05rem;
+  }
+
+  .team-name {
+    font-size: 0.8rem;
+  }
+
+  .team-score {
+    font-size: 0.95rem;
+    padding: 1px 6px;
+  }
+
+  .header-center {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .progress-header {
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+  }
+
+  .progress-track {
+    height: 6px;
+  }
+
+  /* Turn Banner */
+  .turn-banner {
+    padding: 6px 10px;
+    font-size: 0.88rem;
+    gap: 6px;
+  }
+
+  /* Game Stage & Mystery Card */
+  .game-stage {
+    padding: 6px 10px;
+  }
+
+  .mystery-card-container {
+    padding: 10px;
+    gap: 8px;
+    border-radius: 14px;
+  }
+
+  .stage-card-item {
+    height: clamp(150px, 25vh, 230px);
+    min-height: 140px;
+    border-radius: 10px;
+  }
+
+  .covered-emblem {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .covered-hint {
+    font-size: 0.78rem;
+  }
+
+  .vinyl-disc {
+    width: 120px;
+    height: 120px;
+  }
+
+  .vinyl-center {
+    width: 38px;
+    height: 38px;
+    font-size: 0.85rem;
+  }
+
+  .vinyl-waves {
+    margin-top: 10px;
+    height: 20px;
+  }
+
+  .stage-card-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding-top: 6px;
+  }
+
+  .stage-info-text {
+    text-align: center;
+    align-items: center;
+  }
+
+  .stage-title {
+    font-size: 1.05rem;
+    white-space: normal;
+  }
+
+  .stage-instructions {
+    font-size: 0.78rem;
+  }
+
+  .stage-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .action-btn {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .drag-hint-pill {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 6px 10px;
+  }
+
+  /* Timeline */
+  .timeline-section {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .timeline-header {
+    padding: 0 4px;
+  }
+
+  .timeline-title {
+    font-size: 0.82rem;
+  }
+
+  .timeline-count-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+  }
+
+  .timeline-scroll-container {
+    padding: 8px 6px 12px;
+  }
+
+  .timeline-slot {
+    width: 36px;
+  }
+
+  .timeline-slot::before {
+    font-size: 1.1rem;
+  }
+
+  .timeline-slot:hover,
+  .timeline-slot.drag-over {
+    width: var(--card-w);
+  }
+
+  .timeline-card-media {
+    height: 72px;
+  }
+
+  .timeline-card-details {
+    padding: 4px 6px;
+  }
+
+  .timeline-card-year {
+    font-size: 0.95rem;
+  }
+
+  .timeline-card-title {
+    font-size: 0.72rem;
+  }
+
+  /* Toast Notification */
+  .toast-verdict {
+    top: 70px;
+    width: calc(100% - 32px);
+    max-width: 480px;
+    font-size: 0.9rem;
+    padding: 10px 16px;
+    justify-content: center;
+    text-align: center;
+    border-radius: 14px;
+  }
+}
+
+/* Very Small Screens & Short Viewports (< 420px wide or < 650px high) */
+@media (max-width: 420px) {
+  .modal-dialog {
+    padding: 14px 10px;
+  }
+
+  .option-sub {
+    display: none;
+  }
+
+  .option-card {
+    padding: 8px 2px;
+  }
+
+  .option-title {
+    font-size: 0.76rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+
+  .modal-desc {
+    display: none;
+  }
+}
+
+@media (max-height: 650px) {
+  .modal-desc {
+    display: none;
+  }
+  .setup-group {
+    margin-bottom: 8px;
+  }
+  .option-sub {
+    display: none;
+  }
+  .modal-dialog {
+    padding: 12px 14px;
+  }
+  .stage-card-item {
+    height: 140px;
+    min-height: 120px;
   }
 }

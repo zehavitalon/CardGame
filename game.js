@@ -217,6 +217,12 @@
     // Move to Next Card Button
     elements.nextCardBtn.addEventListener('click', proceedToNextCard);
 
+    // Toast Verdict Click to dismiss
+    elements.toastVerdict.addEventListener('click', () => {
+      clearTimeout(toastTimer);
+      elements.toastVerdict.classList.remove('show');
+    });
+
     // Skip Card Button for Kids
     if (elements.skipCardBtn) {
       elements.skipCardBtn.addEventListener('click', skipCurrentCardForKids);
@@ -677,9 +683,9 @@
     const revealedTitle = formatRevealedTitle(card);
     
     if (card.year === 'JOKER') {
-      showToast(`✨ הפתעה! זהו קלף ג'וקר על-זמני - נקודה בטוחה ל${teamName}!`, 'toast-correct', 2800);
+      showToast(`✨ הפתעה! זהו קלף ג'וקר על-זמני - נקודה בטוחה ל${teamName}!`, 'toast-correct', 0);
     } else {
-      showToast(`✨ בול! ${card.year} - נקודה ל${teamName}!`, 'toast-correct', 2200);
+      showToast(`✨ בול! ${card.year} - נקודה ל${teamName}!`, 'toast-correct', 0);
     }
 
     updateUI();
@@ -714,7 +720,7 @@
     const correctSlot = findCorrectSlotIndex(card);
     const correctSlotLabel = getSlotDescription(correctSlot);
     
-    showToast(`❌ לא מדויק! השנה היא ${card.year} (מתאים ${correctSlotLabel}). הקלף חוזר לתחתית החפיסה 🔄`, 'toast-wrong', 3400);
+    showToast(`❌ לא מדויק! השנה היא ${card.year} (מתאים ${correctSlotLabel}). הקלף חוזר לתחתית החפיסה 🔄`, 'toast-wrong', 0);
 
     // Recycle card to the bottom of the draw deck
     drawDeck.push(card);
@@ -744,6 +750,8 @@
   }
 
   function proceedToNextCard() {
+    clearTimeout(toastTimer);
+    elements.toastVerdict.classList.remove('show');
     stopAudio();
     if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
     if (elements.coupleTag) elements.coupleTag.style.display = 'none';
@@ -888,9 +896,12 @@
     elements.toastMessage.textContent = message;
     elements.toastVerdict.className = `toast-verdict show ${type}`;
     
-    toastTimer = setTimeout(() => {
-      elements.toastVerdict.classList.remove('show');
-    }, duration);
+    // Only auto-dismiss if a positive duration is provided (0 means stay until next card is chosen)
+    if (duration > 0) {
+      toastTimer = setTimeout(() => {
+        elements.toastVerdict.classList.remove('show');
+      }, duration);
+    }
   }
 
   // ==========================================================================
