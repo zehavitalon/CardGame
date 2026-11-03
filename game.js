@@ -9,6 +9,7 @@
   // State
   let masterDeck = [];
   let drawDeck = [];
+  let discardedCards = [];
   let timelineCards = [];
   let currentCard = null;
   let isChecking = false;
@@ -313,16 +314,40 @@
   }
 
   function prepareDeckAndAnchor() {
-    const datedCards = masterDeck.filter(c => typeof c.year === 'number');
-    const jokers = masterDeck.filter(c => c.year === 'JOKER');
-    
+    discardedCards = [];
+
     // Select 1989 Wedding year or first memory as the initial anchor
+    const datedCards = masterDeck.filter(c => typeof c.year === 'number');
     const anchorCard = datedCards.find(c => c.year === 1989) || datedCards[0];
-    const remainingDated = datedCards.filter(c => c !== anchorCard);
-    
-    // Pool all other cards and shuffle
-    drawDeck = shuffle([...remainingDated, ...jokers]);
-    
+
+    // Categorize remaining cards into distinct pools
+    const poolPhotos = shuffle(masterDeck.filter(c => c !== anchorCard && c.category === 'photo'));
+    const poolSongs = shuffle(masterDeck.filter(c => c.category === 'song'));
+    const poolVideos = shuffle(masterDeck.filter(c => c.category === 'family_video' || c.category === 'sports_video'));
+    const poolJokers = shuffle(masterDeck.filter(c => c.year === 'JOKER' || c.category === 'joker'));
+
+    // Combine Videos and Jokers (12 dynamic cards: 10 videos + 2 jokers)
+    const poolMediaSpecial = shuffle([...poolVideos, ...poolJokers]);
+
+    // Interleave Songs (15) and MediaSpecial (12) to form the non-photo sequence (27 cards)
+    const nonPhotos = [];
+    while (poolSongs.length > 0 || poolMediaSpecial.length > 0) {
+      if (poolSongs.length > 0) nonPhotos.push(poolSongs.shift());
+      if (poolMediaSpecial.length > 0) nonPhotos.push(poolMediaSpecial.shift());
+    }
+
+    // Interleave Non-Photos (27) and Photos (26)
+    // Resulting cadence: NonPhoto (Song/Video/Joker), Photo, NonPhoto, Photo...
+    // Guarantees:
+    // 1. No song ever follows a song
+    // 2. No photo ever follows a photo
+    // 3. Videos and Jokers are evenly distributed throughout the game
+    drawDeck = [];
+    while (nonPhotos.length > 0 || poolPhotos.length > 0) {
+      if (nonPhotos.length > 0) drawDeck.push(nonPhotos.shift());
+      if (poolPhotos.length > 0) drawDeck.push(poolPhotos.shift());
+    }
+
     // Place anchor on timeline
     anchorCard.isAnchor = true;
     anchorCard.ownerTeam = 0; // neutral
@@ -334,9 +359,11 @@
   // ==========================================================================
   function drawNextMysteryCard() {
     if (drawDeck.length === 0) {
-      drawDeck = shuffle([...masterDeck.filter(c => !timelineCards.includes(c))]);
+      // Draw deck exhausted
+      showVictoryScreen();
+      return;
     }
-    
+
     currentCard = drawDeck.shift();
     isChecking = false;
     isCardActivated = false;
@@ -738,8 +765,8 @@
       elements.stageVerdict.style.display = 'flex';
     }
 
-    // Recycle card to the bottom of the draw deck
-    drawDeck.push(card);
+    // Option A: Discard mistaken card permanently (not returned to drawDeck)
+    discardedCards.push(card);
 
     const nextTeamName = gameConfig.currentTeam === 1 ? gameConfig.team2Name : gameConfig.team1Name;
 
