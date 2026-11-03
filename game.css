@@ -300,16 +300,16 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  padding: 12px 20px 10px;
+  padding: 14px 24px 12px;
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  max-width: 960px;
-  width: 100%;
+  max-width: 1280px;
+  width: 95%;
   min-height: 0;
   position: relative;
   transition: transform var(--trans-smooth), border-color var(--trans-smooth);
@@ -328,8 +328,8 @@ html, body {
 /* Card Visual Element • Cinema Stage Screen (Huge & Uncropped) */
 .stage-card-item {
   width: 100%;
-  height: clamp(200px, 34vh, 380px);
-  min-height: 180px;
+  height: clamp(320px, 48vh, 560px);
+  min-height: 280px;
   border-radius: var(--radius-md);
   background: #040712;
   border: 2px solid rgba(255, 255, 255, 0.14);
@@ -380,8 +380,8 @@ html, body {
 }
 
 .vinyl-disc {
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   background: radial-gradient(circle, #222 25%, #050505 70%);
   border: 3px solid #333;
@@ -402,8 +402,8 @@ html, body {
 }
 
 .vinyl-center {
-  width: 56px;
-  height: 56px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: var(--team-parents);
   display: flex;
@@ -411,7 +411,7 @@ html, body {
   justify-content: center;
   color: #000;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   box-shadow: 0 0 8px rgba(0,0,0,0.6);
 }
 
@@ -644,15 +644,15 @@ html, body {
 }
 
 .covered-emblem {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   border: 2px solid var(--team-parents);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: var(--team-parents);
   background: rgba(245, 208, 97, 0.1);
@@ -1118,6 +1118,32 @@ html, body {
   color: #f87171;
   background: rgba(239, 68, 68, 0.15);
   box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
+/* Large Desktop & TV Screens (>= 1400px wide) */
+@media (min-width: 1400px) and (min-height: 800px) {
+  .mystery-card-container {
+    max-width: 1440px;
+    gap: 14px;
+    padding: 18px 28px 14px;
+  }
+  .stage-card-item {
+    height: clamp(380px, 52vh, 640px);
+  }
+  .vinyl-disc {
+    width: 260px;
+    height: 260px;
+  }
+  .vinyl-center {
+    width: 80px;
+    height: 80px;
+    font-size: 1.35rem;
+  }
+  .covered-emblem {
+    width: 130px;
+    height: 130px;
+    font-size: 3rem;
+  }
 }
 
 /* Responsive adjustments */
