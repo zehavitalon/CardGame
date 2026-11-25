@@ -1,12 +1,24 @@
 /**
- * Timeline Family Game (Parents vs. Kids) • Game Engine
- * 37th Wedding Anniversary Interactive Experience
+ * Timeline Memory Game • Multi-Player Engine (1 to 4 Players)
+ * Universal Interactive Experience for any Custom Deck
  */
 
 (function () {
   'use strict';
 
-  // State
+  // Player Configurations & Color Themes
+  const PLAYER_CONFIGS = [
+    { id: 1, defaultName: 'שחקן 1', icon: '👑', color: '#f5d061', cssClass: 'p-theme-1', bannerClass: 'p-banner-1', cardClass: 'card-p-theme-1' },
+    { id: 2, defaultName: 'שחקן 2', icon: '🚀', color: '#38bdf8', cssClass: 'p-theme-2', bannerClass: 'p-banner-2', cardClass: 'card-p-theme-2' },
+    { id: 3, defaultName: 'שחקן 3', icon: '🌟', color: '#2ed573', cssClass: 'p-theme-3', bannerClass: 'p-banner-3', cardClass: 'card-p-theme-3' },
+    { id: 4, defaultName: 'שחקן 4', icon: '💜', color: '#e056fd', cssClass: 'p-theme-4', bannerClass: 'p-banner-4', cardClass: 'card-p-theme-4' },
+    { id: 5, defaultName: 'שחקן 5', icon: '🔥', color: '#ff7675', cssClass: 'p-theme-5', bannerClass: 'p-banner-5', cardClass: 'card-p-theme-5' },
+    { id: 6, defaultName: 'שחקן 6', icon: '⚡', color: '#00cec9', cssClass: 'p-theme-6', bannerClass: 'p-banner-6', cardClass: 'card-p-theme-6' },
+    { id: 7, defaultName: 'שחקן 7', icon: '🦄', color: '#fd79a8', cssClass: 'p-theme-7', bannerClass: 'p-banner-7', cardClass: 'card-p-theme-7' },
+    { id: 8, defaultName: 'שחקן 8', icon: '🎯', color: '#a29bfe', cssClass: 'p-theme-8', bannerClass: 'p-banner-8', cardClass: 'card-p-theme-8' }
+  ];
+
+  // Game State
   let masterDeck = [];
   let drawDeck = [];
   let discardedCards = [];
@@ -15,293 +27,432 @@
   let isChecking = false;
   let isCardActivated = false;
   let isAudioPlaying = false;
-  
-  // Game Configuration
+  let toastTimer = null;
+
+  let activePlayerCount = 1;
+  let activePlayers = [];
+  let currentTurnIndex = 0;
+  let activeCode = 'ZIV-59';
+
   let gameConfig = {
-    mode: 'parents_vs_kids', // 'parents_vs_kids' | 'couples' | 'solo'
-    targetCards: 37,
-    team1Name: 'ההורים (חיים וזהבית)',
-    team2Name: 'הילדים',
-    currentTeam: 1, // 1 or 2
-    scores: { 1: 0, 2: 0 }
+    targetCards: 15
   };
 
-  // DOM Elements
-  const elements = {
-    // Setup Modal
-    setupModal: document.getElementById('setupModal'),
-    startBtn: document.getElementById('startBtn'),
-    modeOptions: document.querySelectorAll('.mode-option'),
-    targetOptions: document.querySelectorAll('.target-option'),
-    
-    // Status Bar
-    progressBar: document.getElementById('progressBar'),
-    progressCount: document.getElementById('progressCount'),
-    targetDisplay: document.getElementById('targetDisplay'),
-    team1Pill: document.getElementById('team1Pill'),
-    team2Pill: document.getElementById('team2Pill'),
-    team1Name: document.getElementById('team1Name'),
-    team2Name: document.getElementById('team2Name'),
-    team1Score: document.getElementById('team1Score'),
-    team2Score: document.getElementById('team2Score'),
-    
-    // Turn Banner
-    turnBanner: document.getElementById('turnBanner'),
-    turnText: document.getElementById('turnText'),
-    
-    // Mystery Cinema Stage
-    stageCardItem: document.getElementById('stageCardItem'),
-    stageVerdict: document.getElementById('stageVerdict'),
-    verdictIcon: document.getElementById('verdictIcon'),
-    verdictText: document.getElementById('verdictText'),
-    stageCategory: document.getElementById('stageCategory'),
-    stagePrompt: document.getElementById('stagePrompt'),
-    stageInstructions: document.getElementById('stageInstructions'),
-    activateCardBtn: document.getElementById('activateCardBtn'),
-    activateBtnText: document.getElementById('activateBtnText'),
-    skipCardBtn: document.getElementById('skipCardBtn'),
-    coupleTag: document.getElementById('coupleTag'),
-    playToggleBtn: document.getElementById('playToggleBtn'),
-    nextCardBtn: document.getElementById('nextCardBtn'),
-    dragHintPill: document.getElementById('dragHintPill'),
-    audioElement: document.getElementById('gameAudio'),
-    
-    // Timeline
-    timelineTrack: document.getElementById('timelineTrack'),
-    timelineCountBadge: document.getElementById('timelineCountBadge'),
-    
-    // Victory Modal
-    victoryModal: document.getElementById('victoryModal'),
-    victoryTitle: document.getElementById('victoryTitle'),
-    victorySubtitle: document.getElementById('victorySubtitle'),
-    victoryScore1: document.getElementById('victoryScore1'),
-    victoryScore2: document.getElementById('victoryScore2'),
-    victoryScoreboard: document.getElementById('victoryScoreboard'),
-    exploreAlbumBtn: document.getElementById('exploreAlbumBtn'),
-    playAgainBtn: document.getElementById('playAgainBtn'),
-    
-    // Toast Feedback
-    toastVerdict: document.getElementById('toastVerdict'),
-    toastMessage: document.getElementById('toastMessage')
-  };
+  // DOM Elements Cache
+  const elements = {};
 
-  // ==========================================================================
-  // Web Audio Synthesizer (Zero-latency sound effects)
-  // ==========================================================================
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function cacheElements() {
+    elements.setupModal = document.getElementById('setupModal');
+    elements.startBtn = document.getElementById('startBtn');
+    elements.playersScoreboard = document.getElementById('playersScoreboard');
+    elements.playerInputsList = document.getElementById('playerInputsList');
+    elements.deckCardsCountText = document.getElementById('deckCardsCountText');
 
-  function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
-    try {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+    elements.progressBar = document.getElementById('progressBar');
+    elements.progressCount = document.getElementById('progressCount');
+    elements.targetDisplay = document.getElementById('targetDisplay');
+
+    elements.turnBanner = document.getElementById('turnBanner');
+    elements.turnText = document.getElementById('turnText');
+
+    elements.stageCardItem = document.getElementById('stageCardItem');
+    elements.stageVerdict = document.getElementById('stageVerdict');
+    elements.verdictIcon = document.getElementById('verdictIcon');
+    elements.verdictText = document.getElementById('verdictText');
+    elements.stageCategory = document.getElementById('stageCategory');
+    elements.stagePrompt = document.getElementById('stagePrompt');
+    elements.stageInstructions = document.getElementById('stageInstructions');
+    elements.activateCardBtn = document.getElementById('activateCardBtn');
+    elements.activateBtnText = document.getElementById('activateBtnText');
+    elements.playToggleBtn = document.getElementById('playToggleBtn');
+    elements.nextCardBtn = document.getElementById('nextCardBtn');
+    elements.dragHintPill = document.getElementById('dragHintPill');
+    elements.audioElement = document.getElementById('gameAudio');
+
+    elements.mediaCinemaModal = document.getElementById('mediaCinemaModal');
+    elements.mediaCinemaContent = document.getElementById('mediaCinemaContent');
+    elements.mediaFullscreenBtn = document.getElementById('mediaFullscreenBtn');
+    elements.fullScreenIcon = document.getElementById('fullScreenIcon');
+    elements.fullScreenLabel = document.getElementById('fullScreenLabel');
+
+    elements.timelineTrack = document.getElementById('timelineTrack');
+    elements.timelineViewport = document.getElementById('timelineViewport');
+    elements.toastVerdict = document.getElementById('toastVerdict');
+    elements.toastMessage = document.getElementById('toastMessage');
+
+    elements.cardDetailModal = document.getElementById('cardDetailModal');
+    elements.cardDetailYear = document.getElementById('cardDetailYear');
+    elements.cardDetailTitle = document.getElementById('cardDetailTitle');
+    elements.cardDetailDescription = document.getElementById('cardDetailDescription');
+    elements.cardDetailMedia = document.getElementById('cardDetailMedia');
+    elements.cardDetailCloseBtn = document.getElementById('cardDetailCloseBtn');
+
+    elements.victoryModal = document.getElementById('victoryModal');
+    elements.victoryTitle = document.getElementById('victoryTitle');
+    elements.victorySubtitle = document.getElementById('victorySubtitle');
+    elements.victoryLeaderboard = document.getElementById('victoryLeaderboard');
+    elements.playAgainBtn = document.getElementById('playAgainBtn');
+  }
+
+  // --- IndexedDB Access for Decks ---
+  function getDeckFromIDB(key) {
+    return new Promise((resolve) => {
+      try {
+        const req = indexedDB.open('CardGameMemoriesDB', 1);
+        req.onerror = () => resolve(null);
+        req.onsuccess = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('decks')) {
+            resolve(null);
+            return;
+          }
+          const tx = db.transaction('decks', 'readonly');
+          const store = tx.objectStore('decks');
+          const getReq = store.get(key);
+          getReq.onsuccess = () => resolve(getReq.result || null);
+          getReq.onerror = () => resolve(null);
+        };
+      } catch (err) {
+        resolve(null);
       }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-      // AudioContext fallback
+    });
+  }
+
+  // --- Multi-Player Dynamic UI Logic ---
+  window.setPlayerCount = function (count) {
+    activePlayerCount = Math.min(PLAYER_CONFIGS.length, Math.max(1, count));
+    renderPlayerInputs();
+  };
+
+  window.addPlayer = function () {
+    if (activePlayerCount >= PLAYER_CONFIGS.length) return;
+
+    // Preserve existing input values
+    const currentValues = [];
+    for (let i = 0; i < activePlayerCount; i++) {
+      const inp = document.getElementById(`playerNameInput_${i}`);
+      currentValues.push(inp ? inp.value : '');
+    }
+
+    activePlayerCount++;
+    renderPlayerInputs(currentValues);
+
+    const newInp = document.getElementById(`playerNameInput_${activePlayerCount - 1}`);
+    if (newInp) {
+      newInp.focus();
+      newInp.select();
+    }
+  };
+
+  window.removePlayer = function (index) {
+    if (activePlayerCount <= 1) return;
+
+    const currentValues = [];
+    for (let i = 0; i < activePlayerCount; i++) {
+      const inp = document.getElementById(`playerNameInput_${i}`);
+      currentValues.push(inp ? inp.value : '');
+    }
+
+    currentValues.splice(index, 1);
+    activePlayerCount--;
+    renderPlayerInputs(currentValues);
+  };
+
+  function renderPlayerInputs(savedValues) {
+    const list = elements.playerInputsList;
+    if (!list) return;
+
+    // Use savedValues or read current values from DOM
+    const currentValues = savedValues || [];
+    if (!savedValues) {
+      for (let i = 0; i < activePlayerCount; i++) {
+        const inp = document.getElementById(`playerNameInput_${i}`);
+        if (inp) currentValues[i] = inp.value;
+      }
+    }
+
+    let html = '';
+    for (let i = 0; i < activePlayerCount; i++) {
+      const cfg = PLAYER_CONFIGS[i] || {
+        id: i + 1,
+        defaultName: `שחקן ${i + 1}`,
+        icon: '👤',
+        color: '#38bdf8',
+        cssClass: 'p-theme-2',
+        bannerClass: 'p-banner-2',
+        cardClass: 'card-p-theme-2'
+      };
+
+      let val = currentValues[i];
+      if (val === undefined || val === null) {
+        val = (i === 0) ? 'שחקן 1' : '';
+      }
+
+      html += `
+        <div style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); padding:8px 12px; border-radius:10px; border:1px solid ${cfg.color}40; transition:all 0.2s ease;">
+          <span style="font-size:1.3rem;">${cfg.icon}</span>
+          <span style="font-weight:700; color:${cfg.color}; font-size:0.9rem; min-width:70px;">שחקן ${i + 1}:</span>
+          <input type="text" id="playerNameInput_${i}" class="form-input" style="flex:1; padding:8px 12px; border-radius:8px; background:rgba(0,0,0,0.3); border:1px solid ${cfg.color}60; color:#fff; font-family:Rubik,sans-serif; font-size:0.95rem;" value="${val}" placeholder="${cfg.defaultName}" oninput="this.style.borderColor='${cfg.color}60'">
+          ${activePlayerCount > 1 ? `
+            <button type="button" class="btn-remove-player" onclick="window.removePlayer(${i})" title="הסר שחקן ${i + 1}">✕</button>
+          ` : ''}
+        </div>
+      `;
+    }
+    list.innerHTML = html;
+
+    const addBtn = document.getElementById('addPlayerBtn');
+    if (addBtn) {
+      if (activePlayerCount >= PLAYER_CONFIGS.length) {
+        addBtn.disabled = true;
+        addBtn.title = `הגעת למספר השחקנים המרבי (${PLAYER_CONFIGS.length})`;
+      } else {
+        addBtn.disabled = false;
+        addBtn.title = 'הוסף שחקן למשחק';
+      }
     }
   }
 
-  function playSuccessChime() {
-    playTone(523.25, 'triangle', 0.2, 0.15); // C5
-    setTimeout(() => playTone(659.25, 'triangle', 0.25, 0.15), 100); // E5
-    setTimeout(() => playTone(783.99, 'triangle', 0.35, 0.2), 200); // G5
-    setTimeout(() => playTone(1046.50, 'triangle', 0.5, 0.25), 320); // C6
+  function renderScoreboardPills() {
+    const board = elements.playersScoreboard;
+    if (!board) return;
+    board.innerHTML = activePlayers.map((p, idx) => `
+      <div class="player-pill ${p.cssClass} ${idx === currentTurnIndex ? 'active-turn' : ''}" id="playerPill_${idx}">
+        <span>${p.icon}</span>
+        <span>${activePlayers.length > 1 ? p.name : 'נקודות:'}</span>
+        <span style="font-weight:800; font-family:Outfit,sans-serif; font-size:1.1rem; margin-right:4px;" id="playerScore_${idx}">${p.score}</span>
+      </div>
+    `).join('');
   }
 
-  function playErrorBuzz() {
-    playTone(220, 'sawtooth', 0.25, 0.12);
-    setTimeout(() => playTone(180, 'sawtooth', 0.35, 0.15), 150);
-  }
+  function updateTurnIndicator() {
+    if (!activePlayers.length) return;
+    const curr = activePlayers[currentTurnIndex];
+    activePlayers.forEach((p, idx) => {
+      const pill = document.getElementById(`playerPill_${idx}`);
+      if (pill) pill.classList.toggle('active-turn', idx === currentTurnIndex);
+    });
 
-  function playCardFlipSound() {
-    playTone(400, 'sine', 0.08, 0.08);
-  }
-
-  function playSkipSound() {
-    playTone(320, 'sine', 0.1, 0.1);
-    setTimeout(() => playTone(480, 'sine', 0.15, 0.12), 90);
-  }
-
-  // ==========================================================================
-  // Couple-Only Cards Detection (Exact list of 14 cards chosen by Zehavit)
-  // Cards: 7, 8, 10, 13, 14, 19, 26, 31, 37, 40, 41, 50, 53, 54
-  // ==========================================================================
-  const COUPLE_CARD_NUMBERS = new Set([
-    7, 8, 10, 13, 14, 19, 26, 31, 37, 40, 41, 50, 53, 54
-  ]);
-
-  function isCoupleCard(card) {
-    if (!card) return false;
-    if (COUPLE_CARD_NUMBERS.has(card.number)) return true;
-    if (card.is_couple === true) return true;
-    return false;
-  }
-
-  // ==========================================================================
-  // Clean Title Formatting (Eliminate duplicate years & duplicate Jokers)
-  // ==========================================================================
-  function formatRevealedTitle(card) {
-    if (card.year === 'JOKER') {
-      return "🃏 קלף ג'וקר על-זמני!";
+    const banner = elements.turnBanner;
+    if (banner) {
+      if (activePlayers.length > 1) {
+        banner.style.display = 'flex';
+        banner.className = `turn-banner ${curr.bannerClass}`;
+        elements.turnText.textContent = `תור של ${curr.name} ${curr.icon}`;
+      } else {
+        banner.style.display = 'none';
+      }
     }
-    const yearStr = String(card.year);
-    let title = (card.title || '').trim();
-    
-    // If title already has the year in parentheses like "(2016)" or ends with " 2016" or contains it
-    if (title.includes(`(${yearStr})`) || title.endsWith(` ${yearStr}`) || title.includes(yearStr)) {
-      return title;
+  }
+
+  function toggleTeamTurn() {
+    if (activePlayers.length > 1) {
+      currentTurnIndex = (currentTurnIndex + 1) % activePlayers.length;
     }
-    return `${title} (${yearStr})`;
+    updateTurnIndicator();
   }
 
   // ==========================================================================
-  // Initialization & Deck Fetch
+  // Initialization
   // ==========================================================================
   async function initGame() {
+    cacheElements();
     setupEventListeners();
-    if (window.DECK_DATA && Array.isArray(window.DECK_DATA) && window.DECK_DATA.length > 0) {
+    renderPlayerInputs();
+
+    // 1. Determine active deck code strictly from URL (?game=CODE or ?deck=CODE) or default
+    const urlParams = new URLSearchParams(window.location.search);
+    activeCode = (urlParams.get('game') || urlParams.get('deck') || 'ZIV-59').toUpperCase().trim();
+    console.log('🎮 Active Game Deck Code:', activeCode);
+
+    // Update Header
+    const titleHeader = document.getElementById('gameTitleHeader');
+    const badgeHeader = document.getElementById('modalBadge');
+    if (activeCode.includes('ZIV')) {
+      if (titleHeader) titleHeader.textContent = 'ציר הזמן של זיו • משחק המחשב';
+      if (badgeHeader) badgeHeader.textContent = '🎂 יום הולדת לזיו • ציר הזמן';
+      document.title = 'יום הולדת לזיו • משחק ציר הזמן';
+    } else {
+      if (titleHeader) titleHeader.textContent = `ציר הזמן • חפיסת ${activeCode}`;
+      if (badgeHeader) badgeHeader.textContent = `✨ חפיסת ${activeCode} • משחק המחשב`;
+      document.title = `משחק ציר הזמן • ${activeCode}`;
+    }
+
+    // 2. Load deck data: IndexedDB -> LocalStorage -> deck.json -> universal_deck.json
+    let loadedCards = null;
+    try {
+      loadedCards = await getDeckFromIDB('MEMORIES_DECK_' + activeCode);
+    } catch (e) { }
+
+    if (!loadedCards || !loadedCards.length) {
+      try {
+        const raw = localStorage.getItem('MEMORIES_DECK_' + activeCode);
+        if (raw) loadedCards = JSON.parse(raw);
+      } catch (e) { }
+    }
+
+    if (loadedCards && Array.isArray(loadedCards) && loadedCards.length >= 2) {
+      masterDeck = loadedCards;
+      console.log(`Loaded ${masterDeck.length} cards from custom storage for code ${activeCode}`);
+    } else if (window.DECK_DATA && Array.isArray(window.DECK_DATA) && window.DECK_DATA.length > 0) {
       masterDeck = window.DECK_DATA;
     } else {
       try {
         const response = await fetch('deck.json');
-        if (!response.ok) throw new Error('Failed to load deck.json');
-        masterDeck = await response.json();
+        if (response.ok) masterDeck = await response.json();
       } catch (err) {
-        console.warn('Local deck fetch blocked, trying live CDN:', err);
         try {
-          const res2 = await fetch('https://37-4xb.pages.dev/deck.json');
-          if (res2.ok) masterDeck = await res2.json();
-        } catch (err2) {
-          console.error('Error loading cards from all sources:', err2);
-        }
+          const resUni = await fetch('universal_deck.json');
+          if (resUni.ok) masterDeck = await resUni.json();
+        } catch (err2) { }
       }
     }
+
+    // 3. Filter active cards (with valid year)
+    const customizedCards = masterDeck.filter(c => c && (c.isCustomized || c.media_file || (c.year && c.year !== 0) || (c.title && c.title !== 'זיכרון אישי' && c.title !== 'טרם הוגדר')));
+    if (customizedCards.length >= 2) {
+      masterDeck = customizedCards;
+      console.log(`Filtered to ${masterDeck.length} active custom cards`);
+    }
+
+    // 4. Update Deck Info & Length
+    gameConfig.targetCards = masterDeck.length;
+    if (elements.deckCardsCountText) {
+      elements.deckCardsCountText.textContent = `${masterDeck.length} קלפים`;
+    }
+    if (elements.targetDisplay) {
+      elements.targetDisplay.textContent = masterDeck.length;
+    }
+
+    // 5. Setup Event Listeners & UI
+    setupEventListeners();
+    renderPlayerInputs();
   }
 
   function setupEventListeners() {
-    // Mode Selection in Setup
-    elements.modeOptions.forEach(btn => {
-      btn.addEventListener('click', () => {
-        elements.modeOptions.forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        gameConfig.mode = btn.dataset.mode;
-        updateSetupNames();
-      });
-    });
-
-    // Target Selection in Setup
-    elements.targetOptions.forEach(btn => {
-      btn.addEventListener('click', () => {
-        elements.targetOptions.forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        gameConfig.targetCards = parseInt(btn.dataset.target, 10);
-      });
-    });
-
-    // Start Game Button
-    elements.startBtn.addEventListener('click', startNewGame);
-
-    // Card Activation Button & Card Item Click
-    elements.activateCardBtn.addEventListener('click', activateCurrentCard);
-    elements.stageCardItem.addEventListener('click', () => {
-      if (!isCardActivated && currentCard && !isChecking) {
-        activateCurrentCard();
-      }
-    });
-
-    // Move to Next Card Button
-    elements.nextCardBtn.addEventListener('click', proceedToNextCard);
-
-    // Toast Verdict Click to dismiss
-    elements.toastVerdict.addEventListener('click', () => {
-      clearTimeout(toastTimer);
-      elements.toastVerdict.classList.remove('show');
-    });
-
-    // Skip Card Button for Kids
-    if (elements.skipCardBtn) {
-      elements.skipCardBtn.addEventListener('click', skipCurrentCardForKids);
+    if (elements.startBtn) {
+      elements.startBtn.addEventListener('click', startNewGame);
     }
 
-    // Audio Play / Pause
-    elements.playToggleBtn.addEventListener('click', toggleAudio);
-    elements.audioElement.addEventListener('ended', () => {
-      isAudioPlaying = false;
-      updatePlayBtnUI();
-    });
-
-    // Victory Screen Actions
-    elements.playAgainBtn.addEventListener('click', () => {
-      elements.victoryModal.classList.add('hidden');
-      elements.setupModal.classList.remove('hidden');
-    });
-
-    elements.exploreAlbumBtn.addEventListener('click', () => {
-      elements.victoryModal.classList.add('hidden');
-      showToast('מצב אלבום משפחתי פעיל! לחצו על כל קלף כדי לצפות ולהאזין לזיכרון ✨', 'toast-correct', 4000);
-    });
-
-    // Enable HTML5 Drag & Drop on mystery card
-    elements.stageCardItem.setAttribute('draggable', 'true');
-    elements.stageCardItem.addEventListener('dragstart', handleDragStart);
-    elements.stageCardItem.addEventListener('dragend', handleDragEnd);
-  }
-
-  function updateSetupNames() {
-    if (gameConfig.mode === 'parents_vs_kids') {
-      gameConfig.team1Name = 'ההורים (חיים וזהבית)';
-      gameConfig.team2Name = 'הילדים';
-    } else if (gameConfig.mode === 'couples') {
-      gameConfig.team1Name = 'חיים';
-      gameConfig.team2Name = 'זהבית';
-    } else {
-      gameConfig.team1Name = 'שחקן סולו';
-      gameConfig.team2Name = '';
+    if (elements.activateCardBtn) {
+      elements.activateCardBtn.addEventListener('click', activateCurrentCard);
     }
+    if (elements.stageCardItem) {
+      elements.stageCardItem.addEventListener('click', () => {
+        if (!isCardActivated && currentCard && !isChecking) {
+          activateCurrentCard();
+        }
+      });
+    }
+
+    if (elements.nextCardBtn) {
+      elements.nextCardBtn.addEventListener('click', proceedToNextCard);
+    }
+
+    window.scrollTimelineLeft = function () {
+      const vp = elements.timelineViewport || document.getElementById('timelineViewport');
+      if (vp) vp.scrollBy({ left: -320, behavior: 'smooth' });
+    };
+
+    window.scrollTimelineRight = function () {
+      const vp = elements.timelineViewport || document.getElementById('timelineViewport');
+      if (vp) vp.scrollBy({ left: 320, behavior: 'smooth' });
+    };
+
+    const vp = elements.timelineViewport || document.getElementById('timelineViewport');
+    if (vp) {
+      vp.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          vp.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    }
+
+    if (elements.toastVerdict) {
+      elements.toastVerdict.addEventListener('click', () => {
+        clearTimeout(toastTimer);
+        elements.toastVerdict.classList.remove('show');
+      });
+    }
+
+    if (elements.cardDetailCloseBtn) {
+      elements.cardDetailCloseBtn.addEventListener('click', closeCardDetailModal);
+    }
+    if (elements.cardDetailModal) {
+      elements.cardDetailModal.addEventListener('click', (e) => {
+        if (e.target === elements.cardDetailModal) closeCardDetailModal();
+      });
+    }
+
+    if (elements.playAgainBtn) {
+      elements.playAgainBtn.addEventListener('click', () => {
+        elements.victoryModal.classList.add('hidden');
+        elements.setupModal.classList.remove('hidden');
+      });
+    }
+
+    document.addEventListener('keydown', handleKeyNavigation);
   }
 
   // ==========================================================================
   // Start New Game Session
   // ==========================================================================
   function startNewGame() {
-    elements.setupModal.classList.add('hidden');
-    elements.victoryModal.classList.add('hidden');
-    
-    // Reset scores & state
-    gameConfig.scores[1] = 0;
-    gameConfig.scores[2] = 0;
-    gameConfig.currentTeam = 1;
-    timelineCards = [];
-    isChecking = false;
-    isCardActivated = false;
-    stopAudio();
-
-    // Update UI headers
-    elements.team1Name.textContent = gameConfig.team1Name;
-    elements.team2Name.textContent = gameConfig.team2Name || 'סולו';
-    elements.team1Score.textContent = '0';
-    elements.team2Score.textContent = '0';
-    elements.targetDisplay.textContent = gameConfig.targetCards;
-    
-    if (gameConfig.mode === 'solo') {
-      elements.team2Pill.style.display = 'none';
-    } else {
-      elements.team2Pill.style.display = 'flex';
+    if (masterDeck.length < 2) {
+      alert(`בחפיסה "${activeCode}" לא נמצאו מספיק קלפים פעילים למשחק.`);
+      return;
     }
 
-    // Shuffle Deck & Seed First Anchor Card
-    prepareDeckAndAnchor();
+    // Default player names if left empty
+    for (let i = 0; i < activePlayerCount; i++) {
+      const inp = document.getElementById(`playerNameInput_${i}`);
+      let val = inp ? inp.value.trim() : '';
+      if (!val) {
+        val = PLAYER_CONFIGS[i]?.defaultName || `שחקן ${i + 1}`;
+        if (inp) inp.value = val;
+      }
+    }
+
+    elements.setupModal.classList.add('hidden');
+    elements.victoryModal.classList.add('hidden');
+
+    // Initialize players from inputs
+    activePlayers = [];
+    for (let i = 0; i < activePlayerCount; i++) {
+      const inp = document.getElementById(`playerNameInput_${i}`);
+      const cfg = PLAYER_CONFIGS[i] || {
+        id: i + 1,
+        defaultName: `שחקן ${i + 1}`,
+        icon: '👤',
+        color: '#38bdf8',
+        cssClass: 'p-theme-2',
+        bannerClass: 'p-banner-2',
+        cardClass: 'card-p-theme-2'
+      };
+      const name = inp.value.trim();
+      activePlayers.push({
+        ...cfg,
+        name: name,
+        score: 0
+      });
+    }
+
+    gameConfig.targetCards = masterDeck.length;
+    currentTurnIndex = 0;
+    timelineCards = [];
+    discardedCards = [];
+    isChecking = false;
+    isCardActivated = false;
+    currentCard = null;
+    stopAudio();
+
+    prepareDeck();
+    renderScoreboardPills();
+    updateTurnIndicator();
     updateUI();
-    drawNextMysteryCard();
+    renderTimeline();
+    renderMysteryStageInstructions();
   }
 
   function shuffle(array) {
@@ -313,328 +464,385 @@
     return arr;
   }
 
-  function prepareDeckAndAnchor() {
+  function prepareDeck() {
     discardedCards = [];
-
-    // Select 1989 Wedding year or first memory as the initial anchor
-    const datedCards = masterDeck.filter(c => typeof c.year === 'number');
-    const anchorCard = datedCards.find(c => c.year === 1989) || datedCards[0];
-
-    // Categorize remaining cards into distinct pools
-    const poolPhotos = shuffle(masterDeck.filter(c => c !== anchorCard && c.category === 'photo'));
-    const poolSongs = shuffle(masterDeck.filter(c => c.category === 'song'));
-    const poolVideos = shuffle(masterDeck.filter(c => c.category === 'family_video' || c.category === 'sports_video'));
-    const poolJokers = shuffle(masterDeck.filter(c => c.year === 'JOKER' || c.category === 'joker'));
-
-    // Combine Videos and Jokers (12 dynamic cards: 10 videos + 2 jokers)
-    const poolMediaSpecial = shuffle([...poolVideos, ...poolJokers]);
-
-    // Interleave Songs (15) and MediaSpecial (12) to form the non-photo sequence (27 cards)
-    const nonPhotos = [];
-    while (poolSongs.length > 0 || poolMediaSpecial.length > 0) {
-      if (poolSongs.length > 0) nonPhotos.push(poolSongs.shift());
-      if (poolMediaSpecial.length > 0) nonPhotos.push(poolMediaSpecial.shift());
-    }
-
-    // Interleave Non-Photos (27) and Photos (26)
-    // Resulting cadence: NonPhoto (Song/Video/Joker), Photo, NonPhoto, Photo...
-    // Guarantees:
-    // 1. No song ever follows a song
-    // 2. No photo ever follows a photo
-    // 3. Videos and Jokers are evenly distributed throughout the game
-    drawDeck = [];
-    while (nonPhotos.length > 0 || poolPhotos.length > 0) {
-      if (nonPhotos.length > 0) drawDeck.push(nonPhotos.shift());
-      if (poolPhotos.length > 0) drawDeck.push(poolPhotos.shift());
-    }
-
-    // Place anchor on timeline
-    anchorCard.isAnchor = true;
-    anchorCard.ownerTeam = 0; // neutral
-    timelineCards = [anchorCard];
+    timelineCards = [];
+    drawDeck = shuffle([...masterDeck]);
+    gameConfig.targetCards = masterDeck.length;
+    console.log(`Deck prepared: ${drawDeck.length} cards, zero pre-placed anchors.`);
   }
 
-  // ==========================================================================
-  // Drawing & Rendering the Mystery Card (Initial Covered State)
-  // ==========================================================================
+  function mediaThumb(card) {
+    return card ? (card.card_image || card.media_file || '') : '';
+  }
+
+  // --- Fullscreen Cinema Modal Logic ---
+  window.toggleFullScreen = function () {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        if (elements.fullScreenLabel) elements.fullScreenLabel.textContent = 'צא ממסך מלא';
+        if (elements.fullScreenIcon) elements.fullScreenIcon.textContent = '✖';
+      }).catch(() => { });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          if (elements.fullScreenLabel) elements.fullScreenLabel.textContent = 'מסך מלא';
+          if (elements.fullScreenIcon) elements.fullScreenIcon.textContent = '⛶';
+        }).catch(() => { });
+      }
+    }
+  };
+
+  window.openMediaCinemaModal = function (card, titleOverride) {
+    const modal = elements.mediaCinemaModal || document.getElementById('mediaCinemaModal');
+    const content = elements.mediaCinemaContent || document.getElementById('mediaCinemaContent');
+    if (!modal || !content || !card) return;
+
+    const mediaType = card.media_type;
+    const thumb = mediaThumb(card);
+    const titleBadge = titleOverride ? `<div class="cinema-title-badge">${titleOverride}</div>` : '';
+
+    if (mediaType === 'video' || (thumb && thumb.endsWith('.mp4'))) {
+      content.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw;">
+          ${titleBadge}
+          <video src="${thumb}" controls autoplay playsinline loop class="cinema-view-video"></video>
+        </div>
+      `;
+    } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3'))) {
+      const audioSrc = card.media_file || thumb;
+      content.innerHTML = `
+        <div style="text-align:center; color:#fff; padding:20px; display:flex; flex-direction:column; align-items:center;">
+          ${titleBadge}
+          <div style="font-size:6rem; margin:16px 0;">🎵</div>
+          <h2 style="font-size:1.8rem; color:#f5d061; margin-bottom:14px; font-weight:800;">האזינו לשיר ונחשו את השנה!</h2>
+          ${audioSrc ? `<audio src="${audioSrc}" controls autoplay style="margin-top:10px; width:320px; max-width:90vw;"></audio>` : ''}
+        </div>
+      `;
+      if (audioSrc && elements.audioElement) {
+        try {
+          elements.audioElement.src = audioSrc;
+          elements.audioElement.play().catch(() => {});
+        } catch (e) {}
+      }
+    } else if (thumb) {
+      content.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw;">
+          ${titleBadge}
+          <img src="${thumb}" alt="תמונת זיכרון" class="cinema-view-img">
+        </div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div style="text-align:center; color:#fff; padding:30px; display:flex; flex-direction:column; align-items:center;">
+          ${titleBadge}
+          <div style="font-size:5rem; margin:16px 0;">📷</div>
+          <h2 style="font-size:1.6rem; color:#fff; margin-bottom:8px;">נחשו מה קרה ומתי!</h2>
+        </div>
+      `;
+    }
+
+    modal.classList.add('active');
+  };
+
+  window.closeMediaModal = function (e) {
+    if (e) e.stopPropagation();
+    const modal = elements.mediaCinemaModal || document.getElementById('mediaCinemaModal');
+    if (!modal) return;
+    const content = elements.mediaCinemaContent || document.getElementById('mediaCinemaContent');
+    if (content) {
+      const vid = content.querySelector('video');
+      if (vid) {
+        try { vid.pause(); } catch (err) { }
+      }
+    }
+    modal.classList.remove('active');
+  };
+
+  window.toggleMediaModalFullscreen = function () {
+    if (currentCard) {
+      openMediaCinemaModal(currentCard);
+    }
+  };
+
   function drawNextMysteryCard() {
     if (drawDeck.length === 0) {
-      // Draw deck exhausted
       showVictoryScreen();
       return;
     }
 
     currentCard = drawDeck.shift();
     isChecking = false;
+    isCardActivated = true;
+    stopAudio();
+
+    // 1. Immediately open cinema modal so viewport is instantly covered (zero flicker underneath)
+    openMediaCinemaModal(currentCard);
+
+    // 2. Render background stage & timeline
+    renderMysteryStageRevealed(currentCard);
+    renderTimeline();
+    updateTurnIndicator();
+
+    if (elements.mediaFullscreenBtn) elements.mediaFullscreenBtn.style.display = 'inline-flex';
+    if (elements.nextCardBtn) elements.nextCardBtn.style.display = 'none';
+    if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
+  }
+
+  function renderMysteryStageInstructions() {
+    currentCard = null;
+    isChecking = false;
     isCardActivated = false;
     stopAudio();
 
-    renderMysteryStageCovered(currentCard);
-    renderTimeline();
-    updateTurnIndicator();
-  }
-
-  function renderMysteryStageCovered(card) {
     if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
-    elements.nextCardBtn.style.display = 'none';
-    elements.playToggleBtn.style.display = 'none';
-    elements.dragHintPill.style.display = 'none';
-    if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
-    if (elements.coupleTag) elements.coupleTag.style.display = 'none';
-    elements.activateCardBtn.style.display = 'inline-flex';
+    if (elements.mediaFullscreenBtn) elements.mediaFullscreenBtn.style.display = 'none';
+    if (elements.dragHintPill) elements.dragHintPill.style.display = 'none';
+    if (elements.stagePrompt) elements.stagePrompt.textContent = '';
 
-    // Completely disguise Joker cards so players don't know they are Jokers!
-    const catName = card.year === 'JOKER' ? 'תמונה משפחתית 🖼️' : (card.category_name || 'זיכרון מרגש');
-    elements.stageCategory.textContent = catName;
-
-    // Set stage item as covered card
-    elements.stageCardItem.className = 'stage-card-item is-covered';
+    elements.stageCardItem.className = 'stage-card-item is-deck-stage';
+    elements.stageCardItem.style.boxShadow = '';
+    elements.stageCardItem.style.borderColor = '';
+    elements.stageCardItem.style.borderWidth = '';
+    elements.stageCardItem.style.border = '';
+    elements.stageCardItem.style.zIndex = '';
     elements.stageCardItem.innerHTML = `
-      <div class="covered-emblem">37</div>
-      <div class="covered-hint">לחצו להפעלת הזיכרון 🎴</div>
-    `;
-
-    elements.stagePrompt.textContent = 'קלף זיכרון חדש נשלף 🎴';
-    elements.stageInstructions.textContent = 'לחצו על המסך או על הכפתור כדי להפעיל את הזיכרון (השמעת שיר / צפייה בווידאו / חשיפת תמונה).';
-
-    if (card.media_type === 'audio') {
-      elements.activateBtnText.textContent = 'הפעל והאזן לשיר';
-    } else if (card.media_type === 'video') {
-      elements.activateBtnText.textContent = 'הפעל וצפה בווידאו';
-    } else {
-      elements.activateBtnText.textContent = 'חשוף את התמונה';
-    }
-  }
-
-  // ==========================================================================
-  // Manual Card Activation (User clicks to open/play)
-  // ==========================================================================
-  function activateCurrentCard() {
-    if (!currentCard || isCardActivated) return;
-    isCardActivated = true;
-    playCardFlipSound();
-
-    elements.activateCardBtn.style.display = 'none';
-    elements.dragHintPill.style.display = 'inline-flex';
-    elements.stageCardItem.className = 'stage-card-item';
-
-    const card = currentCard;
-
-    // Audio Song
-    if (card.media_type === 'audio') {
-      elements.playToggleBtn.style.display = 'inline-flex';
-      elements.audioElement.src = card.media_file;
-
-      const vinylHTML = `
-        <div class="stage-audio-wrapper">
-          <div class="vinyl-disc" id="vinylDiscVisual">
-            <div class="vinyl-center">37</div>
+      <div class="deck-3d-wrapper" title="לחצו להתחלת המשחק!">
+        <div class="deck-card-layer layer-3"></div>
+        <div class="deck-card-layer layer-2"></div>
+        <div class="deck-card-layer layer-1"></div>
+        <div class="deck-top-card is-instructions">
+          <div class="deck-instr-header">
+            <span class="deck-instr-icon">📜</span>
+            <h3 class="deck-instr-title">איך משחקים?</h3>
           </div>
-          <div class="vinyl-waves">
-            <div class="vinyl-wave-bar"></div>
-            <div class="vinyl-wave-bar"></div>
-            <div class="vinyl-wave-bar"></div>
-            <div class="vinyl-wave-bar"></div>
-            <div class="vinyl-wave-bar"></div>
+          <div class="deck-instr-list">
+            <div class="deck-instr-item">
+              <div class="deck-instr-step">1</div>
+              <div class="deck-instr-text"><strong>שולפים קלף</strong> – לוחצים וחושפים זיכרון (תמונה, וידאו, שיר או חידה)</div>
+            </div>
+            <div class="deck-instr-item">
+              <div class="deck-instr-step">2</div>
+              <div class="deck-instr-text"><strong>מנחשים את השנה</strong> – מזהים מה היה האירוע ומתי הוא קרה</div>
+            </div>
+            <div class="deck-instr-item">
+              <div class="deck-instr-step">3</div>
+              <div class="deck-instr-text"><strong>משבצים בציר הזמן</strong> – בוחרים משבצת ➕ מתאימה לפי השנים</div>
+            </div>
+          </div>
+          <div class="deck-instr-footer">
+            <button type="button" class="deck-start-btn">
+              <span>התחילו לשחק</span> <span>🚀</span>
+            </button>
           </div>
         </div>
-      `;
-      elements.stageCardItem.innerHTML = vinylHTML;
-      elements.stagePrompt.textContent = 'שיר אהבה מסתורי 🎵';
-      elements.stageInstructions.textContent = 'האזינו לשיר... באיזו שנה הוא יצא? גררו את הקלף לציר הזמן למטה או לחצו על החריץ הרצוי (+).';
-      
-      playAudio();
+      </div>
+    `;
 
-    // Video (Zero cropping, natural aspect ratio, full controls)
-    } else if (card.media_type === 'video') {
-      elements.playToggleBtn.style.display = 'none';
-      const videoHTML = `
-        <video src="${card.media_file}" controls autoplay playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:inherit;"></video>
-      `;
-      elements.stageCardItem.innerHTML = videoHTML;
-      elements.stagePrompt.textContent = card.category === 'sports_video' ? 'רגע ספורט היסטורי ⚽🚴' : 'רגע וידאו משפחתי מרגש 🎬';
-      elements.stageInstructions.textContent = 'צפו בקטע הווידאו... באיזו שנה זה קרה? גררו לציר הזמן או לחצו על החריץ הרצוי (+).';
-
-    // Picture (Zero cropping, natural aspect ratio, full resolution)
-    } else {
-      elements.playToggleBtn.style.display = 'none';
-      const imgHTML = `
-        <img src="${card.media_file}" alt="Mystery Memory" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:inherit;">
-      `;
-      elements.stageCardItem.innerHTML = imgHTML;
-      elements.stagePrompt.textContent = 'תמונה משפחתית מתוך האלבום 🖼️';
-      elements.stageInstructions.textContent = 'התבוננו היטב בתמונה... מאיזו שנה היא? שריינו לה מקום בציר הזמן למטה!';
+    if (elements.nextCardBtn) {
+      elements.nextCardBtn.style.display = 'none';
     }
 
-    // Couple-only card check: Show special badge and allow Kids to Skip
-    const isCouple = isCoupleCard(card);
-    const isKidsTurn = gameConfig.mode === 'parents_vs_kids' && gameConfig.currentTeam === 2;
+    elements.stageCardItem.onclick = function () {
+      proceedToNextCard();
+    };
+  }
 
-    if (isCouple) {
-      if (elements.coupleTag) elements.coupleTag.style.display = 'inline-flex';
-      if (isKidsTurn) {
-        if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'inline-flex';
-        elements.stageInstructions.textContent = 'זוהי חוויה של ההורים בלבד! באפשרותכם לנסות לשבץ בציר הזמן, או ללחוץ על "דלג" כדי להחזיר את הקלף להורים ולשלוף קלף חדש ✨';
+  function renderMysteryStageDeckStack() {
+    currentCard = null;
+    isChecking = false;
+    isCardActivated = false;
+    stopAudio();
+
+    if (elements.mediaFullscreenBtn) elements.mediaFullscreenBtn.style.display = 'none';
+    if (elements.dragHintPill) elements.dragHintPill.style.display = 'none';
+    if (elements.stagePrompt) elements.stagePrompt.textContent = '';
+    if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
+    if (elements.nextCardBtn) elements.nextCardBtn.style.display = 'none';
+
+    const remaining = drawDeck.length;
+    let drawText = '';
+    if (remaining === 0) {
+      drawText = '🏆 סיום המשחק';
+    } else if (activePlayers.length > 1) {
+      const nextPlayer = activePlayers[currentTurnIndex];
+      drawText = `🃏 שלפו קלף (תור ${nextPlayer.name})`;
+    } else {
+      drawText = `🃏 שלפו קלף הבא (נותרו ${remaining})`;
+    }
+
+    elements.stageCardItem.className = 'stage-card-item is-deck-stage';
+    elements.stageCardItem.style.boxShadow = '';
+    elements.stageCardItem.style.borderColor = '';
+    elements.stageCardItem.style.borderWidth = '';
+    elements.stageCardItem.style.border = '';
+    elements.stageCardItem.style.zIndex = '';
+    elements.stageCardItem.innerHTML = `
+      <div class="deck-3d-wrapper" title="לחצו לשליפת הקלף הבא!">
+        <div class="deck-card-layer layer-3"></div>
+        <div class="deck-card-layer layer-2"></div>
+        <div class="deck-card-layer layer-1"></div>
+        <div class="deck-top-card is-deck-back">
+          <div class="card-back-pattern">
+            <div class="card-inner-border">
+              <div class="card-center-emblem">
+                <span class="deck-emblem-icon">⏳</span>
+                <span class="deck-emblem-text">ציר הזמן</span>
+                <button type="button" class="deck-draw-action-btn">
+                  <span>${drawText}</span>
+                  <span>⬅️</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    elements.stageCardItem.onclick = function () {
+      if (drawDeck.length > 0) {
+        proceedToNextCard();
       } else {
-        if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
+        showVictoryScreen();
       }
-    } else {
-      if (elements.coupleTag) elements.coupleTag.style.display = 'none';
-      if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
+    };
+  }
+
+  function renderMysteryStageRevealed(card) {
+    if (!card) return;
+    if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
+    if (elements.nextCardBtn) elements.nextCardBtn.style.display = 'none';
+    if (elements.dragHintPill) elements.dragHintPill.style.display = 'none';
+
+    if (elements.stageCategory) {
+      elements.stageCategory.style.display = 'none';
     }
+    if (elements.stagePrompt) {
+      elements.stagePrompt.textContent = '';
+      elements.stagePrompt.style.display = 'none';
+    }
+    elements.stageCardItem.className = 'stage-card-item is-revealed';
+    elements.stageCardItem.style.border = '';
+    elements.stageCardItem.style.boxShadow = '';
+    elements.stageCardItem.style.zIndex = '';
+    elements.stageCardItem.onclick = function () {
+      window.toggleMediaModalFullscreen();
+    };
+
+    const thumb = mediaThumb(card);
+
+    if (card.media_type === 'video' && card.media_file) {
+      elements.stageCardItem.innerHTML = `
+        <video src="${card.media_file}" controls autoplay playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
+      `;
+    } else if (thumb) {
+      elements.stageCardItem.innerHTML = `
+        <img src="${thumb}" alt="קלף מסתורי" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);">
+      `;
+    } else {
+      elements.stageCardItem.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--gold-light);">
+          <span style="font-size:3rem; margin-bottom:8px;">📷</span>
+          <span style="font-size:1.1rem; font-weight:700;">קלף מסתורי</span>
+        </div>
+      `;
+    }
+
+    if (elements.stageInstructions) elements.stageInstructions.style.display = 'none';
+  }
+
+  function activateCurrentCard() {
+    if (!currentCard) return;
+    openMediaCinemaModal(currentCard);
   }
 
   // ==========================================================================
-  // Audio Controls
-  // ==========================================================================
-  function playAudio() {
-    elements.audioElement.play().then(() => {
-      isAudioPlaying = true;
-      updatePlayBtnUI();
-    }).catch(() => {
-      isAudioPlaying = false;
-      updatePlayBtnUI();
-    });
-  }
-
-  function stopAudio() {
-    elements.audioElement.pause();
-    elements.audioElement.currentTime = 0;
-    isAudioPlaying = false;
-    updatePlayBtnUI();
-  }
-
-  function toggleAudio() {
-    if (elements.audioElement.paused) {
-      playAudio();
-    } else {
-      elements.audioElement.pause();
-      isAudioPlaying = false;
-      updatePlayBtnUI();
-    }
-  }
-
-  function updatePlayBtnUI() {
-    const disc = document.getElementById('vinylDiscVisual');
-    if (isAudioPlaying) {
-      elements.playToggleBtn.innerHTML = '<span>⏸️</span><span>השהה שיר</span>';
-      elements.playToggleBtn.classList.add('btn-playing');
-      if (disc) disc.classList.add('playing');
-    } else {
-      elements.playToggleBtn.innerHTML = '<span>▶️</span><span>השמע שיר</span>';
-      elements.playToggleBtn.classList.remove('btn-playing');
-      if (disc) disc.classList.remove('playing');
-    }
-  }
-
-  // ==========================================================================
-  // Timeline Rendering & Drop Slots
+  // Timeline Rendering & Slot Selection
   // ==========================================================================
   function renderTimeline() {
     elements.timelineTrack.innerHTML = '';
-    
-    // There are (timelineCards.length + 1) slots
-    for (let slotIndex = 0; slotIndex <= timelineCards.length; slotIndex++) {
-      // 1. Render Drop Slot
-      const slotEl = createSlotElement(slotIndex);
+
+    const canPlace = currentCard !== null && isCardActivated && !isChecking;
+
+    const slotCount = timelineCards.length + 1;
+    for (let slotIdx = 0; slotIdx < slotCount; slotIdx++) {
+      // Slender line slot with + badge - identical, smooth behavior across the entire game
+      const slotEl = createSlenderSlotElement(slotIdx, canPlace);
       elements.timelineTrack.appendChild(slotEl);
 
-      // 2. Render Card (if exists at slotIndex)
-      if (slotIndex < timelineCards.length) {
-        const cardEl = createPlacedCardElement(timelineCards[slotIndex]);
+      if (slotIdx < timelineCards.length) {
+        const cardEl = createPlacedCardElement(timelineCards[slotIdx]);
         elements.timelineTrack.appendChild(cardEl);
       }
     }
-
-    elements.timelineCountBadge.textContent = `${timelineCards.length} קלפים בציר`;
   }
 
-  function createSlotElement(index) {
-    const slot = document.createElement('div');
-    slot.className = 'timeline-slot';
-    slot.dataset.slotIndex = index;
-    
-    let tooltipText = '';
-    if (index === 0) {
-      const firstYear = getEffectiveYear(timelineCards[0]);
-      tooltipText = `לפני ${firstYear}`;
-    } else if (index === timelineCards.length) {
-      const lastYear = getEffectiveYear(timelineCards[timelineCards.length - 1]);
-      tooltipText = `אחרי ${lastYear}`;
-    } else {
-      const prevYear = getEffectiveYear(timelineCards[index - 1]);
-      const nextYear = getEffectiveYear(timelineCards[index]);
-      tooltipText = `בין ${prevYear} ל-${nextYear}`;
+  function createFirstSlotElement() {
+    const slotEl = document.createElement('div');
+    slotEl.className = 'timeline-slot slot-first-card';
+    slotEl.dataset.slotIndex = 0;
+    slotEl.innerHTML = `
+      <div class="slot-circle">➕</div>
+      <div class="slot-label">התחלת ציר הזמן - שבצו כאן את הקלף הראשון!</div>
+    `;
+    slotEl.addEventListener('click', () => {
+      handleSlotChosen(0);
+    });
+    return slotEl;
+  }
+
+  function createSlenderSlotElement(slotIndex, isActive) {
+    const slotEl = document.createElement('div');
+    slotEl.className = 'timeline-slot-slender' + (isActive ? '' : ' is-inactive');
+    slotEl.dataset.slotIndex = slotIndex;
+    const label = getSlotDescription(slotIndex);
+    slotEl.innerHTML = `
+      <span class="slot-slender-badge">+</span>
+      <span class="slot-slender-tooltip">${label}</span>
+    `;
+    if (isActive) {
+      slotEl.title = `שבצו כאן: ${label}`;
+      slotEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleSlotChosen(slotIndex);
+      });
     }
-    
-    slot.innerHTML = `<span class="slot-tooltip">${tooltipText}</span>`;
-
-    // Click-to-place event
-    slot.addEventListener('click', () => handleSlotChosen(index));
-
-    // Drag-over events
-    slot.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      slot.classList.add('drag-over');
-    });
-
-    slot.addEventListener('dragleave', () => {
-      slot.classList.remove('drag-over');
-    });
-
-    slot.addEventListener('drop', (e) => {
-      e.preventDefault();
-      slot.classList.remove('drag-over');
-      handleSlotChosen(index);
-    });
-
-    return slot;
+    return slotEl;
   }
 
-  function getEffectiveYear(card) {
-    if (!card) return '';
-    if (card.year === 'JOKER') return "ג'וקר";
-    return card.year;
+  function createSlotElement(slotIndex) {
+    return createSlenderSlotElement(slotIndex, true);
+  }
+
+  function getSlotDescription(index) {
+    if (timelineCards.length === 0) return 'קלף ראשון בציר';
+    if (index === 0) return `לפני ${timelineCards[0].year || ''}`;
+    if (index === timelineCards.length) return `אחרי ${timelineCards[timelineCards.length - 1].year || ''}`;
+    return `בין ${timelineCards[index - 1].year || ''} ל-${timelineCards[index].year || ''}`;
   }
 
   function createPlacedCardElement(card) {
     const cardEl = document.createElement('div');
     cardEl.className = 'timeline-card';
-    
-    if (card.isAnchor) {
-      cardEl.classList.add('card-anchor');
-    } else if (card.ownerTeam === 1) {
-      cardEl.classList.add('team-parents');
-    } else if (card.ownerTeam === 2) {
-      cardEl.classList.add('team-kids');
-    }
 
-    const yearDisplay = card.year === 'JOKER' ? "🃏 ג'וקר" : card.year;
-    const mediaThumb = card.card_image || card.media_file;
-
+    const owner = card.ownerPlayer;
     let ownerBadge = '';
-    if (card.isAnchor) {
-      ownerBadge = '✨ עוגן פתיחה';
-    } else if (card.ownerTeam === 1) {
-      ownerBadge = `👑 ${gameConfig.team1Name}`;
-    } else if (card.ownerTeam === 2) {
-      ownerBadge = `🚀 ${gameConfig.team2Name}`;
+    if (owner && activePlayers.length > 1) {
+      cardEl.classList.add(owner.cardClass);
+      ownerBadge = `${owner.icon} ${owner.name}`;
     }
 
-    let cardTitle = card.title;
-    if (card.year === 'JOKER') {
-      cardTitle = "קלף על-זמני מיוחד 🃏";
-    }
+    const yearDisplay = card.year || '----';
+    const mediaThumb = card.card_image || card.media_file || '';
 
     cardEl.innerHTML = `
       <div class="timeline-card-media">
-        <img src="${mediaThumb}" alt="${cardTitle}" style="object-fit:cover; width:100%; height:100%;">
-        <span class="timeline-card-badge">${card.category_name || ''}</span>
+        ${mediaThumb ? `<img src="${mediaThumb}" alt="${card.title || ''}" style="object-fit:cover; width:100%; height:100%;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">📷</div>'}
       </div>
       <div class="timeline-card-details">
         <div class="timeline-card-year">${yearDisplay}</div>
-        <div class="timeline-card-title">${cardTitle}</div>
-        <div class="timeline-card-owner">${ownerBadge}</div>
+        <div class="timeline-card-title">${card.title || ''}</div>
+        ${ownerBadge ? `<div class="timeline-card-owner">${ownerBadge}</div>` : ''}
       </div>
     `;
 
@@ -646,325 +854,395 @@
     return cardEl;
   }
 
-  // ==========================================================================
-  // Card Placement & Rule Validation
-  // ==========================================================================
+  function validatePlacement(card, slotIndex) {
+    const cardYear = parseInt(card.year, 10);
+    if (isNaN(cardYear)) return true;
+
+    let prevYear = -Infinity;
+    for (let i = slotIndex - 1; i >= 0; i--) {
+      const y = parseInt(timelineCards[i].year, 10);
+      if (!isNaN(y)) { prevYear = y; break; }
+    }
+
+    let nextYear = Infinity;
+    for (let i = slotIndex; i < timelineCards.length; i++) {
+      const y = parseInt(timelineCards[i].year, 10);
+      if (!isNaN(y)) { nextYear = y; break; }
+    }
+
+    return cardYear >= prevYear && cardYear <= nextYear;
+  }
+
   function handleSlotChosen(slotIndex) {
-    if (isChecking || !currentCard) return;
-    
-    // Require card to be activated first before placing
-    if (!isCardActivated) {
-      showToast('לחצו קודם להפעלת הזיכרון לפני השיבוץ בציר! 🎴', 'toast-wrong', 2200);
-      activateCurrentCard();
+    if (isChecking) return;
+
+    if (!currentCard) {
+      showToast('פתחו קודם את הקלף! 🎴', 'toast-wrong', 2000);
       return;
     }
 
     isChecking = true;
     playCardFlipSound();
 
+    // 1. Visually mark the selected slot so the player sees exactly where they guessed
+    const targetSlot = document.querySelector(`.timeline-slot-slender[data-slot-index="${slotIndex}"]`);
+    if (targetSlot) {
+      targetSlot.classList.add('is-selected');
+    }
+
     const placedCard = currentCard;
     const isCorrect = validatePlacement(placedCard, slotIndex);
 
+    // 2. Reveal the real year and title directly on the central stage card with glowing frame!
+    showStageCardReveal(placedCard, isCorrect);
+
+    const curr = activePlayers[currentTurnIndex];
+
     if (isCorrect) {
-      handleCorrectPlacement(placedCard, slotIndex);
+      playSuccessChime();
+      curr.score++;
+      placedCard.ownerPlayer = curr;
+
+      const scoreEl = document.getElementById(`playerScore_${currentTurnIndex}`);
+      if (scoreEl) scoreEl.textContent = curr.score;
+
+      // 3. Give 2.0 seconds to clearly see the real year on the card and the green glow
+      setTimeout(() => {
+        animateCardFlightToSlot(placedCard, targetSlot, slotIndex, () => {
+          timelineCards.splice(slotIndex, 0, placedCard);
+          currentCard = null;
+          isChecking = false;
+          isCardActivated = false;
+
+          if (activePlayers.length > 1) {
+            toggleTeamTurn();
+          }
+
+          updateUI();
+          renderTimeline();
+          renderMysteryStageDeckStack();
+
+          // Add sparkle landing pulse to the newly placed card on timeline
+          const placedCards = elements.timelineTrack.querySelectorAll('.timeline-card');
+          if (placedCards[slotIndex]) {
+            placedCards[slotIndex].classList.add('just-landed-glow');
+          }
+          playCardFlipSound();
+        });
+      }, 2000);
+
     } else {
-      handleIncorrectPlacement(placedCard, slotIndex);
-    }
-  }
-
-  function validatePlacement(card, slotIndex) {
-    // Jokers accept ANY slot on the timeline
-    if (card.year === 'JOKER') return true;
-
-    const cardYear = parseInt(card.year, 10);
-    
-    // Find closest dated card before this slot
-    let prevYear = -Infinity;
-    for (let i = slotIndex - 1; i >= 0; i--) {
-      if (typeof timelineCards[i].year === 'number') {
-        prevYear = timelineCards[i].year;
-        break;
+      playErrorBuzz();
+      if (elements.stageCardItem) {
+        elements.stageCardItem.classList.add('card-shake-wrong');
       }
-    }
 
-    // Find closest dated card after this slot
-    let nextYear = Infinity;
-    for (let i = slotIndex; i < timelineCards.length; i++) {
-      if (typeof timelineCards[i].year === 'number') {
-        nextYear = timelineCards[i].year;
-        break;
-      }
-    }
+      // 3. Give 2.2 seconds to see the real year and red glow, then fade out
+      setTimeout(() => {
+        if (elements.stageCardItem) {
+          elements.stageCardItem.classList.add('fading-discard');
+        }
 
-    return cardYear >= prevYear && cardYear <= nextYear;
+        setTimeout(() => {
+          discardedCards.push(placedCard);
+          currentCard = null;
+          isChecking = false;
+          isCardActivated = false;
+
+          if (activePlayers.length > 1) {
+            toggleTeamTurn();
+          }
+
+          updateUI();
+          renderTimeline();
+          renderMysteryStageDeckStack();
+        }, 500);
+      }, 2200);
+    }
   }
 
-  function formatTeamDative(name) {
-    if (!name) return '';
-    if (name.includes('הורים')) return 'להורים';
-    if (name.includes('ילדים')) return 'לילדים';
-    if (name === 'חיים') return 'לחיים';
-    if (name === 'זהבית') return 'לזהבית';
-    if (name.startsWith('ה')) return 'ל' + name.slice(1);
-    return 'ל' + name;
-  }
+  function animateCardFlightToSlot(card, targetSlot, slotIndex, onComplete) {
+    const stageEl = elements.stageCardItem;
+    if (!stageEl) {
+      onComplete();
+      return;
+    }
 
-  function handleCorrectPlacement(card, slotIndex) {
-    playSuccessChime();
-    
-    // Assign team ownership
-    card.ownerTeam = gameConfig.currentTeam;
-    timelineCards.splice(slotIndex, 0, card);
-    
-    // Score point
-    gameConfig.scores[gameConfig.currentTeam]++;
-    
-    const teamName = gameConfig.currentTeam === 1 ? gameConfig.team1Name : gameConfig.team2Name;
-    const nextTeamName = gameConfig.currentTeam === 1 ? gameConfig.team2Name : gameConfig.team1Name;
-    const revealedTitle = formatRevealedTitle(card);
-    
-    // Option A: Short, clean inline verdict banner directly below the cinema screen
+    // 1. Immediately expand the target slot: Neighboring timeline cards smoothly glide aside and clear room!
+    if (targetSlot) {
+      targetSlot.classList.add('is-expanding-slot');
+    }
+
+    // 2. Measure starting and destination coordinates
+    const startRect = stageEl.getBoundingClientRect();
+    let destX = window.innerWidth / 2 - 63;
+    let destY = window.innerHeight - 200;
+
+    if (targetSlot) {
+      const targetRect = targetSlot.getBoundingClientRect();
+      destX = targetRect.left + (targetRect.width / 2) - 63;
+      destY = targetRect.top + (targetRect.height / 2) - 88;
+    }
+
+    // 3. Create the traveling card clone
+    const flyer = document.createElement('div');
+    flyer.className = 'flying-card-clone';
+    flyer.style.left = `${startRect.left}px`;
+    flyer.style.top = `${startRect.top}px`;
+    flyer.style.width = `${startRect.width}px`;
+    flyer.style.height = `${startRect.height}px`;
+
+    const thumb = mediaThumb(card);
+    flyer.innerHTML = `
+      <div style="width:100%; height:100%; position:relative; background:#0f172a; display:flex; flex-direction:column;">
+        <div style="width:100%; height:100%; position:relative; overflow:hidden;">
+          ${thumb ? `<img src="${thumb}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:3rem;">📷</div>'}
+        </div>
+        <div class="stage-reveal-overlay" style="padding:10px;">
+          <div class="stage-reveal-year-badge" style="font-size:2rem; margin:0;">${card.year || ''}</div>
+          <div class="stage-reveal-title" style="font-size:0.95rem;">${card.title || ''}</div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(flyer);
+
+    // 4. Reset tabletop stage underneath to the waiting deck stack so only the card travels
+    renderMysteryStageDeckStack();
+
+    // 5. Hide verdict message as flight begins so screen cleans up
     if (elements.stageVerdict) {
-      elements.stageVerdict.className = 'stage-verdict verdict-correct';
-      elements.verdictIcon.textContent = '✨';
-      if (card.year === 'JOKER') {
-        elements.verdictText.textContent = `בול! ג'וקר על-זמני • נקודה ${formatTeamDative(teamName)}!`;
-      } else {
-        elements.verdictText.textContent = `בול! השנה היא ${card.year} • נקודה ${formatTeamDative(teamName)}!`;
-      }
-      elements.stageVerdict.style.display = 'flex';
+      elements.stageVerdict.style.display = 'none';
     }
 
-    updateUI();
-    renderTimeline();
+    // 6. Animate flyer smoothly down to the target slot over 1.15s
+    requestAnimationFrame(() => {
+      flyer.style.left = `${destX}px`;
+      flyer.style.top = `${destY}px`;
+      flyer.style.width = '126px';
+      flyer.style.height = '176px';
+      flyer.style.borderRadius = '14px';
+      flyer.style.boxShadow = '0 10px 35px rgba(245, 208, 97, 0.95)';
+    });
 
-    // Check Victory Condition
-    if (timelineCards.length >= gameConfig.targetCards) {
-      setTimeout(showVictoryScreen, 1200);
+    setTimeout(() => {
+      flyer.remove();
+      if (targetSlot) {
+        targetSlot.classList.remove('is-expanding-slot');
+      }
+      onComplete();
+    }, 1180);
+  }
+
+  function showStageCardReveal(card, isCorrect) {
+    if (!elements.stageCardItem) return;
+
+    const existingOverlay = elements.stageCardItem.querySelector('.stage-reveal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'stage-reveal-overlay';
+    overlay.innerHTML = `
+      <div class="stage-reveal-year-badge">${card.year || '----'}</div>
+      <div class="stage-reveal-title">${card.title || ''}</div>
+    `;
+    elements.stageCardItem.appendChild(overlay);
+
+    // Ensure stage card sits high in stacking context during verification
+    elements.stageCardItem.style.position = 'relative';
+    elements.stageCardItem.style.zIndex = '35';
+
+    if (isCorrect) {
+      elements.stageCardItem.style.border = '3px solid #10b981';
+      elements.stageCardItem.style.boxShadow = '0 0 35px rgba(16, 185, 129, 0.9), 0 12px 40px rgba(0,0,0,0.8)';
     } else {
-      elements.dragHintPill.style.display = 'none';
-      elements.activateCardBtn.style.display = 'none';
-      if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
-      
-      elements.stagePrompt.textContent = `${revealedTitle} ✅`;
-      elements.stageInstructions.textContent = ''; // Removed verbose paragraphs
-
-      elements.nextCardBtn.innerHTML = `<span>עברו לקלף הבא (תור ${nextTeamName})</span> <span>⬅️</span>`;
-      elements.nextCardBtn.style.display = 'inline-flex';
+      elements.stageCardItem.style.border = '3px solid #ef4444';
+      elements.stageCardItem.style.boxShadow = '0 0 35px rgba(239, 68, 68, 0.9), 0 12px 40px rgba(0,0,0,0.8)';
     }
   }
 
-  function handleIncorrectPlacement(card, slotIndex) {
-    playErrorBuzz();
-    
-    // Option A: Short, clean error banner directly below cinema screen indicating the correct year!
-    if (elements.stageVerdict) {
-      elements.stageVerdict.className = 'stage-verdict verdict-wrong';
-      elements.verdictIcon.textContent = '❌';
-      elements.verdictText.textContent = `לא מדויק. השנה הנכונה היא ${card.year}`;
-      elements.stageVerdict.style.display = 'flex';
+  function setupNextCardButton() {
+    if (elements.nextCardBtn) {
+      elements.nextCardBtn.style.display = 'none';
     }
-
-    // Option A: Discard mistaken card permanently (not returned to drawDeck)
-    discardedCards.push(card);
-
-    const nextTeamName = gameConfig.currentTeam === 1 ? gameConfig.team2Name : gameConfig.team1Name;
-
-    elements.dragHintPill.style.display = 'none';
-    elements.activateCardBtn.style.display = 'none';
-    if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
-    
-    // If audio was playing, keep the toggle button available
-    if (isAudioPlaying) {
-      elements.playToggleBtn.style.display = 'inline-flex';
-    }
-
-    const revealedTitle = formatRevealedTitle(card);
-    elements.stagePrompt.textContent = `${revealedTitle} 🔄`;
-    elements.stageInstructions.textContent = ''; // Removed verbose paragraphs
-
-    elements.nextCardBtn.innerHTML = `<span>עברו לתור הבא (תור ${nextTeamName})</span> <span>⬅️</span>`;
-    elements.nextCardBtn.style.display = 'inline-flex';
   }
 
   function proceedToNextCard() {
     clearTimeout(toastTimer);
-    elements.toastVerdict.classList.remove('show');
+    stopAudio();
+
+    if (drawDeck.length === 0) {
+      showVictoryScreen();
+      return;
+    }
     if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
-    stopAudio();
-    if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
-    if (elements.coupleTag) elements.coupleTag.style.display = 'none';
-    // Also pause any video element if playing
-    const vid = elements.stageCardItem.querySelector('video');
-    if (vid) {
-      try { vid.pause(); } catch(e) {}
-    }
-    toggleTeamTurn();
+    if (elements.nextCardBtn) elements.nextCardBtn.style.display = 'none';
     drawNextMysteryCard();
-  }
-
-  // ==========================================================================
-  // Skip Card Action (Kids skip couple-only experiences)
-  // ==========================================================================
-  function skipCurrentCardForKids() {
-    if (!currentCard || isChecking) return;
-    if (gameConfig.mode !== 'parents_vs_kids' || gameConfig.currentTeam !== 2) return;
-
-    playSkipSound();
-    stopAudio();
-
-    const vid = elements.stageCardItem.querySelector('video');
-    if (vid) {
-      try { vid.pause(); } catch (e) {}
-    }
-
-    const skipped = currentCard;
-    // Push skipped card to the bottom of the draw deck so the parents get to experience it later!
-    drawDeck.push(skipped);
-
-    showToast('💑 הקלף הוחזר לחפיסה עבור ההורים! נשלף קלף חדש לילדים ✨', 'toast-correct', 3000);
-
-    if (elements.skipCardBtn) elements.skipCardBtn.style.display = 'none';
-    if (elements.coupleTag) elements.coupleTag.style.display = 'none';
-
-    // Draw the next mystery card for the kids (do NOT toggle turn)
-    drawNextMysteryCard();
-  }
-
-  function findCorrectSlotIndex(card) {
-    if (card.year === 'JOKER') return 0;
-    const y = parseInt(card.year, 10);
-    for (let i = 0; i < timelineCards.length; i++) {
-      if (typeof timelineCards[i].year === 'number' && y < timelineCards[i].year) {
-        return i;
-      }
-    }
-    return timelineCards.length;
-  }
-
-  function getSlotDescription(index) {
-    if (index === 0) return `לפני ${getEffectiveYear(timelineCards[0])}`;
-    if (index === timelineCards.length) return `אחרי ${getEffectiveYear(timelineCards[timelineCards.length - 1])}`;
-    return `בין ${getEffectiveYear(timelineCards[index - 1])} ל-${getEffectiveYear(timelineCards[index])}`;
-  }
-
-  function toggleTeamTurn() {
-    if (gameConfig.mode !== 'solo') {
-      gameConfig.currentTeam = gameConfig.currentTeam === 1 ? 2 : 1;
-    }
-    updateTurnIndicator();
-  }
-
-  function updateTurnIndicator() {
-    elements.team1Score.textContent = gameConfig.scores[1];
-    elements.team2Score.textContent = gameConfig.scores[2];
-
-    const isTeam1 = gameConfig.currentTeam === 1;
-    elements.team1Pill.classList.toggle('active-turn', isTeam1);
-    elements.team2Pill.classList.toggle('active-turn', !isTeam1);
-
-    elements.turnBanner.classList.remove('turn-parents', 'turn-kids');
-    elements.turnBanner.classList.add(isTeam1 ? 'turn-parents' : 'turn-kids');
-
-    const activeName = isTeam1 ? gameConfig.team1Name : gameConfig.team2Name;
-    const icon = isTeam1 ? '👑' : '🚀';
-    elements.turnText.textContent = `תור קבוצת ${activeName} ${icon}`;
   }
 
   function updateUI() {
     const totalCount = timelineCards.length;
     elements.progressCount.textContent = totalCount;
     elements.targetDisplay.textContent = gameConfig.targetCards;
-    
+
     const pct = Math.min(100, Math.round((totalCount / gameConfig.targetCards) * 100));
     elements.progressBar.style.width = `${pct}%`;
   }
 
   // ==========================================================================
-  // Victory Screen & End Celebration
+  // Victory Screen (Leaderboard)
   // ==========================================================================
   function showVictoryScreen() {
-    stopAudio();
-    playSuccessChime();
+    playVictoryFanfare();
+    elements.victoryModal.classList.remove('hidden');
 
-    // Trigger celebration song if available (track 9 - Sweetest Thing, wedding 1989)
-    try {
-      elements.audioElement.src = 'assets/audio/track_9.mp3';
-      elements.audioElement.play().catch(() => {});
-    } catch(e) {}
+    const sorted = [...activePlayers].sort((a, b) => b.score - a.score);
+    const winner = sorted[0];
+    const medals = ['🥇', '🥈', '🥉', '4️⃣'];
 
-    const s1 = gameConfig.scores[1];
-    const s2 = gameConfig.scores[2];
-
-    elements.victoryScore1.textContent = s1;
-    elements.victoryScore2.textContent = s2;
-
-    if (gameConfig.mode === 'solo') {
-      elements.victoryTitle.textContent = '🎉 מזל טוב! השלמת את ציר הזמן!';
-      elements.victorySubtitle.textContent = `בנית בהצלחה רצף מפואר של ${timelineCards.length} קלפים וזיכרונות לכבוד יום הנישואין ה-37!`;
-      elements.victoryScoreboard.style.display = 'none';
-    } else if (s1 > s2) {
-      elements.victoryTitle.textContent = `🏆 קבוצת ${gameConfig.team1Name} ניצחה בקרב על ה-37!`;
-      elements.victorySubtitle.textContent = `הניסיון והזיכרון של ההורים הוכיחו את עצמם! (${s1} מול ${s2})`;
-    } else if (s2 > s1) {
-      elements.victoryTitle.textContent = `🏆 קבוצת ${gameConfig.team2Name} ניצחה בקרב על ה-37!`;
-      elements.victorySubtitle.textContent = `מהפך היסטורי! הילדים מכירים את ההיסטוריה המשפחתית בעל-פה! (${s2} מול ${s1})`;
-    } else {
-      elements.victoryTitle.textContent = '❤️ תיקו משפחתי מושלם של אהבה!';
-      elements.victorySubtitle.textContent = `שתי הקבוצות הגיעו לתוצאה זהה של ${s1} קלפים כל אחת!`;
+    const lb = elements.victoryLeaderboard;
+    if (lb) {
+      if (activePlayers.length > 1) {
+        lb.innerHTML = sorted.map((p, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.06); padding:12px 18px; border-radius:12px; border:1px solid ${p.color}50;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.4rem;">${medals[idx] || '🏅'}</span>
+              <span style="font-size:1.2rem;">${p.icon}</span>
+              <strong style="color:${p.color}; font-size:1.05rem;">${p.name}</strong>
+            </div>
+            <div style="font-size:1.2rem; font-weight:800; font-family:Outfit,sans-serif; color:#fff;">
+              ${p.score} <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">נק'</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        lb.innerHTML = `
+          <div style="display:flex; justify-content:center; align-items:center; gap:12px; background:rgba(255,255,255,0.06); padding:16px 24px; border-radius:14px; border:1px solid rgba(245,208,97,0.35);">
+            <span style="font-size:2rem;">🏆</span>
+            <div style="font-size:1.35rem; font-weight:800; color:#f5d061;">
+              סך הכל: ${winner.score} נקודות
+            </div>
+          </div>
+        `;
+      }
     }
 
-    elements.victoryModal.classList.remove('hidden');
+    if (activePlayers.length > 1) {
+      if (sorted.length > 1 && sorted[0].score === sorted[1].score) {
+        elements.victoryTitle.textContent = 'תיקו הירואי! 🤝';
+        elements.victorySubtitle.textContent = `שוויון מרתק בצמרת עם ${sorted[0].score} נקודות לכל אחד!`;
+      } else {
+        elements.victoryTitle.textContent = `הניצחון שייך ל${winner.name}! 🏆`;
+        elements.victorySubtitle.textContent = `האלופים בציר הזמן עם ${winner.score} נקודות מנצחות!`;
+      }
+    } else {
+      elements.victoryTitle.textContent = 'כל הכבוד! 🌟';
+      elements.victorySubtitle.textContent = `השלמת בהצלחה את ציר הזמן עם ${winner.score} נקודות!`;
+    }
   }
+  window.showVictoryScreen = showVictoryScreen;
 
   // ==========================================================================
-  // Card Detail Modal (Album Mode)
+  // Card Detail Modal
   // ==========================================================================
   function showCardDetailModal(card) {
-    const revealedTitle = formatRevealedTitle(card);
-    const desc = card.description || 'זיכרון יקר מתוך 37 שנות הנישואין המאושרות.';
-    alert(`🎴 ${revealedTitle}\n\n${desc}`);
-  }
+    if (!elements.cardDetailModal) return;
+    elements.cardDetailYear.textContent = card.year || '';
+    elements.cardDetailTitle.textContent = card.title || '';
+    elements.cardDetailDescription.textContent = card.description || '';
 
-  // ==========================================================================
-  // Toast Notification Helper
-  // ==========================================================================
-  let toastTimer = null;
-  function showToast(message, type = 'toast-correct', duration = 2400) {
-    clearTimeout(toastTimer);
-    elements.toastMessage.textContent = message;
-    elements.toastVerdict.className = `toast-verdict show ${type}`;
-    
-    // Only auto-dismiss if a positive duration is provided (0 means stay until next card is chosen)
-    if (duration > 0) {
-      toastTimer = setTimeout(() => {
-        elements.toastVerdict.classList.remove('show');
-      }, duration);
-    }
-  }
-
-  // ==========================================================================
-  // Drag & Drop Handlers
-  // ==========================================================================
-  function handleDragStart(e) {
-    if (isChecking || !currentCard || !isCardActivated) {
-      e.preventDefault();
-      if (!isCardActivated && currentCard) {
-        showToast('לחצו קודם להפעלת הזיכרון לפני הגרירה! 🎴', 'toast-wrong', 2200);
-        activateCurrentCard();
+    const mediaThumb = card.card_image || card.media_file || '';
+    if (elements.cardDetailMedia) {
+      if (card.media_type === 'video' || (mediaThumb && mediaThumb.endsWith('.mp4'))) {
+        elements.cardDetailMedia.innerHTML = `
+          <video src="${mediaThumb}" controls autoplay playsinline loop style="max-height:clamp(400px, 68vh, 780px); max-width:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 45px rgba(0,0,0,0.75);"></video>
+        `;
+      } else if (mediaThumb) {
+        elements.cardDetailMedia.innerHTML = `
+          <img src="${mediaThumb}" alt="${card.title || 'זיכרון'}" style="max-height:clamp(400px, 68vh, 780px); max-width:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 45px rgba(0,0,0,0.75);">
+        `;
+      } else {
+        elements.cardDetailMedia.innerHTML = '';
       }
-      return;
     }
-    e.dataTransfer.setData('text/plain', 'mystery-card');
-    elements.stageCardItem.style.opacity = '0.5';
+    elements.cardDetailModal.classList.remove('hidden');
   }
 
-  function handleDragEnd() {
-    elements.stageCardItem.style.opacity = '1';
-    document.querySelectorAll('.timeline-slot').forEach(s => s.classList.remove('drag-over'));
+  function closeCardDetailModal() {
+    if (elements.cardDetailModal) {
+      const vid = elements.cardDetailModal.querySelector('video');
+      if (vid) { try { vid.pause(); } catch (e) { } }
+      elements.cardDetailModal.classList.add('hidden');
+    }
+  }
+  window.closeCardDetailModal = closeCardDetailModal;
+
+  // ==========================================================================
+  // Sound Effects
+  // ==========================================================================
+  function playCardFlipSound() {
+    playBeep(440, 0.08, 'sine');
+  }
+  function playSuccessChime() {
+    playBeep(523.25, 0.1, 'triangle');
+    setTimeout(() => playBeep(659.25, 0.15, 'triangle'), 100);
+    setTimeout(() => playBeep(783.99, 0.25, 'triangle'), 200);
+  }
+  function playErrorBuzz() {
+    playBeep(180, 0.2, 'sawtooth');
+  }
+  function playVictoryFanfare() {
+    playSuccessChime();
   }
 
-  // Launch on DOM ready
-  document.addEventListener('DOMContentLoaded', initGame);
+  function playBeep(freq, duration, type = 'sine') {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) { }
+  }
 
+  function stopAudio() {
+    if (elements.audioElement) {
+      elements.audioElement.pause();
+      elements.audioElement.currentTime = 0;
+    }
+    isAudioPlaying = false;
+  }
+
+  function showToast(msg, typeClass, duration = 2500) {
+    if (!elements.toastVerdict) return;
+    clearTimeout(toastTimer);
+    elements.toastMessage.textContent = msg;
+    elements.toastVerdict.className = `toast-verdict show ${typeClass}`;
+    toastTimer = setTimeout(() => {
+      elements.toastVerdict.classList.remove('show');
+    }, duration);
+  }
+
+  function handleKeyNavigation(e) {
+    if (e.key === 'Escape') {
+      window.closeMediaModal();
+    } else if (e.key === 'ArrowRight') {
+      elements.timelineTrack.scrollBy({ left: -320, behavior: 'smooth' });
+    } else if (e.key === 'ArrowLeft') {
+      elements.timelineTrack.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  }
+
+  // Run on DOM ready or immediately if already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+  } else {
+    initGame();
+  }
 })();

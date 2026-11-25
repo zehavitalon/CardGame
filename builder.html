@@ -3,270 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>פורטל עיצוב חפיסת זיכרונות אישית • 54 קלפים</title>
-
-  <!-- Vector Playing Cards Engine -->
-  <script src="cardmeister.js"></script>
-  <!-- Universal Default Deck Data -->
-  <script src="assets/deck_data.js"></script>
-  <!-- Client-side ZIP bundle generators -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-  <!-- Google Fonts -->
+  <title>יצירת ציר הזמן • אלבום זיכרונות אישי</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
     :root {
       --bg-dark: #0a0d14;
-      --bg-surface: #121624;
-      --bg-card: rgba(22, 28, 45, 0.88);
-      --bg-card-hover: rgba(30, 39, 64, 0.95);
-      --gold: #f5d061;
-      --gold-light: #ffea9f;
-      --gold-dark: #b89328;
-      --casino-red: #dc2626;
-      --casino-green: #10b981;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-card: rgba(245, 208, 97, 0.25);
-      --border-subtle: rgba(255, 255, 255, 0.1);
-      --shadow-luxury: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 208, 97, 0.1);
+      --card-bg: rgba(26, 31, 46, 0.85);
+      --card-border: rgba(212, 175, 55, 0.25);
+      --gold-primary: #d4af37;
+      --gold-light: #f5e6a3;
+      --cyan-light: #00d2ff;
+      --text-main: #f0f4fc;
+      --text-muted: #8c9bb5;
+      --danger: #ff4757;
+      --success: #2ed573;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      background-color: var(--bg-dark);
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(0, 210, 255, 0.06) 0%, transparent 40%);
       color: var(--text-main);
       font-family: 'Rubik', sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow-x: hidden;
-      padding-bottom: 80px;
-      direction: rtl;
-      text-align: right;
+      padding: 24px 16px 80px;
     }
 
-    /* Ambient Background Glow */
-    .ambient-glow {
-      position: fixed;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      filter: blur(150px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.15;
-    }
-    .glow-gold {
-      top: -150px;
-      right: -100px;
-      background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
-    }
-    .glow-red {
-      bottom: -150px;
-      left: -100px;
-      background: radial-gradient(circle, #b91c1c 0%, transparent 70%);
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    /* Header & Branding */
-    header.portal-header {
-      position: relative;
-      z-index: 2;
-      background: linear-gradient(180deg, rgba(22, 28, 45, 0.95) 0%, rgba(10, 13, 20, 0.8) 100%);
-      border-bottom: 1px solid var(--border-subtle);
-      backdrop-filter: blur(14px);
-      padding: 24px 20px 20px;
-      text-align: right;
+    /* Header */
+    .app-header {
+      text-align: center;
+      margin-bottom: 28px;
     }
 
-    .header-badge {
+    .app-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(245, 208, 97, 0.12);
-      border: 1px solid var(--border-card);
-      padding: 5px 14px;
-      border-radius: 20px;
+      padding: 6px 14px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 999px;
       color: var(--gold-light);
       font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
-    h1.portal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.1rem;
+    .app-title {
+      font-size: 2.2rem;
+      font-weight: 800;
       background: linear-gradient(135deg, #ffffff 40%, var(--gold-light) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-      text-align: right;
+      margin-bottom: 8px;
     }
 
-    .portal-desc {
+    .app-subtitle {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      max-width: 680px;
-      margin: 0 0 16px 0;
-      line-height: 1.5;
-      text-align: right;
+      font-size: 1rem;
     }
 
-    /* Game Code & Session Bar */
-    .session-bar {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-card);
-      border-radius: 30px;
-      padding: 8px 18px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-      flex-wrap: wrap;
-      justify-content: flex-start;
-    }
-
-    .session-label {
-      font-size: 0.88rem;
-      color: var(--text-muted);
+    /* Top Control Bar */
+    .control-bar {
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
     }
 
-    .session-input {
+    .code-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .code-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .code-input {
       background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 14px;
-      font-size: 0.92rem;
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
       font-family: 'Outfit', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      width: 140px;
       text-align: center;
-      width: 160px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .session-input:focus {
-      border-color: var(--gold);
+      letter-spacing: 1px;
     }
 
-    /* Progress & Stats Section */
-    .stats-container {
-      max-width: 1100px;
-      margin: 20px auto 0;
-      padding: 0 16px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .progress-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 18px;
-      padding: 20px;
-      box-shadow: var(--shadow-luxury);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .progress-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .progress-info {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-
-    .progress-num {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--gold);
-    }
-
-    .progress-text {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 12px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #b89328, var(--gold));
-      width: 0%;
-      border-radius: 10px;
-      transition: width 0.4s ease;
-      box-shadow: 0 0 12px rgba(245, 208, 97, 0.5);
-    }
-
-    /* Badges Pill Row */
-    .stats-pills {
+    .action-btns {
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .stat-pill {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 6px 14px;
-      border-radius: 12px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .stat-pill strong {
-      color: #fff;
-    }
-
-    /* Actions Toolbar */
-    .toolbar {
-      max-width: 1100px;
-      margin: 18px auto 0;
-      padding: 0 16px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .toolbar-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
     }
 
     .btn {
@@ -274,295 +126,295 @@
       align-items: center;
       gap: 8px;
       padding: 10px 18px;
-      border-radius: 12px;
-      font-size: 0.88rem;
+      border-radius: 10px;
+      font-family: 'Rubik', sans-serif;
       font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
-      border: none;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       text-decoration: none;
+      border: none;
     }
 
     .btn-gold {
-      background: linear-gradient(135deg, var(--gold), #d4af37);
-      color: #0f172a;
-      box-shadow: 0 4px 15px rgba(245, 208, 97, 0.25);
+      background: linear-gradient(135deg, var(--gold-primary), #b8972e);
+      color: #0b0e14;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
     }
-    .btn-gold:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(245, 208, 97, 0.45);
-    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45); }
 
-    .btn-magic {
-      background: linear-gradient(135deg, #7c3aed, #9333ea);
+    .btn-primary {
+      background: linear-gradient(135deg, #1e90ff, #00d2ff);
       color: #fff;
-      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 4px 14px rgba(0, 210, 255, 0.25);
     }
-    .btn-magic:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
-    }
+    .btn-primary:hover { transform: translateY(-2px); }
 
     .btn-outline {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
       color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-    .btn-outline:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
 
     .btn-danger {
-      background: rgba(220, 38, 38, 0.15);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-      color: #fca5a5;
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.3);
     }
-    .btn-danger:hover {
-      background: rgba(220, 38, 38, 0.3);
-    }
+    .btn-danger:hover { background: rgba(255, 71, 87, 0.25); }
 
-    /* Era / Suit Filter Tabs */
-    .filter-tabs {
-      max-width: 1100px;
-      margin: 24px auto 14px;
-      padding: 0 16px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      position: relative;
-      z-index: 2;
-    }
-    .filter-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .tab-btn {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      padding: 10px 18px;
-      border-radius: 12px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
+    /* Summary Bar */
+    .summary-bar {
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 0 4px;
     }
-    .tab-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
-    .tab-btn.active {
-      background: rgba(245, 208, 97, 0.15);
-      border-color: var(--gold);
+
+    .cards-count {
+      font-size: 1.15rem;
+      font-weight: 700;
       color: var(--gold-light);
     }
 
-    /* 54 Cards Grid */
-    main.cards-grid {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 16px;
+    /* Cards Grid */
+    .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 16px;
-      position: relative;
-      z-index: 2;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
     }
 
-    .deck-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 12px;
+    /* Card Item */
+    .card-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
       transition: all 0.25s ease;
       position: relative;
-      overflow: hidden;
     }
-    .deck-card:hover {
+    .card-item:hover {
       transform: translateY(-4px);
-      border-color: var(--gold);
-      background: var(--bg-card-hover);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border-color: rgba(212, 175, 55, 0.6);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
     }
 
-    .deck-card.is-filled {
-      border-color: rgba(16, 185, 129, 0.4);
-    }
-    .deck-card.is-filled::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      left: 0;
-      height: 3px;
-      background: var(--casino-green);
-    }
-
-    .card-top-header {
+    .card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .card-num-badge {
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
+    .card-num {
+      font-weight: 800;
+      font-size: 0.95rem;
       color: var(--gold-light);
-      background: rgba(245, 208, 97, 0.15);
-      padding: 2px 8px;
-      border-radius: 8px;
     }
 
-    .card-status-badge {
-      font-size: 0.72rem;
-      font-weight: 600;
+    .card-year-pill {
+      background: rgba(212, 175, 55, 0.18);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .card-year-pill.empty {
+      color: var(--text-muted);
+      border-color: rgba(255, 255, 255, 0.1);
+      background: transparent;
+    }
+
+    .card-img-box {
+      width: 100%;
+      height: 160px;
+      background: rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
-      gap: 4px;
-    }
-    .status-empty {
-      color: var(--text-muted);
-    }
-    .status-filled {
-      color: var(--casino-green);
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
     }
 
-    /* Card Mini Preview Box */
-    .card-preview-mini {
-      height: 110px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 10px;
+    .card-img-box img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .card-item:hover .card-img-box img { transform: scale(1.04); }
+
+    .card-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .card-placeholder span { font-size: 2rem; }
+
+    .card-body {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+    .card-title.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .card-actions .btn {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      justify-content: center;
+    }
+
+    /* Add Card Big Tile */
+    .add-card-tile {
+      background: rgba(212, 175, 55, 0.04);
+      border: 2px dashed rgba(212, 175, 55, 0.4);
+      border-radius: 16px;
+      min-height: 280px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      position: relative;
-      border: 1px dashed rgba(255, 255, 255, 0.1);
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      padding: 24px;
+      text-align: center;
     }
-
-    .card-preview-mini img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .add-card-tile:hover {
+      background: rgba(212, 175, 55, 0.09);
+      border-color: var(--gold-primary);
+      transform: translateY(-4px);
     }
-
-    .card-preview-mini .empty-icon {
-      font-size: 1.8rem;
-      opacity: 0.35;
-      margin-bottom: 4px;
-    }
-    .card-preview-mini .empty-text {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    .card-meta {
+    .add-tile-icon {
+      font-size: 3rem;
+      background: rgba(212, 175, 55, 0.15);
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(212, 175, 55, 0.3);
     }
-
-    .card-meta-year {
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.95rem;
+    .add-tile-text {
       font-weight: 700;
-      color: #fff;
+      font-size: 1.1rem;
+      color: var(--gold-light);
     }
-
-    .card-meta-title {
-      font-size: 0.8rem;
+    .add-tile-sub {
+      font-size: 0.82rem;
       color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    /* Modal Styles */
+    /* Empty State */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px dashed rgba(212, 175, 55, 0.3);
+      border-radius: 20px;
+      max-width: 550px;
+      margin: 20px auto;
+    }
+    .empty-icon { font-size: 4rem; margin-bottom: 14px; }
+    .empty-title { font-size: 1.5rem; font-weight: 700; color: var(--gold-light); margin-bottom: 8px; }
+    .empty-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+
+    /* Edit Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(8px);
-      z-index: 100;
       display: none;
       align-items: center;
       justify-content: center;
+      z-index: 1000;
       padding: 16px;
     }
-    .modal-overlay.open {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
 
     .modal-window {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-card);
+      background: #121722;
+      border: 1px solid rgba(212, 175, 55, 0.4);
       border-radius: 20px;
       width: 100%;
-      max-width: 680px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
+      max-width: 500px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      animation: popIn 0.25s ease-out;
+      overflow: hidden;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .modal-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(22, 28, 45, 0.8);
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-
-    .modal-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--gold-light); }
+    .modal-close {
+      background: none; border: none; font-size: 1.6rem; color: var(--text-muted); cursor: pointer;
     }
-
-    .modal-card-id {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--gold);
-    }
-
-    .modal-card-suit {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-
-    .close-modal-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.5rem;
-      cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s;
-    }
-    .close-modal-btn:hover {
-      color: #fff;
-    }
+    .modal-close:hover { color: #fff; }
 
     .modal-body {
-      padding: 24px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
     }
 
     .form-group {
@@ -570,787 +422,503 @@
       flex-direction: column;
       gap: 6px;
     }
-
     .form-label {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .form-label span.req {
-      color: #ef4444;
+      color: var(--text-muted);
     }
 
-    .form-input, .form-textarea {
-      background: rgba(10, 13, 20, 0.8);
+    .form-input {
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 10px 14px;
       border-radius: 10px;
-      font-size: 0.95rem;
+      padding: 10px 14px;
+      color: #fff;
       font-family: 'Rubik', sans-serif;
+      font-size: 0.95rem;
+    }
+    .form-input:focus {
       outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus, .form-textarea:focus {
-      border-color: var(--gold);
+      border-color: var(--gold-primary);
+      background: rgba(255, 255, 255, 0.09);
     }
 
-    .form-textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    /* Media Uploader Area */
-    .dropzone-box {
-      border: 2px dashed rgba(245, 208, 97, 0.35);
-      background: rgba(10, 13, 20, 0.6);
-      border-radius: 14px;
+    .dropzone {
+      border: 2px dashed rgba(212, 175, 55, 0.4);
+      background: rgba(212, 175, 55, 0.04);
+      border-radius: 12px;
       padding: 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      position: relative;
     }
-    .dropzone-box:hover {
-      border-color: var(--gold);
-      background: rgba(245, 208, 97, 0.05);
+    .dropzone:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--gold-primary);
     }
-
-    .dropzone-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .dropzone-icon {
-      font-size: 2.2rem;
-    }
-
-    .dropzone-prompt {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .dropzone-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .modal-preview-box {
-      margin-top: 10px;
-      border-radius: 12px;
-      overflow: hidden;
-      max-height: 220px;
-      display: none;
-      position: relative;
-      background: #000;
-    }
-    .modal-preview-box img, .modal-preview-box video {
-      width: 100%;
-      height: 100%;
-      max-height: 220px;
-      object-fit: contain;
-    }
-    .modal-preview-box audio {
-      width: 100%;
-      margin: 10px 0;
+    .dropzone img {
+      max-height: 140px;
+      border-radius: 8px;
+      margin-bottom: 8px;
     }
 
     .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(22, 28, 45, 0.8);
-      flex-wrap: wrap;
-      gap: 10px;
+      padding: 14px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .modal-nav-btns {
-      display: flex;
-      gap: 8px;
-    }
-
-    /* Notification Toast */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
-      right: 24px;
-      background: #1e293b;
-      border: 1px solid var(--gold);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1f2738;
+      border: 1px solid var(--gold-primary);
       color: #fff;
-      padding: 12px 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      z-index: 1000;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s ease;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+      z-index: 2000;
       pointer-events: none;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    @media (max-width: 640px) {
-      h1.portal-title {
-        font-size: 1.6rem;
-      }
-      .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .toolbar-group {
-        justify-content: center;
-      }
-      main.cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-  <div class="ambient-glow glow-gold"></div>
-  <div class="ambient-glow glow-red"></div>
+  <div class="container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-badge">✨ אלבום ציר הזמן המשפחתי</div>
+      <h1 class="app-title" id="pageTitle">ציר הזמן של זיו</h1>
+      <p class="app-subtitle">הוסיפו תמונות ורגעים אישיים אחד-אחד בקצב שלכם!</p>
+    </header>
 
-  <!-- Header -->
-  <header class="portal-header">
-    <div class="header-badge">✨ פורטל הלקוח הרשמי • חפיסת הזיכרונות</div>
-    <h1 class="portal-title">עיצוב חפיסת ציר הזמן שלך</h1>
-    <p class="portal-desc">
-      מלאו את 54 הקלפים בשנים, תמונות, הקלטות ורגעים אישיים. כל שינוי נשמר אוטומטית במכשירכם.
-    </p>
-
-    <!-- Session Game Code Bar -->
-    <div class="session-bar">
-      <div class="session-label">
-        <span>🔑</span>
-        <span>קוד חפיסה אישי:</span>
-      </div>
-      <input type="text" id="gameCodeInput" class="session-input" placeholder="למשל: FAMILY-2026" onchange="updateGameCode()">
-      <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem;" onclick="generateRandomCode()">קוד חדש 🎲</button>
-    </div>
-  </header>
-
-  <!-- Progress Stats -->
-  <section class="stats-container">
-    <div class="progress-card">
-      <div class="progress-top-row">
-        <div class="progress-info">
-          <span class="progress-num" id="statCompletedNum">0/54</span>
-          <span class="progress-text" id="statCompletedPct">(0% מהחפיסה הושלמו)</span>
+    <!-- Top Control Bar -->
+    <div class="control-bar">
+      <div class="code-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="code-label" style="font-weight:600;">📁 החפיסות שלי:</span>
+        <select id="decksDropdown" class="form-input" style="padding:7px 12px; border-radius:8px; border:1px solid var(--gold-primary); color:var(--gold-light); font-weight:700; background:rgba(0,0,0,0.5); cursor:pointer;" onchange="onDeckDropdownChange(this.value)">
+          <!-- Populated dynamically -->
+        </select>
+        
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="code-label" style="font-size:0.8rem; color:var(--text-muted);">קוד:</span>
+          <input type="text" id="deckCodeInput" class="code-input" value="ZIV-59" style="width:120px; padding:6px 10px; font-size:0.95rem;" onchange="switchDeckCode()">
         </div>
-        <div class="stats-pills">
-          <div class="stat-pill">🖼️ תמונות: <strong id="statPhotos">0</strong></div>
-          <div class="stat-pill">🎬 סרטונים: <strong id="statVideos">0</strong></div>
-          <div class="stat-pill">🎵 הקלטות: <strong id="statAudio">0</strong></div>
-          <div class="stat-pill">📜 ציטוטים: <strong id="statQuotes">0</strong></div>
-        </div>
+
+        <button class="btn btn-outline" onclick="promptNewDeck()" style="padding:6px 12px; font-size:0.82rem;" title="פתיחת חפיסה חדשה למשחק נוסף">
+          <span>✨ חפיסה חדשה</span>
+        </button>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBarFill"></div>
+
+      <div class="action-btns">
+        <a href="hub.html" class="btn btn-outline" style="text-decoration:none; border-color:rgba(56,189,248,0.4); color:#38bdf8;" title="חזרה למרכז השליטה הראשי">
+          <span>🎛️</span>
+          <span>מרכז השליטה (Hub)</span>
+        </a>
+        <button class="btn btn-outline" onclick="addNewCard()">
+          <span>➕</span>
+          <span>הוסף קלף</span>
+        </button>
+        <button class="btn btn-primary" onclick="launchGame()">
+          <span>🎮</span>
+          <span>שחק בטלוויזיה</span>
+        </button>
+        <button class="btn btn-outline" onclick="exportZip()">
+          <span>📦</span>
+          <span>הורד גיבוי</span>
+        </button>
+        <button class="btn btn-danger" onclick="clearAllCards()" style="padding: 10px 14px;" title="מחיקת כל הקלפים והתחלה מ-0">
+          <span>🧹</span>
+        </button>
       </div>
     </div>
-  </section>
 
-  <!-- Actions Toolbar -->
-  <section class="toolbar">
-    <div class="toolbar-group">
-      <button class="btn btn-magic" onclick="autoFillGenericTrivia()">
-        <span>🪄</span>
-        <span>השלמה אוטומטית מטריוויה</span>
-      </button>
-      <button class="btn btn-gold" onclick="exportZipArchive()">
-        <span>📦</span>
-        <span>הורדת ארכיון זיכרונות (ZIP)</span>
+    <!-- Summary Count -->
+    <div class="summary-bar">
+      <div class="cards-count" id="cardsCountText">0 קלפים בחפיסה</div>
+      <button class="btn btn-gold" onclick="addNewCard()" style="padding: 8px 16px; font-size: 0.9rem;">
+        <span>➕</span>
+        <span>הוסף קלף הבא</span>
       </button>
     </div>
 
-    <div class="toolbar-group">
-      <label class="btn btn-outline" style="cursor: pointer; margin: 0;">
-        <span>📂</span>
-        <span>טעינת גיבוי (JSON)</span>
-        <input type="file" id="backupFileInput" accept=".json" style="display: none;" onchange="importBackupJSON(event)">
-      </label>
-      <button class="btn btn-outline" onclick="openPrintableCheatSheet()">
-        <span>🖨️</span>
-        <span>מפתח שנים להדפסה</span>
-      </button>
-      <a href="index.html" class="btn btn-outline" id="playNowBtn">
-        <span>📱</span>
-        <span>שחק עכשיו בחפיסה</span>
-      </a>
-      <button class="btn btn-danger" onclick="resetCurrentDeck()">
-        <span>🗑️</span>
-        <span>איפוס</span>
-      </button>
-    </div>
-  </section>
+    <!-- Cards Grid -->
+    <main class="cards-grid" id="cardsGrid">
+      <!-- Populated via JS -->
+    </main>
 
-  <!-- Suit / Era Filter Tabs -->
-  <div class="filter-tabs" id="filterTabs">
-    <button class="tab-btn active" data-suit="all" onclick="filterBySuit('all')">הכל (54)</button>
-    <button class="tab-btn" data-suit="c" onclick="filterBySuit('c')">♣ תלתן (1-13) • ילדות ונעורים</button>
-    <button class="tab-btn" data-suit="d" onclick="filterBySuit('d')">♦ יהלום (14-26) • בגרות ולימודים</button>
-    <button class="tab-btn" data-suit="h" onclick="filterBySuit('h')">♥ לב (27-39) • אהבה ומשפחה</button>
-    <button class="tab-btn" data-suit="s" onclick="filterBySuit('s')">♠ עלה (40-52) • טיולים והישגים</button>
-    <button class="tab-btn" data-suit="joker" onclick="filterBySuit('joker')">★ ג'וקרים (53-54) • ברכות חופשיות</button>
   </div>
 
-  <!-- 54 Cards Grid -->
-  <main class="cards-grid" id="cardsGridContainer">
-    <!-- Populated by JS -->
-  </main>
-
-  <!-- User Legal Declaration & Guidance Footer -->
-  <footer class="portal-footer" style="max-width: 1100px; margin: 40px auto 20px; padding: 20px 24px; background: rgba(18, 22, 36, 0.7); border: 1px solid var(--border-subtle); border-radius: 14px; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; text-align: right;">
-    <div style="font-weight: 700; color: var(--gold-light); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-      <span>⚖️</span>
-      <span>תנאי שימוש, זכויות יוצרים ופרטיות:</span>
-    </div>
-    <p style="margin-bottom: 8px;">
-      "המשתמש מצהיר כי התמונות והחומרים המועלים על ידו הם בבעלותו או שיש לו הרשאה לשימוש בהם, והוא נושא באחריות המלאה לתכנים אלו."
-    </p>
-    <p>
-      🔒 <strong>מדיניות שמירת קבצים:</strong> קבצי המדיה של המשחק נשמרים בענן לצורך פעילות האירוע למשך 60 יום ממועד יצירתם, ולאחר מכן נמחקים לצמיתות לשמירה על פרטיות מלאה. אנא הקפידו להוריד את <strong>ארכיון הזיכרונות (קובץ ZIP)</strong> באמצעות הכפתור בראש העמוד כדי לשמור את כל 54 הקבצים לתמיד במחשבכם!
-    </p>
-  </footer>
-
-  <!-- Card Editor Modal -->
-  <div class="modal-overlay" id="editModalOverlay">
+  <!-- Edit Card Modal -->
+  <div class="modal-overlay" id="editModal">
     <div class="modal-window">
       <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-card-id" id="modalCardNum">קלף #1</span>
-          <span class="modal-card-suit" id="modalCardSuit">(תלתן A)</span>
-        </div>
-        <button class="close-modal-btn" onclick="closeEditModal()">&times;</button>
+        <span class="modal-title" id="modalCardTitle">עריכת קלף #1</span>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
 
       <div class="modal-body">
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
-          <div class="form-group">
-            <label class="form-label">שנה <span class="req">*</span></label>
-            <input type="number" id="modalYearInput" class="form-input" placeholder="למשל: 1985">
-          </div>
-          <div class="form-group">
-            <label class="form-label">כותרת האירוע <span class="req">*</span></label>
-            <input type="text" id="modalTitleInput" class="form-input" placeholder="למשל: יום החתונה בירושלים">
-          </div>
-        </div>
-
+        
+        <!-- Image Upload -->
         <div class="form-group">
-          <label class="form-label">רמז לשחקנים (מוצג לפני חשיפת השנה)</label>
-          <input type="text" id="modalHintInput" class="form-input" placeholder="למשל: באיזה עשור נפגשנו לראשונה באוניברסיטה?">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">סיפור קצר / תיאור</label>
-          <textarea id="modalDescInput" class="form-textarea" placeholder="מה קרה באותו יום מרגש? מי מופיע בתמונה?"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">סוג מדיה</label>
-          <select id="modalMediaTypeSelect" class="form-input" onchange="onMediaTypeChange()">
-            <option value="photo">🖼️ תמונה (תמונה משפחתית)</option>
-            <option value="video">🎬 סרטון (סרטון קצר / ברכה)</option>
-            <option value="audio">🎵 הקלטת קול / שיר אהוב</option>
-            <option value="text">📜 ציטוט / זיכרון טקסט בלבד</option>
-          </select>
-        </div>
-
-        <!-- File Upload Area -->
-        <div class="form-group" id="modalUploadGroup">
-          <label class="form-label">העלאת קובץ מדיה</label>
-          <div class="dropzone-box" onclick="document.getElementById('modalFileInput').click()">
-            <input type="file" id="modalFileInput" style="display: none;" onchange="handleFileUpload(event)">
-            <div class="dropzone-inner">
-              <span class="dropzone-icon">📤</span>
-              <span class="dropzone-prompt">לחצו להעלאת קובץ מהטלפון או גררו לכאן</span>
-              <span class="dropzone-sub">תומך בתמונות (JPG, PNG, WebP), סרטונים (MP4) והקלטות (MP3, WAV)</span>
+          <label class="form-label">תמונה או סרטון:</label>
+          <div class="dropzone" id="modalDropzone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*" onchange="handleFileUpload(event)">
+            <div id="dropzonePreview">
+              <span style="font-size:2rem; display:block; margin-bottom:4px;">📤</span>
+              <span style="color:var(--gold-light); font-weight:600;">לחצו לבחירת תמונה מהמחשב/טלפון</span>
+              <span style="color:var(--text-muted); font-size:0.78rem; display:block; margin-top:2px;">או גררו קובץ לכאן</span>
             </div>
           </div>
-          <!-- Preview Box -->
-          <div class="modal-preview-box" id="modalPreviewBox"></div>
         </div>
+
+        <!-- Year -->
+        <div class="form-group">
+          <label class="form-label">📅 שנת האירוע (השנה לניחוש):</label>
+          <input type="number" id="cardYearInput" class="form-input" placeholder="למשל: 1995" min="1900" max="2030">
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label">✍️ כותרת הזיכרון:</label>
+          <input type="text" id="cardTitleInput" class="form-input" placeholder="למשל: טיול ראשון לצפון / יום הגיוס">
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">📖 תיאור / סיפור קצר (מופיע בחשיפה):</label>
+          <textarea id="cardDescInput" class="form-input" rows="2" placeholder="ספרו בכמה מילים מה קרה שם..."></textarea>
+        </div>
+
       </div>
 
       <div class="modal-footer">
-        <div class="modal-nav-btns">
-          <button class="btn btn-outline" onclick="navigateCard(-1)">⬅ קודם</button>
-          <button class="btn btn-outline" onclick="navigateCard(1)">הבא ➡</button>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-danger" onclick="clearCurrentCardContent()">מחק קלף</button>
-          <button class="btn btn-gold" onclick="saveCurrentCardModal()">שמור קלף ✨</button>
+        <button class="btn btn-danger" onclick="deleteCurrentCard()">🗑️ מחק קלף</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" onclick="closeModal()">ביטול</button>
+          <button class="btn btn-gold" onclick="saveCurrentCard()">שמור קלף ✨</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toastNotification">
+  <!-- Toast -->
+  <div class="toast" id="toast">
     <span id="toastIcon">✨</span>
-    <span id="toastMsg">הקלף נשמר בהצלחה!</span>
-  </div>
-
-  <!-- Printable Cheat Sheet Modal -->
-  <div class="modal-overlay" id="cheatSheetModalOverlay">
-    <div class="modal-window" style="max-width: 780px;">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-card-id">🖨️ מפתח שנים לכל 54 הקלפים</span>
-          <span class="modal-card-suit" id="cheatSheetCode">(חפיסה פעילה)</span>
-        </div>
-        <button class="close-modal-btn" onclick="closeCheatSheetModal()">&times;</button>
-      </div>
-      <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">
-          זהו מפתח הפתרונות המלא המסודר לפי מספר הקלף (1 עד 54). ניתן להדפיס דף זה, לקפל ולהניח בקופסת הקלפים כרפרנס לשופט או למשפחה בתום המשחק:
-        </p>
-        <div id="cheatSheetTableContainer"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeCheatSheetModal()">סגור</button>
-        <button class="btn btn-gold" onclick="printCheatSheet()">הדפס דף פתרונות 🖨️</button>
-      </div>
-    </div>
+    <span id="toastMsg">הקלף נשמר!</span>
   </div>
 
   <script>
-    // System Constants & Storage Keys
-    const STORAGE_KEY_PREFIX = 'TIMELINE_DECK_';
-    let currentCode = 'FAMILY-2026';
-    let currentSuit = 'all';
-    let activeCardIndex = 0; // 0 to 53
-    let clientDeck = [];
+    let activeDeck = [];
+    let currentCode = 'ZIV';
+    let editingIndex = -1;
+    let tempMediaData = '';
+    let tempMediaType = 'photo';
 
-    // --- Robust Persistent Storage Layer (IndexedDB with LocalStorage Fallback) ---
+    // --- IndexedDB Support ---
     const DB_NAME = 'CardGameMemoriesDB';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'decks';
-
-    function openIDB() {
+    function getDB() {
       return new Promise((resolve) => {
-        if (!window.indexedDB) {
-          resolve(null);
-          return;
-        }
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        const req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME);
+          if (!db.objectStoreNames.contains('decks')) {
+            db.createObjectStore('decks');
           }
         };
-        req.onsuccess = () => resolve(req.result);
+        req.onsuccess = (e) => resolve(e.target.result);
         req.onerror = () => resolve(null);
       });
     }
 
-    async function idbGet(key) {
-      const db = await openIDB();
+    async function dbGet(key) {
+      const db = await getDB();
       if (!db) return null;
       return new Promise((resolve) => {
-        try {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.get(key);
-          req.onsuccess = () => resolve(req.result || null);
-          req.onerror = () => resolve(null);
-        } catch (e) {
-          resolve(null);
-        }
+        const tx = db.transaction('decks', 'readonly');
+        const req = tx.objectStore('decks').get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
       });
     }
 
-    async function idbSet(key, value) {
-      const db = await openIDB();
-      if (!db) return false;
+    async function dbSet(key, val) {
+      const db = await getDB();
+      if (!db) return;
       return new Promise((resolve) => {
-        try {
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.put(value, key);
-          req.onsuccess = () => resolve(true);
-          req.onerror = () => resolve(false);
-        } catch (e) {
-          resolve(false);
-        }
+        const tx = db.transaction('decks', 'readwrite');
+        tx.objectStore('decks').put(val, key);
+        tx.oncomplete = () => resolve();
       });
     }
 
-    // Initialize 54 cards template based on Universal Deck (survives all session reloads)
-    async function initClientDeck() {
-      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
-      if (savedCode) {
-        currentCode = savedCode;
+    
+    // --- Saved Decks Registry (Manage Multiple Games Simultaneously) ---
+    function getDecksRegistry() {
+      try {
+        const raw = localStorage.getItem('SAVED_DECKS_REGISTRY');
+        return raw ? JSON.parse(raw) : ['ZIV-59', 'ZIV'];
+      } catch (e) {
+        return ['ZIV-59', 'ZIV'];
       }
-      document.getElementById('gameCodeInput').value = currentCode;
-
-      // 1. Try IndexedDB first (no 5MB limit, stores all high-res photos safely)
-      let loaded = await idbGet(STORAGE_KEY_PREFIX + currentCode);
-
-      // 2. Fallback to localStorage if not found
-      if (!loaded) {
-        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
-        if (raw) {
-          try { loaded = JSON.parse(raw); } catch (e) {}
-        }
-      }
-
-      if (loaded && Array.isArray(loaded) && loaded.length > 0) {
-        clientDeck = loaded;
-      } else {
-        createBlankDeck();
-      }
-
-      renderGrid();
-      updateStats();
     }
 
-    function createBlankDeck() {
-      const base = window.DECK_DATA || [];
-      clientDeck = base.map(c => ({
-        id: c.id,
-        number: c.number || c.id,
-        cid: c.cid || '',
-        suit: c.suit,
-        suit_name: c.suit_name,
-        rank: c.rank || '',
-        color: c.color || 'black',
-        isJoker: !!c.isJoker,
-        category: c.category || 'photo',
-        category_name: c.category_name || 'זיכרון אישי',
-        // User custom fields:
-        isCustomized: false,
-        year: '',
-        year_display: '',
-        title: '',
-        hint: '',
-        description: '',
-        media_type: 'photo',
-        media_file: '', // Base64 data URL or relative URL
-        media_name: ''
-      }));
-      saveDeck();
+    function registerDeckCode(code, count) {
+      if (!code) return;
+      let registry = getDecksRegistry();
+      if (!registry.includes(code)) {
+        registry.unshift(code);
+      }
+      try {
+        localStorage.setItem('SAVED_DECKS_REGISTRY', JSON.stringify(registry));
+        localStorage.setItem('DECK_COUNT_' + code, count || 0);
+      } catch (e) {}
+      renderDecksDropdown();
+    }
+
+    function renderDecksDropdown() {
+      const select = document.getElementById('decksDropdown');
+      if (!select) return;
+      const registry = getDecksRegistry();
+      
+      let optsHtml = '';
+      registry.forEach(c => {
+        const count = localStorage.getItem('DECK_COUNT_' + c) || (c === currentCode ? activeDeck.length : 0);
+        const label = `${c} (${count} קלפים)`;
+        optsHtml += `<option value="${c}" ${c === currentCode ? 'selected' : ''}>${label}</option>`;
+      });
+      optsHtml += `<option value="__NEW__">✨ + פתח חפיסה חדשה...</option>`;
+      select.innerHTML = optsHtml;
+    }
+
+    function onDeckDropdownChange(val) {
+      if (val === '__NEW__') {
+        promptNewDeck();
+      } else {
+        currentCode = val;
+        document.getElementById('deckCodeInput').value = currentCode;
+        localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+        updatePageTitle();
+        loadDeck();
+        showToast('🔄', `עברת לחפיסה: ${currentCode}`);
+      }
+    }
+
+    function promptNewDeck() {
+      const name = prompt('הקלידו קוד לחפיסה החדשה (למשל: DANA-30, MOM-70):');
+      if (!name) {
+        renderDecksDropdown();
+        return;
+      }
+      const clean = name.trim().toUpperCase().replace(/\s+/g, '-');
+      currentCode = clean;
+      document.getElementById('deckCodeInput').value = currentCode;
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+      registerDeckCode(clean, 0);
+      updatePageTitle();
+      loadDeck();
+      showToast('🆕', `נוצרה חפיסה חדשה: ${clean}`);
+    }
+
+// --- Init App ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
+      if (savedCode) currentCode = savedCode.toUpperCase();
+      document.getElementById('deckCodeInput').value = currentCode;
+      updatePageTitle();
+      await loadDeck();
+      renderDecksDropdown();
+    });
+
+    function updatePageTitle() {
+      const t = currentCode === 'ZIV' ? 'ציר הזמן של זיו' : `ציר הזמן • חפיסת ${currentCode}`;
+      document.getElementById('pageTitle').textContent = t;
+    }
+
+    async function loadDeck() {
+      let loaded = await dbGet('MEMORIES_DECK_' + currentCode);
+      if (!loaded) {
+        try {
+          const raw = localStorage.getItem('MEMORIES_DECK_' + currentCode);
+          if (raw) loaded = JSON.parse(raw);
+        } catch (e) {}
+      }
+
+      // Filter only real user cards (clean out any old poker template cards)
+      if (loaded && Array.isArray(loaded)) {
+        activeDeck = loaded.filter(c => c && (c.isCustomized || c.year || c.media_file || (c.title && c.title !== 'טרם הוגדר')));
+      } else {
+        activeDeck = [];
+      }
+
+      renderCards();
     }
 
     async function saveDeck() {
-      // 1. Save full deck into IndexedDB (virtually unlimited quota)
-      await idbSet(STORAGE_KEY_PREFIX + currentCode, clientDeck);
-      await idbSet('ACTIVE_CUSTOM_DECK', clientDeck);
-
-      // 2. Save active deck code
+      await dbSet('MEMORIES_DECK_' + currentCode, activeDeck);
       localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
-
-      // 3. Mirror in localStorage with quota error protection
+      registerDeckCode(currentCode, activeDeck.length);
       try {
-        localStorage.setItem(STORAGE_KEY_PREFIX + currentCode, JSON.stringify(clientDeck));
-        localStorage.setItem('ACTIVE_CUSTOM_DECK', JSON.stringify(clientDeck));
-      } catch (quotaErr) {
-        console.warn('LocalStorage quota exceeded. Data safely stored in IndexedDB.', quotaErr);
-      }
-      updateStats();
+        localStorage.setItem('MEMORIES_DECK_' + currentCode, JSON.stringify(activeDeck));
+      } catch (e) {}
     }
 
-    async function updateGameCode() {
-      const val = document.getElementById('gameCodeInput').value.trim();
+    function switchDeckCode() {
+      const val = document.getElementById('deckCodeInput').value.trim().toUpperCase();
       if (!val) return;
-      currentCode = val.toUpperCase().replace(/\s+/g, '-');
-      document.getElementById('gameCodeInput').value = currentCode;
+      currentCode = val;
       localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
-      
-      // Try IndexedDB first
-      let loaded = await idbGet(STORAGE_KEY_PREFIX + currentCode);
-      if (!loaded) {
-        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + currentCode);
-        if (raw) {
-          try { loaded = JSON.parse(raw); } catch (e) {}
-        }
-      }
-
-      if (loaded && Array.isArray(loaded) && loaded.length > 0) {
-        clientDeck = loaded;
-        showToast('✅', `נטענה חפיסה קיימת: ${currentCode}`);
-      } else {
-        createBlankDeck();
-        showToast('🆕', `נוצרה חפיסה חדשה: ${currentCode}`);
-      }
-      renderGrid();
+      registerDeckCode(currentCode, activeDeck.length);
+      updatePageTitle();
+      loadDeck();
+      showToast('🔄', `נטענה חפיסה: ${currentCode}`);
     }
 
-    function generateRandomCode() {
-      const num = Math.floor(1000 + Math.random() * 9000);
-      currentCode = `MEMORIES-${num}`;
-      document.getElementById('gameCodeInput').value = currentCode;
-      updateGameCode();
-    }
+    // --- Render Grid ---
+    function renderCards() {
+      const grid = document.getElementById('cardsGrid');
+      const countText = document.getElementById('cardsCountText');
+      countText.textContent = `${activeDeck.length} קלפים בחפיסה`;
 
-    // --- Printable Cheat Sheet Operations ---
-    function openPrintableCheatSheet() {
-      document.getElementById('cheatSheetCode').textContent = `(קוד: ${currentCode})`;
-      const container = document.getElementById('cheatSheetTableContainer');
-      
-      let rows = clientDeck.map(c => {
-        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
-        const rank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
-        const year = c.year || (c.isJoker ? 'על-זמני' : 'טרם הוגדר');
-        const title = c.title ? escapeHtml(c.title) : (c.isCustomized ? 'ללא כותרת' : '(ריק)');
-        return `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
-            <td style="padding: 6px 10px; font-weight: 700; color: var(--gold-light);">#${c.id}</td>
-            <td style="padding: 6px 10px;">${c.suit_name} ${suitSymbol} ${rank}</td>
-            <td style="padding: 6px 10px; font-weight: 700; color: #fff;">${year}</td>
-            <td style="padding: 6px 10px; color: var(--text-muted);">${title}</td>
-          </tr>
-        `;
-      }).join('');
-
-      container.innerHTML = `
-        <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.85rem;">
-          <thead>
-            <tr style="background: rgba(255,255,255,0.05); color: var(--gold); border-bottom: 1px solid var(--border-card);">
-              <th style="padding: 8px 10px;">מס'</th>
-              <th style="padding: 8px 10px;">קלף פוקר</th>
-              <th style="padding: 8px 10px;">שנה</th>
-              <th style="padding: 8px 10px;">כותרת האירוע / הזיכרון</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-      `;
-
-      document.getElementById('cheatSheetModalOverlay').classList.add('open');
-    }
-
-    function closeCheatSheetModal() {
-      document.getElementById('cheatSheetModalOverlay').classList.remove('open');
-    }
-
-    function printCheatSheet() {
-      const win = window.open('', '_blank');
-      let rows = clientDeck.map(c => {
-        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
-        const rank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
-        const year = c.year || (c.isJoker ? 'על-זמני' : '----');
-        const title = c.title ? escapeHtml(c.title) : '';
-        return `
-          <tr>
-            <td><strong>#${c.id}</strong></td>
-            <td>${c.suit_name} ${suitSymbol} ${rank}</td>
-            <td><strong style="font-size: 1.1em;">${year}</strong></td>
-            <td>${title}</td>
-          </tr>
-        `;
-      }).join('');
-
-      win.document.write(`
-        <!DOCTYPE html>
-        <html lang="he" dir="rtl">
-        <head>
-          <meta charset="UTF-8">
-          <title>מפתח שנים • חפיסת הזיכרונות ${currentCode}</title>
-          <style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #111; }
-            h1 { font-size: 1.5rem; margin-bottom: 4px; }
-            p { color: #555; margin-bottom: 16px; font-size: 0.9rem; }
-            table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-            th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: right; }
-            th { background: #f0f0f0; }
-            @media print {
-              body { padding: 0; }
-              @page { margin: 12mm; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>🎴 מפתח שנים מלא • חפיסת הזיכרונות (${currentCode})</h1>
-          <p>דף פתרונות רשמי לקופסת הקלפים • ממוין כרונולוגית לפי מספר קלף (1 עד 54)</p>
-          <table>
-            <thead>
-              <tr>
-                <th>מספר</th>
-                <th>קלף פוקר</th>
-                <th>שנה</th>
-                <th>כותרת האירוע</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
-        </body>
-        </html>
-      `);
-      win.document.close();
-    }
-
-    function generateRandomCode() {
-      const num = Math.floor(1000 + Math.random() * 9000);
-      currentCode = `MEMORIES-${num}`;
-      document.getElementById('gameCodeInput').value = currentCode;
-      updateGameCode();
-    }
-
-    function renderGrid() {
-      const container = document.getElementById('cardsGridContainer');
-      let filtered = clientDeck;
-      if (currentSuit !== 'all') {
-        filtered = filtered.filter(c => c.suit === currentSuit);
-      }
-
-      container.innerHTML = filtered.map((c, idx) => {
-        const globalIdx = clientDeck.findIndex(item => item.id === c.id);
-        const isFilled = c.isCustomized && (c.year || c.title || c.media_file);
-        const cardTitle = c.title ? escapeHtml(c.title) : 'טרם הוגדר';
-        const cardYear = c.year ? c.year : (c.isJoker ? 'על-זמני' : '----');
-        
-        // Thumbnail preview
-        let previewHtml = '';
-        if (c.media_file && c.media_type === 'photo') {
-          previewHtml = `<img src="${c.media_file}" alt="${cardTitle}" loading="lazy">`;
-        } else if (c.media_file && c.media_type === 'video') {
-          previewHtml = `<div class="empty-icon">🎬</div><div class="empty-text">סרטון מצורף</div>`;
-        } else if (c.media_file && c.media_type === 'audio') {
-          previewHtml = `<div class="empty-icon">🎵</div><div class="empty-text">הקלטת קול</div>`;
-        } else if (c.media_type === 'text') {
-          previewHtml = `<div class="empty-icon">📜</div><div class="empty-text">ציטוט טקסט</div>`;
-        } else {
-          previewHtml = `<div class="empty-icon">📷</div><div class="empty-text">לחצו להוספת זיכרון</div>`;
-        }
-
-        const suitSymbol = c.isJoker ? '★' : getSuitSymbol(c.suit);
-        const cardRank = c.isJoker ? (c.id === 53 ? 'אדום' : 'צהוב') : c.rank;
-
-        return `
-          <div class="deck-card ${isFilled ? 'is-filled' : ''}" onclick="openEditModal(${globalIdx})">
-            <div class="card-top-header">
-              <span class="card-num-badge">#${c.id} • ${c.suit_name} ${suitSymbol}</span>
-              <span class="card-status-badge ${isFilled ? 'status-filled' : 'status-empty'}">
-                ${isFilled ? '✅ מוכן' : '⚪ ריק'}
-              </span>
+      if (activeDeck.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <div class="empty-title">החפיסה נקייה ומוכנה</div>
+            <div class="empty-desc">
+              הוסיפו את התמונות והזיכרונות אחד-אחד בקצב שלכם.<br>
+              אין צורך בכמות מסוימת – כמה שיש, בזה נשחק!
             </div>
-
-            <div class="card-preview-mini">
-              ${previewHtml}
-            </div>
-
-            <div class="card-meta">
-              <div class="card-meta-year">${cardYear}</div>
-              <div class="card-meta-title">${cardTitle}</div>
-            </div>
+            <button class="btn btn-gold" onclick="addNewCard()" style="font-size:1.1rem; padding:12px 28px;">
+              <span>➕</span>
+              <span>הוסף את הקלף הראשון (#1)</span>
+            </button>
           </div>
         `;
-      }).join('');
-    }
-
-    function getSuitSymbol(suit) {
-      if (suit === 'c') return '♣';
-      if (suit === 'd') return '♦';
-      if (suit === 'h') return '♥';
-      if (suit === 's') return '♠';
-      return '★';
-    }
-
-    function filterBySuit(suit) {
-      currentSuit = suit;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.suit === suit);
-      });
-      renderGrid();
-    }
-
-    function updateStats() {
-      const completed = clientDeck.filter(c => c.isCustomized && (c.year || c.title || c.media_file)).length;
-      const pct = Math.round((completed / 54) * 100);
-
-      document.getElementById('statCompletedNum').textContent = `${completed}/54`;
-      document.getElementById('statCompletedPct').textContent = `(${pct}% מהחפיסה הושלמו)`;
-      document.getElementById('progressBarFill').style.width = `${pct}%`;
-
-      const photos = clientDeck.filter(c => c.isCustomized && c.media_type === 'photo' && c.media_file).length;
-      const videos = clientDeck.filter(c => c.isCustomized && c.media_type === 'video' && c.media_file).length;
-      const audio = clientDeck.filter(c => c.isCustomized && c.media_type === 'audio' && c.media_file).length;
-      const quotes = clientDeck.filter(c => c.isCustomized && (c.media_type === 'text' || (!c.media_file && c.description))).length;
-
-      document.getElementById('statPhotos').textContent = photos;
-      document.getElementById('statVideos').textContent = videos;
-      document.getElementById('statAudio').textContent = audio;
-      document.getElementById('statQuotes').textContent = quotes;
-    }
-
-    // Modal Operations
-    function openEditModal(index) {
-      activeCardIndex = index;
-      const card = clientDeck[index];
-      if (!card) return;
-
-      const suitSymbol = card.isJoker ? '★' : getSuitSymbol(card.suit);
-      document.getElementById('modalCardNum').textContent = `קלף #${card.id}`;
-      document.getElementById('modalCardSuit').textContent = `(${card.suit_name} ${suitSymbol} ${card.rank || ''})`;
-
-      document.getElementById('modalYearInput').value = card.year || '';
-      document.getElementById('modalTitleInput').value = card.title || '';
-      document.getElementById('modalHintInput').value = card.hint || '';
-      document.getElementById('modalDescInput').value = card.description || '';
-      document.getElementById('modalMediaTypeSelect').value = card.media_type || 'photo';
-
-      renderModalPreview(card);
-      onMediaTypeChange();
-
-      document.getElementById('editModalOverlay').classList.add('open');
-    }
-
-    function closeEditModal() {
-      document.getElementById('editModalOverlay').classList.remove('open');
-    }
-
-    function renderModalPreview(card) {
-      const box = document.getElementById('modalPreviewBox');
-      box.innerHTML = '';
-      if (!card.media_file) {
-        box.style.display = 'none';
         return;
       }
 
-      box.style.display = 'block';
-      if (card.media_type === 'photo') {
-        box.innerHTML = `<img src="${card.media_file}" alt="תצוגה מקדימה">`;
-      } else if (card.media_type === 'video') {
-        box.innerHTML = `<video src="${card.media_file}" controls></video>`;
-      } else if (card.media_type === 'audio') {
-        box.innerHTML = `<audio src="${card.media_file}" controls></audio>`;
-      } else {
-        box.style.display = 'none';
-      }
+      let html = '';
+      activeDeck.forEach((c, idx) => {
+        const num = idx + 1;
+        const year = c.year || '----';
+        const title = c.title || 'ללא כותרת';
+        const desc = c.description || '';
+        
+        let mediaHtml = `
+          <div class="card-placeholder">
+            <span>📷</span>
+            <span>לחצו להוספת תמונה</span>
+          </div>
+        `;
+        if (c.media_file) {
+          mediaHtml = `<img src="${c.media_file}" alt="${title}">`;
+        }
+
+        html += `
+          <div class="card-item">
+            <div class="card-top">
+              <span class="card-num">קלף #${num}</span>
+              <span class="card-year-pill ${c.year ? '' : 'empty'}">${year}</span>
+            </div>
+            <div class="card-img-box" onclick="editCard(${idx})">
+              ${mediaHtml}
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-title ${c.title ? '' : 'empty'}">${title}</div>
+                ${desc ? `<div class="card-desc">${desc}</div>` : ''}
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-outline" onclick="editCard(${idx})">✏️ עריכה</button>
+                <button class="btn btn-danger" onclick="deleteCard(${idx})" title="מחיקה">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Big Add Tile at the end
+      html += `
+        <div class="add-card-tile" onclick="addNewCard()">
+          <div class="add-tile-icon">➕</div>
+          <div class="add-tile-text">הוסף קלף #${activeDeck.length + 1}</div>
+          <div class="add-tile-sub">לחצו להוספת תמונה ושנה</div>
+        </div>
+      `;
+
+      grid.innerHTML = html;
     }
 
-    function onMediaTypeChange() {
-      const type = document.getElementById('modalMediaTypeSelect').value;
-      const uploadGrp = document.getElementById('modalUploadGroup');
-      if (type === 'text') {
-        uploadGrp.style.display = 'none';
+    // --- Add & Edit Cards ---
+    function addNewCard() {
+      const newCard = {
+        id: activeDeck.length + 1,
+        number: activeDeck.length + 1,
+        year: '',
+        title: '',
+        description: '',
+        media_type: 'photo',
+        media_file: '',
+        isCustomized: true
+      };
+      activeDeck.push(newCard);
+      editingIndex = activeDeck.length - 1;
+      openModal(editingIndex);
+    }
+
+    function editCard(idx) {
+      editingIndex = idx;
+      openModal(idx);
+    }
+
+    function openModal(idx) {
+      const card = activeDeck[idx];
+      document.getElementById('modalCardTitle').textContent = `עריכת קלף #${idx + 1}`;
+      document.getElementById('cardYearInput').value = card.year || '';
+      document.getElementById('cardTitleInput').value = card.title || '';
+      document.getElementById('cardDescInput').value = card.description || '';
+      
+      tempMediaData = card.media_file || '';
+      tempMediaType = card.media_type || 'photo';
+      updateDropzonePreview();
+
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('active');
+      renderCards();
+    }
+
+    function updateDropzonePreview() {
+      const p = document.getElementById('dropzonePreview');
+      if (tempMediaData) {
+        p.innerHTML = `
+          <img src="${tempMediaData}" style="max-height:140px; border-radius:8px; display:block; margin:0 auto 8px;">
+          <span style="color:var(--gold-light); font-size:0.85rem; font-weight:600;">לחצו להחלפת תמונה</span>
+        `;
       } else {
-        uploadGrp.style.display = 'flex';
+        p.innerHTML = `
+          <span style="font-size:2rem; display:block; margin-bottom:4px;">📤</span>
+          <span style="color:var(--gold-light); font-weight:600;">לחצו לבחירת תמונה מהמחשב/טלפון</span>
+          <span style="color:var(--text-muted); font-size:0.78rem; display:block; margin-top:2px;">או גררו קובץ לכאן</span>
+        `;
       }
     }
 
@@ -1358,240 +926,114 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      const card = clientDeck[activeCardIndex];
-      card.media_name = file.name;
-
-      // Auto-detect type
-      if (file.type.startsWith('image/')) {
-        card.media_type = 'photo';
-        document.getElementById('modalMediaTypeSelect').value = 'photo';
-        // Compress and convert to lightweight JPEG/WebP
-        compressImage(file, (dataUrl) => {
-          card.media_file = dataUrl;
-          renderModalPreview(card);
-          showToast('📸', 'התמונה נטענה ועברה דחיסה מותאמת');
-        });
-      } else if (file.type.startsWith('video/')) {
-        card.media_type = 'video';
-        document.getElementById('modalMediaTypeSelect').value = 'video';
-        readFileAsDataURL(file, (dataUrl) => {
-          card.media_file = dataUrl;
-          renderModalPreview(card);
-          showToast('🎬', 'הסרטון נטען בהצלחה');
-        });
-      } else if (file.type.startsWith('audio/')) {
-        card.media_type = 'audio';
-        document.getElementById('modalMediaTypeSelect').value = 'audio';
-        readFileAsDataURL(file, (dataUrl) => {
-          card.media_file = dataUrl;
-          renderModalPreview(card);
-          showToast('🎵', 'ההקלטה נטענה בהצלחה');
-        });
-      }
-    }
-
-    function readFileAsDataURL(file, callback) {
       const reader = new FileReader();
-      reader.onload = (e) => callback(e.target.result);
-      reader.readAsDataURL(file);
-    }
-
-    // Automatic Client-Side Image Compression to ~250KB WebP/JPEG
-    function compressImage(file, callback) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Export compressed JPEG
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-          callback(dataUrl);
-        };
-        img.src = event.target.result;
+      reader.onload = (ev) => {
+        tempMediaData = ev.target.result;
+        tempMediaType = file.type.startsWith('video') ? 'video' : 'photo';
+        updateDropzonePreview();
       };
       reader.readAsDataURL(file);
     }
 
-    function saveCurrentCardModal() {
-      const card = clientDeck[activeCardIndex];
-      card.year = document.getElementById('modalYearInput').value.trim();
-      card.year_display = card.year || (card.isJoker ? 'על-זמני' : '');
-      card.title = document.getElementById('modalTitleInput').value.trim();
-      card.hint = document.getElementById('modalHintInput').value.trim();
-      card.description = document.getElementById('modalDescInput').value.trim();
-      card.media_type = document.getElementById('modalMediaTypeSelect').value;
+    function saveCurrentCard() {
+      if (editingIndex < 0 || editingIndex >= activeDeck.length) return;
+      const card = activeDeck[editingIndex];
+      card.year = parseInt(document.getElementById('cardYearInput').value, 10) || '';
+      card.title = document.getElementById('cardTitleInput').value.trim();
+      card.description = document.getElementById('cardDescInput').value.trim();
+      card.media_file = tempMediaData;
+      card.media_type = tempMediaType;
       card.isCustomized = true;
 
       saveDeck();
-      renderGrid();
-      closeEditModal();
-      showToast('✨', `קלף #${card.id} נשמר בהצלחה!`);
+      closeModal();
+      showToast('✨', `קלף #${editingIndex + 1} נשמר בהצלחה!`);
     }
 
-    function clearCurrentCardContent() {
-      if (!confirm('האם אתם בטוחים שברצונכם לאפס את התוכן של קלף זה?')) return;
-      const base = (window.DECK_DATA || [])[activeCardIndex] || {};
-      clientDeck[activeCardIndex] = {
-        ...clientDeck[activeCardIndex],
-        isCustomized: false,
-        year: '',
-        year_display: '',
-        title: '',
-        hint: '',
-        description: '',
-        media_file: '',
-        media_name: ''
-      };
+    function deleteCurrentCard() {
+      if (editingIndex < 0) return;
+      deleteCard(editingIndex);
+      closeModal();
+    }
+
+    function deleteCard(idx) {
+      if (!confirm(`האם למחוק את קלף #${idx + 1}?`)) return;
+      activeDeck.splice(idx, 1);
+      // Re-index
+      activeDeck.forEach((c, i) => {
+        c.number = i + 1;
+        c.id = i + 1;
+      });
       saveDeck();
-      renderGrid();
-      closeEditModal();
-      showToast('🗑️', 'תוכן הקלף אופס.');
+      renderCards();
+      showToast('🗑️', 'הקלף נמחק');
     }
 
-    function navigateCard(delta) {
-      saveCurrentCardModal();
-      let next = activeCardIndex + delta;
-      if (next < 0) next = 53;
-      if (next > 53) next = 0;
-      openEditModal(next);
+    function clearAllCards() {
+      if (!confirm(`האם לנקות את כל הקלפים בחפיסה "${currentCode}" ולהתחיל מאפס?`)) return;
+      activeDeck = [];
+      saveDeck();
+      renderCards();
+      showToast('🧹', 'החפיסה אופסה לחלוטין!');
     }
 
-    // Magic Hybrid Auto-Fill: Fills uncustomized cards with universal trivia
-    function autoFillGenericTrivia() {
-      if (!confirm('קסם הטריוויה ההיברידי:\nהאם להשלים את כל הקלפים שעדיין ריקים בשאלות טריוויה היסטוריות מרתקות מתוך החפיסה האוניברסלית?')) {
+    // --- Actions ---
+    function launchGame() {
+      window.open(`play.html?game=${encodeURIComponent(currentCode)}`, '_blank');
+    }
+
+    async function exportZip() {
+      if (activeDeck.length === 0) {
+        alert('אין קלפים להורדה בחפיסה זו.');
         return;
       }
 
-      const generic = window.DECK_DATA || [];
-      let filledCount = 0;
-
-      clientDeck.forEach((c, idx) => {
-        if (!c.isCustomized || (!c.year && !c.title && !c.media_file)) {
-          const gen = generic[idx];
-          if (gen) {
-            c.year = gen.year;
-            c.year_display = gen.year_display;
-            c.title = gen.title;
-            c.hint = gen.hint;
-            c.description = gen.description;
-            c.media_type = gen.media_type;
-            c.media_file = gen.media_file;
-            c.isCustomized = true;
-            filledCount++;
-          }
-        }
-      });
-
-      saveDeck();
-      renderGrid();
-      showToast('🪄', `הושלמו אוטומטית ${filledCount} קלפים בשאלות טריוויה!`);
-    }
-
-    // Export entire deck as a downloadable ZIP package
-    async function exportZipArchive() {
-      showToast('📦', 'מכין קובץ ZIP להורדה, אנא המתינו...');
+      showToast('⏳', 'מייצא ארכיון ZIP...');
       const zip = new JSZip();
+      const assetsFolder = zip.folder("assets");
+      const imagesFolder = assetsFolder.folder("images");
 
-      // Folder structure
-      const mediaFolder = zip.folder("media");
-
-      // Clean metadata JSON
-      const cleanDeck = clientDeck.map(c => {
-        const copy = { ...c };
-        // If data URL, extract file and save as standalone file in ZIP
-        if (copy.media_file && copy.media_file.startsWith('data:')) {
-          const ext = copy.media_file.split(';')[0].split('/')[1] || 'bin';
-          const filename = `card_${copy.id}.${ext === 'jpeg' ? 'jpg' : ext}`;
-          const base64Data = copy.media_file.split(',')[1];
-          mediaFolder.file(filename, base64Data, { base64: true });
-          copy.media_file = `media/${filename}`;
+      const exportDeck = activeDeck.map((c, i) => {
+        let mediaFile = '';
+        if (c.media_file && c.media_file.startsWith('data:')) {
+          const base64Data = c.media_file.split(',')[1];
+          const ext = c.media_file.includes('png') ? 'png' : 'jpg';
+          const filename = `photo_${i + 1}.${ext}`;
+          imagesFolder.file(filename, base64Data, { base64: true });
+          mediaFile = `assets/images/${filename}`;
+        } else {
+          mediaFile = c.media_file;
         }
-        return copy;
+
+        return {
+          id: i + 1,
+          number: i + 1,
+          year: c.year,
+          title: c.title,
+          description: c.description,
+          media_type: c.media_type || 'photo',
+          media_file: mediaFile,
+          isCustomized: true
+        };
       });
 
-      zip.file("deck_data.js", `window.DECK_DATA = ${JSON.stringify(cleanDeck, null, 2)};\n`);
-      zip.file("deck_data.json", JSON.stringify(cleanDeck, null, 2));
-      zip.file("README.txt", `חפיסת זיכרונות אישית • קוד: ${currentCode}\nנוצר ב: ${new Date().toLocaleDateString('he-IL')}\nהחפיסה מכילה 54 קלפי משחק מוכנים.`);
+      zip.file("deck.json", JSON.stringify(exportDeck, null, 2));
+      zip.file("README.txt", `חפיסת זיכרונות • קוד: ${currentCode}
+נוצר ב: ${new Date().toLocaleDateString('he-IL')}
+כמות קלפים: ${exportDeck.length}`);
 
-      // Generate ZIP blob and trigger download
       const content = await zip.generateAsync({ type: "blob" });
       saveAs(content, `Memories_Deck_${currentCode}.zip`);
-      showToast('🎉', 'קובץ ה-ZIP הורד בהצלחה למחשבכם!');
-    }
-
-    // Import Backup JSON
-    function importBackupJSON(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          if (Array.isArray(imported) && imported.length > 0) {
-            clientDeck = imported;
-            saveDeck();
-            renderGrid();
-            showToast('✅', 'הגיבוי נטען בהצלחה!');
-          }
-        } catch (err) {
-          alert('שגיאה בקריאת קובץ ה-JSON');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function resetCurrentDeck() {
-      if (!confirm('האם אתם בטוחים שברצונכם לאפס את כל 54 הקלפים בחפיסה זו? פעולה זו אינה ניתנת לביטול!')) return;
-      createBlankDeck();
-      renderGrid();
-      showToast('🗑️', 'החפיסה אופסה לחלוטין.');
+      showToast('✅', 'ארכיון ה-ZIP ירד בהצלחה!');
     }
 
     function showToast(icon, msg) {
-      const toast = document.getElementById('toastNotification');
+      const t = document.getElementById('toast');
       document.getElementById('toastIcon').textContent = icon;
       document.getElementById('toastMsg').textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3200);
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // Kickoff on load
-    window.addEventListener('DOMContentLoaded', initClientDeck);
   </script>
 </body>
 </html>

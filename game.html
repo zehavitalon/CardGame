@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="משחק מחשב משפחתי: הורים מול ילדים – הקרב על ה-37 • יום נישואין 37 לזהבית וחיים">
-  <meta name="robots" content="noindex, nofollow">
-  <title>משחק מחשב: הורים מול ילדים • הקרב על ה-37</title>
-  
-  <!-- Modern Typography from Google Fonts -->
+  <meta name="description" content="משחק מחשב למסך הגדול • ציר הזמן של הזיכרונות">
+  <title>משחק ציר הזמן • חפיסת זיכרונות</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="game.css?v=20261103d">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Rubik:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="game.css?v=20261123">
 </head>
+
 <body>
   <!-- Ambient Lighting Effects -->
   <div class="ambient-glow glow-parents" aria-hidden="true"></div>
@@ -24,15 +26,16 @@
 
   <!-- Main Game Container -->
   <div class="game-app" id="gameApp">
-    
+
     <!-- Top Bar: Scores & Goal Progress -->
     <header class="game-header" id="gameHeader">
       <div class="header-left">
-        <a href="dashboard.html" class="nav-btn" id="backToDashBtn" title="חזרה ללוח הניהול">
-          <span>🏠</span>
-          <span>לוח ניהול</span>
-        </a>
-        <button type="button" class="nav-btn" id="restartGameBtn" onclick="document.getElementById('setupModal').classList.remove('hidden')" title="הגדרות ומשחק חדש">
+        <button type="button" class="nav-btn" id="fullScreenToggleBtn" onclick="window.toggleFullScreen()" title="מסך מלא">
+          <span id="fullScreenIcon">⛶</span>
+          <span id="fullScreenLabel">מסך מלא</span>
+        </button>
+        <button type="button" class="nav-btn" id="restartGameBtn"
+          onclick="document.getElementById('setupModal').classList.remove('hidden')" title="הגדרות ומשחק חדש">
           <span>⚙️</span>
           <span>משחק חדש</span>
         </button>
@@ -42,170 +45,145 @@
       <div class="header-center">
         <div class="progress-header">
           <span>התקדמות ציר הזמן:</span>
-          <strong><span id="progressCount">1</span> מתוך <span id="targetDisplay">37</span> קלפים</strong>
+          <strong><span id="progressCount">1</span> מתוך <span id="targetDisplay">15</span> קלפים</strong>
         </div>
         <div class="progress-track" aria-label="Game Progress">
-          <div class="progress-fill" id="progressBar" style="width: 3%;"></div>
+          <div class="progress-fill" id="progressBar" style="width: 5%;"></div>
         </div>
       </div>
 
-      <!-- Right: Team Score Badges -->
+      <!-- Right: Generic Dynamic Players Scoreboard (1 to 4 Players) -->
       <div class="header-right">
-        <div class="team-scoreboard">
-          <!-- Team 1: Parents (Gold) -->
-          <div class="team-pill team-parents active-turn" id="team1Pill">
-            <span class="team-icon">👑</span>
-            <span class="team-name" id="team1Name">ההורים</span>
-            <span class="team-score" id="team1Score">0</span>
-          </div>
-          
-          <!-- Team 2: Kids (Cyan) -->
-          <div class="team-pill team-kids" id="team2Pill">
-            <span class="team-icon">🚀</span>
-            <span class="team-name" id="team2Name">הילדים</span>
-            <span class="team-score" id="team2Score">0</span>
-          </div>
+        <div class="team-scoreboard" id="playersScoreboard"
+          style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <!-- Dynamically populated via JS -->
         </div>
       </div>
     </header>
 
     <!-- Turn Banner -->
-    <div class="turn-banner turn-parents" id="turnBanner">
+    <div class="turn-banner" id="turnBanner">
       <span class="turn-sparkle">✨</span>
-      <span id="turnText">תור קבוצת ההורים (חיים וזהבית) 👑</span>
+      <span class="turn-text" id="turnText">תור שחקן 1 👑</span>
       <span class="turn-sparkle">✨</span>
     </div>
 
-    <!-- Center Stage: The Mystery Card -->
-    <!-- Center Stage: The Mystery Cinema Stage -->
+    <!-- Main Game Workspace: Cinema Stage + Interactive Timeline -->
     <main class="game-stage" id="gameStage">
-      <div class="mystery-card-container turn-parents" id="mysteryContainer">
-        
-        <!-- Hero Media Cinema Screen (Maximized for full visual impact, no cropping!) -->
-        <div class="stage-card-item is-covered" id="stageCardItem" title="לחצו להפעלה או גררו לציר">
-          <!-- Dynamically populated by game.js -->
-        </div>
 
-        <!-- Option A: Inline Stage Verdict Banner (Directly below cinema screen) -->
-        <div class="stage-verdict" id="stageVerdict" style="display: none;">
-          <span class="verdict-icon" id="verdictIcon">✨</span>
-          <span class="verdict-text" id="verdictText">בול! השנה היא 1989</span>
-        </div>
+      <!-- Mystery Cinema Stage (Card Reveal & Player) -->
+      <section class="cinema-section" aria-label="Cinema Stage">
+        <div class="cinema-frame" id="cinemaFrame">
 
-        <!-- Sleek Horizontal Control & Info Strip -->
-        <div class="stage-card-info">
-          <div class="stage-info-text">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="category-tag" id="stageCategory">שיר אהבה 🎵</span>
-              <span class="couple-tag" id="coupleTag" style="display: none;">💑 חוויה של ההורים בלבד</span>
+          <!-- Active Mystery Card (Vinyl / Video / Photo) -->
+          <div class="stage-card-wrapper" id="stageCardWrapper">
+            <div class="stage-card-item" id="stageCardItem" title="לחצו להגדלה על כל המסך" onclick="window.toggleMediaModalFullscreen()">
+              <!-- Covered Card or Revealed Media -->
             </div>
-            <h1 class="stage-title" id="stagePrompt">קלף זיכרון חדש נשלף 🎴</h1>
-            <p class="stage-instructions" id="stageInstructions">
-              לחצו על הקלף או על הכפתור כדי להפעיל את הזיכרון.
-            </p>
+            <!-- Cinema Overlay Fullscreen Trigger -->
+            <button type="button" class="media-fullscreen-btn" id="mediaFullscreenBtn" title="הצג מדיה על כל המסך (קולנוע)" onclick="window.toggleMediaModalFullscreen()">
+              <span>🔍</span>
+              <span>הגדל למסך מלא</span>
+            </button>
           </div>
 
-          <div class="stage-actions">
-            <button type="button" class="action-btn btn-activate" id="activateCardBtn">
-              <span>▶️</span>
-              <span id="activateBtnText">הפעל והאזן לשיר</span>
+          <!-- Game Action & Verdict Area (Cleanly hidden - draw button is now integrated inside the deck) -->
+          <div class="stage-action-area" id="stageActionArea" style="display:none;">
+            <div class="stage-verdict" id="stageVerdict" style="display:none;">
+              <span class="verdict-icon" id="verdictIcon">✨</span>
+              <span class="verdict-text" id="verdictText"></span>
+            </div>
+            <button type="button" class="action-btn btn-next-card" id="nextCardBtn" style="display:none;">
+              <span>התחילו לשחק</span>
+              <span>🚀</span>
             </button>
-            <button type="button" class="action-btn btn-skip" id="skipCardBtn" style="display: none;" title="מדלגים על חוויה של ההורים בלבד ושולפים קלף חדש">
-              <span>⏭️</span>
-              <span>דלג (חוויה של ההורים)</span>
-            </button>
-            <button type="button" class="action-btn btn-play" id="playToggleBtn" style="display: none;">
-              <span>⏸️</span>
-              <span>השהה שיר</span>
-            </button>
-            <button type="button" class="action-btn btn-next-card" id="nextCardBtn" style="display: none;">
-              <span>עברו לקלף הבא</span>
-              <span>⬅️</span>
-            </button>
-            <span class="drag-hint-pill" id="dragHintPill" style="display: none;">
-              <span>💡</span>
-              <span>גררו לציר או לחצו על ה-(+) הרצוי</span>
-            </span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Interactive Timeline Rail -->
+      <section class="timeline-section" aria-label="Interactive Timeline">
+        <button type="button" class="timeline-scroll-btn btn-scroll-right" id="timelineScrollRightBtn" title="גלול ימינה (אירועים מוקדמים יותר)" onclick="window.scrollTimelineRight()">
+          <span>▶</span>
+        </button>
+
+        <!-- Scrolling Timeline Track -->
+        <div class="timeline-viewport" id="timelineViewport">
+          <div class="timeline-track" id="timelineTrack">
+            <!-- Dynamically populated slots and placed cards -->
           </div>
         </div>
 
-      </div>
+        <button type="button" class="timeline-scroll-btn btn-scroll-left" id="timelineScrollLeftBtn" title="גלול שמאלה (אירועים מאוחרים יותר)" onclick="window.scrollTimelineLeft()">
+          <span>◀</span>
+        </button>
+      </section>
+
     </main>
-
-    <!-- Bottom Section: The Horizontal Timeline -->
-    <section class="timeline-section" id="timelineSection">
-      <div class="timeline-header">
-        <div class="timeline-title">
-          <span>📅</span>
-          <span>ציר 37 שנות הנישואין (לפי סדר כרונולוגי)</span>
-        </div>
-        <div class="timeline-count-badge" id="timelineCountBadge">1 קלפים בציר</div>
-      </div>
-
-      <div class="timeline-scroll-container" id="timelineScrollContainer">
-        <div class="timeline-track" id="timelineTrack">
-          <!-- Populated dynamically with slots and placed cards -->
-        </div>
-      </div>
-    </section>
 
   </div>
 
-  <!-- Feedback Toast (Verdict) -->
+  <!-- Toast Notification Feedback -->
   <div class="toast-verdict" id="toastVerdict">
     <span id="toastMessage">כל הכבוד!</span>
   </div>
 
-  <!-- Setup Modal (Lobby) -->
+  <!-- Card Detail Modal (Click placed card on timeline - Huge Theater View) -->
+  <div class="modal-overlay hidden" id="cardDetailModal" onclick="closeCardDetailModal()">
+    <div class="modal-dialog card-detail-dialog" onclick="event.stopPropagation()">
+      <div class="card-detail-header">
+        <div class="modal-badge" id="cardDetailYear" style="font-size:1.3rem; font-weight:800; color:#f5d061; padding:4px 18px;">1995</div>
+        <h2 class="modal-title" id="cardDetailTitle" style="font-size:1.6rem; margin-top:8px;">כותרת הזיכרון</h2>
+      </div>
+      <div id="cardDetailMedia" class="card-detail-media-container"></div>
+      <p class="modal-desc" id="cardDetailDescription" style="font-size:1.05rem; line-height:1.6; color:#e0e6ed; margin:4px 0 14px; text-align:center;"></p>
+      <button type="button" class="start-btn" id="cardDetailCloseBtn" onclick="closeCardDetailModal()" style="max-width:240px; margin-top:8px;">סגור ✖</button>
+    </div>
+  </div>
+
+  <!-- Media Cinema Fullscreen Modal (Zero cropping, natural aspect ratio, full controls) -->
+  <div class="media-cinema-modal" id="mediaCinemaModal" onclick="window.closeMediaModal(event)">
+    <button type="button" class="cinema-close-btn" onclick="window.closeMediaModal(event)" title="סגור וחזור לשיבוץ בציר (Esc)">
+      ✕ סגור וחזור לשיבוץ בציר
+    </button>
+    <div class="media-cinema-content" id="mediaCinemaContent" onclick="event.stopPropagation()">
+      <!-- Populated via JS -->
+    </div>
+    <button type="button" class="cinema-place-btn" onclick="window.closeMediaModal(event)">
+      🎯 מוכנים? לחצו לשיבוץ בציר הזמן!
+    </button>
+  </div>
+
+  <!-- Setup Modal (Configure Players & Start Game) -->
   <div class="modal-overlay" id="setupModal">
     <div class="modal-dialog">
-      <div class="modal-badge">✨ יום נישואין 37 • משחק המחשב המשפחתי</div>
-      <h2 class="modal-title">הקרב על ה-37</h2>
-      <p class="modal-desc">
-        בנו יחד את ציר הזמן המפואר של 37 שנות הנישואין! שבצו שירים, תמונות משפחתיות וסרטונים היסטוריים בסדר הכרונולוגי הנכון.
+      <div class="modal-badge" id="modalBadge">✨ משחק הזיכרונות האישי • ציר הזמן</div>
+      <h2 class="modal-title" id="gameTitleHeader">הקרב על ציר הזמן</h2>
+      <p class="modal-desc" id="gameDescHeader">
+        שבצו יחד את התמונות והרגעים המרגשים בסדר הכרונולוגי הנכון לאורך ציר הזמן!
       </p>
 
-      <!-- Mode Selection -->
-      <div class="setup-group">
-        <label class="setup-label">בחרו מצב משחק:</label>
-        <div class="option-grid">
-          <div class="option-card mode-option selected" data-mode="parents_vs_kids" id="modeParentsKids">
-            <div class="option-icon">👑⚔️🚀</div>
-            <div class="option-title">הורים מול ילדים</div>
-            <div class="option-sub">חיים וזהבית נגד 4 הילדים</div>
-          </div>
-          <div class="option-card mode-option" data-mode="couples" id="modeCouples">
-            <div class="option-icon">💑</div>
-            <div class="option-title">משחק זוגי</div>
-            <div class="option-sub">חיים מול זהבית ראש-בראש</div>
-          </div>
-          <div class="option-card mode-option" data-mode="solo" id="modeSolo">
-            <div class="option-icon">👤</div>
-            <div class="option-title">משחק סולו</div>
-            <div class="option-sub">אתגר אישי נינוח</div>
-          </div>
+      <!-- Players Setup -->
+      <div class="setup-group" style="margin-bottom: 22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+          <label class="setup-label" style="margin-bottom: 0;">👥 שחקנים / משתתפים:</label>
+          <button type="button" id="addPlayerBtn" class="btn-add-player" onclick="window.addPlayer()">
+            <span style="font-size:1.1rem; line-height:1;">➕</span> הוסף שחקן
+          </button>
+        </div>
+
+        <div id="playerInputsList" style="display:flex; flex-direction:column; gap:8px;">
+          <!-- Dynamically populated via JS -->
         </div>
       </div>
 
-      <!-- Target Selection -->
-      <div class="setup-group">
-        <label class="setup-label">יעד קלפים לסיום על הציר:</label>
-        <div class="option-grid">
-          <div class="option-card target-option" data-target="15" id="target15">
-            <div class="option-icon">⚡</div>
-            <div class="option-title">15 קלפים</div>
-            <div class="option-sub">משחק מהיר (כ-10 דק')</div>
-          </div>
-          <div class="option-card target-option" data-target="25" id="target25">
-            <div class="option-icon">🎯</div>
-            <div class="option-title">25 קלפים</div>
-            <div class="option-sub">משחק בינוני (כ-20 דק')</div>
-          </div>
-          <div class="option-card target-option selected" data-target="37" id="target37">
-            <div class="option-icon">💖</div>
-            <div class="option-title">37 קלפים</div>
-            <div class="option-sub">המשחק החגיגי המלא</div>
-          </div>
+      <!-- Deck Info -->
+      <div id="deckInfoBar" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px 16px; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.2rem;">🃏</span>
+          <span style="font-size:0.92rem; color:#cbd5e1;">אורך המשחק:</span>
+          <strong id="deckCardsCountText" style="color:#f5d061; font-size:1rem;">טוען קלפים...</strong>
         </div>
       </div>
 
@@ -217,27 +195,16 @@
   <div class="modal-overlay hidden" id="victoryModal">
     <div class="modal-dialog">
       <div class="modal-badge">🎉 סיום המשחק החגיגי!</div>
-      <h2 class="modal-title" id="victoryTitle">קבוצת ההורים ניצחה!</h2>
-      <p class="modal-desc" id="victorySubtitle">
-        ציר 37 שנות הנישואין הושלם בהצלחה מדהימה!
-      </p>
+      <h2 class="modal-title" id="victoryTitle">כל הכבוד! 🏆</h2>
+      <p class="modal-desc" id="victorySubtitle">ציר הזמן הושלם בהצלחה מדהימה!</p>
 
-      <div class="setup-group" id="victoryScoreboard" style="display: flex; justify-content: center; gap: 24px; margin-bottom: 24px;">
-        <div class="team-pill team-parents" style="padding: 10px 20px; font-size: 1.1rem;">
-          <span>👑 ההורים:</span>
-          <strong id="victoryScore1" style="font-size: 1.4rem;">0</strong>
-        </div>
-        <div class="team-pill team-kids" style="padding: 10px 20px; font-size: 1.1rem;">
-          <span>🚀 הילדים:</span>
-          <strong id="victoryScore2" style="font-size: 1.4rem;">0</strong>
-        </div>
+      <div id="victoryLeaderboard"
+        style="display:flex; flex-direction:column; gap:10px; max-width:440px; margin:20px auto; width:100%;">
+        <!-- Populated via JS -->
       </div>
 
-      <div style="display: flex; gap: 12px;">
-        <button type="button" class="start-btn" id="exploreAlbumBtn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);">
-          📖 פתחו את אלבום הזיכרונות
-        </button>
-        <button type="button" class="start-btn" id="playAgainBtn" style="flex: 1;">
+      <div style="display: flex; justify-content: center; margin-top:24px;">
+        <button type="button" class="start-btn" id="playAgainBtn" style="min-width: 240px;">
           🔄 שחקו שוב
         </button>
       </div>
@@ -245,6 +212,7 @@
   </div>
 
   <script src="assets/deck_data.js"></script>
-  <script src="game.js?v=20261103f"></script>
+  <script src="game.js?v=20261123"></script>
 </body>
+
 </html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מרכז השליטה והמעבר • Game Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: rgba(18, 25, 44, 0.85);
+      --border-card: rgba(255, 255, 255, 0.1);
+      --gold: #f5d061;
+      --gold-glow: rgba(245, 208, 97, 0.25);
+      --blue: #38bdf8;
+      --green: #2ed573;
+      --purple: #c084fc;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #172554, #0a0f1d 70%);
+      color: var(--text-main);
+      font-family: 'Rubik', sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(245, 208, 97, 0.12);
+      border: 1px solid rgba(245, 208, 97, 0.35);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* Active Deck Control Bar */
+    .deck-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 20px 26px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      margin-bottom: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .deck-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .deck-icon {
+      font-size: 2rem;
+      background: rgba(56, 189, 248, 0.12);
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .deck-meta h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .deck-badge {
+      background: rgba(245, 208, 97, 0.15);
+      color: var(--gold);
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+    }
+
+    .deck-meta p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .deck-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-code {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      min-width: 130px;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #d4af37);
+      color: #0b0f1a;
+      box-shadow: 0 4px 14px var(--gold-glow);
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 208, 97, 0.4);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      color: #fff;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 3 Portal Cards Grid */
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-bottom: 35px;
+    }
+
+    @media (max-width: 900px) {
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .portal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 4px;
+    }
+
+    .portal-card.card-player::before {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+    }
+
+    .portal-card.card-client::before {
+      background: linear-gradient(90deg, #2ed573, #10b981);
+    }
+
+    .portal-card.card-admin::before {
+      background: linear-gradient(90deg, #f5d061, #f59e0b);
+    }
+
+    .portal-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-top {
+      margin-bottom: 22px;
+    }
+
+    .card-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+    }
+
+    .role-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .pill-player {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .pill-client {
+      background: rgba(46, 213, 115, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .pill-admin {
+      background: rgba(245, 208, 97, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(245, 208, 97, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card-features {
+      list-style: none;
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-features li {
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-launch {
+      width: 100%;
+      justify-content: center;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    .btn-copy {
+      width: 100%;
+      justify-content: center;
+      padding: 9px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    /* Saved Decks Shelf */
+    .shelf-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+    }
+
+    .shelf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .shelf-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .decks-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .deck-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .deck-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .deck-chip.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: #0f172a;
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">🎛️ מרכז שליטה • Game Hub</div>
+      <h1 class="title">פורטל משחקי ציר הזמן</h1>
+      <p class="subtitle">מעבר מהיר בין מסך השחקנים, אשף הלקוח, ולוח הניהול המלא</p>
+    </header>
+
+    <!-- Active Deck Control Bar -->
+    <section class="deck-bar">
+      <div class="deck-info">
+        <div class="deck-icon">🃏</div>
+        <div class="deck-meta">
+          <h3>
+            משחק פעיל: <span id="activeDeckCodeDisplay" class="deck-badge">ZIV-59</span>
+          </h3>
+          <p id="activeDeckDetails">טוען פרטי חפיסה...</p>
+        </div>
+      </div>
+
+      <div class="deck-actions">
+        <input type="text" id="customCodeInput" class="input-code" placeholder="הקלד קוד...">
+        <button type="button" class="btn btn-outline" onclick="selectDeckFromInput()">בחר קוד</button>
+        <button type="button" class="btn btn-gold" onclick="createNewDeckPrompt()">➕ משחק חדש</button>
+      </div>
+    </section>
+
+    <!-- 3 Portals -->
+    <main class="portal-grid">
+
+      <!-- 1. Player Screen -->
+      <div class="portal-card card-player">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <div class="card-icon">🎮</div>
+            <span class="role-pill pill-player">לאורחים באירוע</span>
+          </div>
+          <h2 class="card-title">מסך המשחק (שחקנים)</h2>
+          <p class="card-desc">
+            המסך שמוקרן על הטלוויזיה או מוצג לאורחים. קריאה בלבד ללא שום כפתורי עריכה.
+          </p>
+          <ul class="card-features">
+            <li>✔ שחקן 1 דיפולטי (ניתן לעריכת שם)</li>
+            <li>✔ כפתור "➕ הוסף שחקן" עם דרישת שם</li>
+            <li>✔ משחק על כל הקלפים שהועלו לחפיסה</li>
+            <li>✔ לוח מנצחים מסכם בסיום</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a id="btnLaunchPlayer" href="play.html" target="_blank" class="btn btn-gold btn-launch">
+            ▶️ הפעל משחק
+          </a>
+          <button type="button" class="btn btn-copy" onclick="copyPlayerLink()">
+            📋 העתק קישור לשחקנים
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Customer Wizard -->
+      <div class="portal-card card-client">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <div class="card-icon">📱</div>
+            <span class="role-pill pill-client">למזמין/ת המשחק</span>
+          </div>
+          <h2 class="card-title">אשף הלקוח (העלאת תמונות)</h2>
+          <p class="card-desc">
+            המסך שנשלח לקונה בווטסאפ: מילוי פרטי האירוע, העלאת תמונות מרוכזת ותיוג שנים.
+          </p>
+          <ul class="card-features">
+            <li>✔ מילוי שם השמחה והאירוע (כותרת מותאמת)</li>
+            <li>✔ העלאת תמונות מרוכזת (Bulk Upload)</li>
+            <li>✔ תיוג שנים מהיר וסידור כרונולוגי בזמן אמת</li>
+            <li>✔ כפתור אישור סופי ונעילה להפקה</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a id="btnLaunchClient" href="client.html" target="_blank" class="btn btn-outline btn-launch"
+            style="border-color:rgba(46,213,115,0.4); color:#2ed573;">
+            👁️ פתח כמסך לקוח
+          </a>
+          <button type="button" class="btn btn-copy" onclick="copyClientLink()">
+            💬 העתק קישור לשליחה ללקוח
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Admin & Production -->
+      <div class="portal-card card-admin">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <div class="card-icon">🛠️</div>
+            <span class="role-pill pill-admin">שלך בלבד (Admin)</span>
+          </div>
+          <h2 class="card-title">ניהול והפקה לדפוס</h2>
+          <p class="card-desc">
+            לוח הניהול המקצועי המלא שלך: עריכת קלפים, התאמת שנים, גלופות PDF וקודי QR.
+          </p>
+          <ul class="card-features">
+            <li>✔ עריכת קלפים, תמונות, סיפורים ומדיה</li>
+            <li>✔ הפקת PDF לדפוס (הדפסה דו-צדדית)</li>
+            <li>✔ יצירת QR קודים לקלפים הפיזיים</li>
+            <li>✔ נעילת חפיסות, גיבויים וייצוא</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a id="btnLaunchAdmin" href="builder.html" target="_blank" class="btn btn-outline btn-launch"
+            style="border-color:rgba(245,208,97,0.4); color:#f5d061;">
+            ⚙️ פתח לוח ניהול והפקה
+          </a>
+          <button type="button" class="btn btn-copy" onclick="copyAdminLink()">
+            🔗 העתק קישור ניהול
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Saved Decks Shelf -->
+    <section class="shelf-box">
+      <div class="shelf-header">
+        <div class="shelf-title">
+          <span>📚</span> חפיסות ומשחקים שמורים במערכת
+        </div>
+        <button type="button" class="btn btn-outline" style="font-size:0.8rem; padding:6px 12px;"
+          onclick="refreshDecksShelf()">
+          🔄 רענן
+        </button>
+      </div>
+
+      <div class="decks-list" id="savedDecksList">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span>✅</span> <span id="toastMsg">הקישור הועתק בהצלחה!</span>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      let currentCode = 'ZIV-59';
+
+      function initHub() {
+        const urlParams = new URLSearchParams(window.location.search);
+        currentCode = (urlParams.get('game') || urlParams.get('deck') || localStorage.getItem('ACTIVE_DECK_CODE') || 'ZIV-59').toUpperCase().trim();
+        updateActiveDeckUI();
+        refreshDecksShelf();
+      }
+
+      function updateActiveDeckUI() {
+        localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+
+        const codeDisplay = document.getElementById('activeDeckCodeDisplay');
+        const customInput = document.getElementById('customCodeInput');
+        if (codeDisplay) codeDisplay.textContent = currentCode;
+        if (customInput) customInput.value = currentCode;
+
+        // Update links
+        const btnPlayer = document.getElementById('btnLaunchPlayer');
+        const btnClient = document.getElementById('btnLaunchClient');
+        const btnAdmin = document.getElementById('btnLaunchAdmin');
+
+        if (btnPlayer) btnPlayer.href = `play.html?game=${encodeURIComponent(currentCode)}`;
+        if (btnClient) btnClient.href = `client.html?deck=${encodeURIComponent(currentCode)}`;
+        if (btnAdmin) btnAdmin.href = `builder.html?deck=${encodeURIComponent(currentCode)}`;
+
+        // Check cards count in deck
+        checkDeckCardsCount(currentCode);
+      }
+
+      async function checkDeckCardsCount(code) {
+        const detailsEl = document.getElementById('activeDeckDetails');
+        if (!detailsEl) return;
+        detailsEl.textContent = 'בודק קלפים...';
+
+        let count = 0;
+        try {
+          const raw = localStorage.getItem('MEMORIES_DECK_' + code);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) count = parsed.length;
+          }
+        } catch (e) { }
+
+        if (count === 0 && window.indexedDB) {
+          try {
+            const req = indexedDB.open('CardGameMemoriesDB', 1);
+            req.onsuccess = (e) => {
+              const db = e.target.result;
+              if (db.objectStoreNames.contains('decks')) {
+                const tx = db.transaction('decks', 'readonly');
+                const store = tx.objectStore('decks');
+                const getReq = store.get('MEMORIES_DECK_' + code);
+                getReq.onsuccess = () => {
+                  if (getReq.result && Array.isArray(getReq.result)) {
+                    count = getReq.result.length;
+                    detailsEl.textContent = `${count} קלפים פעילים בחפיסה זו`;
+                  } else {
+                    detailsEl.textContent = count > 0 ? `${count} קלפים פעילים בחפיסה זו` : 'חפיסה ללא קלפים עדיין (עברו למסך לקוח/אדמין להעלאה)';
+                  }
+                };
+              }
+            };
+          } catch (e) { }
+        } else {
+          detailsEl.textContent = count > 0 ? `${count} קלפים פעילים בחפיסה זו` : 'חפיסה ללא קלפים עדיין (עברו למסך לקוח/אדמין להעלאה)';
+        }
+      }
+
+      window.selectDeck = function (code) {
+        currentCode = code.toUpperCase().trim();
+        updateActiveDeckUI();
+        highlightActiveDeckChip();
+      };
+
+      window.selectDeckFromInput = function () {
+        const inp = document.getElementById('customCodeInput');
+        if (!inp || !inp.value.trim()) return;
+        selectDeck(inp.value.trim());
+      };
+
+      window.createNewDeckPrompt = function () {
+        const name = prompt('הזן קוד למשחק החדש (למשל: DANA-40):', '');
+        if (name && name.trim()) {
+          const clean = name.trim().toUpperCase();
+          selectDeck(clean);
+          showToast(`משחק ${clean} נבחר! פתחו את מסך הלקוח או הניהול להתחלת העלאה.`);
+        }
+      };
+
+      window.copyPlayerLink = function () {
+        const url = new URL(`play.html?game=${encodeURIComponent(currentCode)}`, window.location.href).href;
+        copyToClipboard(url, 'קישור השחקנים הועתק! שלחו לאורחים באירוע');
+      };
+
+      window.copyClientLink = function () {
+        const url = new URL(`client.html?deck=${encodeURIComponent(currentCode)}`, window.location.href).href;
+        copyToClipboard(url, 'קישור הלקוח הועתק! שלחו למזמין/ת המשחק בווטסאפ');
+      };
+
+      window.copyAdminLink = function () {
+        const url = new URL(`builder.html?deck=${encodeURIComponent(currentCode)}`, window.location.href).href;
+        copyToClipboard(url, 'קישור הניהול וההדפסה הועתק!');
+      };
+
+      function copyToClipboard(text, msg) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(() => showToast(msg));
+        } else {
+          prompt('העתק את הקישור:', text);
+        }
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        if (!toast) return;
+        if (toastMsg) toastMsg.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+
+      function refreshDecksShelf() {
+        const shelf = document.getElementById('savedDecksList');
+        if (!shelf) return;
+
+        const defaultDecks = ['ZIV-59', 'MOVIES-100', 'FAMILY-GAME'];
+        const found = new Set(defaultDecks);
+
+        // Check LocalStorage
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('MEMORIES_DECK_')) {
+            found.add(k.replace('MEMORIES_DECK_', ''));
+          }
+        }
+
+        shelf.innerHTML = Array.from(found).map(code => `
+          <div class="deck-chip ${code === currentCode ? 'active' : ''}" onclick="window.selectDeck('${code}')">
+            <span>🃏</span>
+            <strong>${code}</strong>
+          </div>
+        `).join('');
+      }
+
+      function highlightActiveDeckChip() {
+        document.querySelectorAll('.deck-chip').forEach(el => {
+          el.classList.toggle('active', el.textContent.includes(currentCode));
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHub);
+      } else {
+        initHub();
+      }
+    })();
+  </script>
+</body>
+
+</html>
+
