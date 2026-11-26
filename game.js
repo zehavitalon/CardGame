@@ -265,10 +265,20 @@
     activeCode = (urlParams.get('game') || urlParams.get('deck') || 'ZIV-59').toUpperCase().trim();
     console.log('🎮 Active Game Deck Code:', activeCode);
 
-    // Update Header
+    // Update Header based on Catalog or Custom Code
+    let catalogKey = activeCode;
+    if (window.GAME_CATALOG_ALIASES && window.GAME_CATALOG_ALIASES[catalogKey]) {
+      catalogKey = window.GAME_CATALOG_ALIASES[catalogKey];
+    }
+    const catEntry = window.GAME_CATALOG && window.GAME_CATALOG[catalogKey];
+
     const titleHeader = document.getElementById('gameTitleHeader');
     const badgeHeader = document.getElementById('modalBadge');
-    if (activeCode.includes('ZIV')) {
+    if (catEntry) {
+      if (titleHeader) titleHeader.textContent = `${catEntry.title} • משחק המחשב`;
+      if (badgeHeader) badgeHeader.textContent = `${catEntry.icon} ${catEntry.title} • ציר הזמן`;
+      document.title = `${catEntry.title} • משחק ציר הזמן`;
+    } else if (activeCode.includes('ZIV')) {
       if (titleHeader) titleHeader.textContent = 'ציר הזמן של זיו • משחק המחשב';
       if (badgeHeader) badgeHeader.textContent = '🎂 יום הולדת לזיו • ציר הזמן';
       document.title = 'יום הולדת לזיו • משחק ציר הזמן';
@@ -278,7 +288,7 @@
       document.title = `משחק ציר הזמן • ${activeCode}`;
     }
 
-    // 2. Load deck data: IndexedDB -> LocalStorage -> deck.json -> universal_deck.json
+    // 2. Load deck data: IndexedDB -> LocalStorage -> GAME_CATALOG -> window.DECK_DATA -> fetch
     let loadedCards = null;
     try {
       loadedCards = await getDeckFromIDB('MEMORIES_DECK_' + activeCode);
@@ -294,6 +304,9 @@
     if (loadedCards && Array.isArray(loadedCards) && loadedCards.length >= 2) {
       masterDeck = loadedCards;
       console.log(`Loaded ${masterDeck.length} cards from custom storage for code ${activeCode}`);
+    } else if (catEntry && Array.isArray(catEntry.deck) && catEntry.deck.length > 0) {
+      masterDeck = JSON.parse(JSON.stringify(catEntry.deck));
+      console.log(`Loaded ${masterDeck.length} cards from GAME_CATALOG for ${catalogKey}`);
     } else if (window.DECK_DATA && Array.isArray(window.DECK_DATA) && window.DECK_DATA.length > 0) {
       masterDeck = window.DECK_DATA;
     } else {
@@ -502,6 +515,8 @@
     const thumb = mediaThumb(card);
     const titleBadge = titleOverride ? `<div class="cinema-title-badge">${titleOverride}</div>` : '';
 
+    stopAudio();
+
     if (mediaType === 'video' || (thumb && thumb.endsWith('.mp4'))) {
       content.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw;">
@@ -514,17 +529,27 @@
       content.innerHTML = `
         <div style="text-align:center; color:#fff; padding:20px; display:flex; flex-direction:column; align-items:center;">
           ${titleBadge}
-          <div style="font-size:6rem; margin:16px 0;">🎵</div>
-          <h2 style="font-size:1.8rem; color:#f5d061; margin-bottom:14px; font-weight:800;">האזינו לשיר ונחשו את השנה!</h2>
-          ${audioSrc ? `<audio src="${audioSrc}" controls autoplay style="margin-top:10px; width:320px; max-width:90vw;"></audio>` : ''}
+          <div class="vinyl-wrapper" style="margin:16px auto; width:160px; height:160px; position:relative;">
+            <div class="vinyl-disc spinning" id="cinemaVinylDisc" style="width:100%; height:100%; border-radius:50%; background:radial-gradient(circle at 50% 50%, #202020 0%, #0d0d0d 100%); border:4px solid #333; position:relative; box-shadow:0 8px 30px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center;">
+              <div style="position:absolute; inset:18%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
+              <div style="position:absolute; inset:32%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
+              <div style="width:55px; height:55px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-weight:900; font-size:1.5rem; box-shadow:0 0 10px rgba(0,0,0,0.5);">🎵</div>
+            </div>
+          </div>
+          <h2 style="font-size:1.7rem; color:#f5d061; margin-bottom:12px; font-weight:800;">האזינו לשיר ונחשו את השנה!</h2>
+          ${audioSrc ? `<audio id="cinemaAudioPlayer" src="${audioSrc}" controls autoplay style="margin-top:8px; width:340px; max-width:90vw;"></audio>` : ''}
         </div>
       `;
-      if (audioSrc && elements.audioElement) {
-        try {
-          elements.audioElement.src = audioSrc;
-          elements.audioElement.play().catch(() => {});
-        } catch (e) {}
-      }
+      // Single audio source truth: sync vinyl disc spin with audio playback
+      setTimeout(() => {
+        const aud = content.querySelector('#cinemaAudioPlayer');
+        const disc = content.querySelector('#cinemaVinylDisc');
+        if (aud && disc) {
+          aud.onplay = () => disc.classList.add('spinning');
+          aud.onpause = () => disc.classList.remove('spinning');
+          aud.onended = () => disc.classList.remove('spinning');
+        }
+      }, 50);
     } else if (thumb) {
       content.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw;">
@@ -555,7 +580,12 @@
       if (vid) {
         try { vid.pause(); } catch (err) { }
       }
+      const aud = content.querySelector('audio');
+      if (aud) {
+        try { aud.pause(); } catch (err) { }
+      }
     }
+    stopAudio();
     modal.classList.remove('active');
   };
 
@@ -734,6 +764,17 @@
     if (card.media_type === 'video' && card.media_file) {
       elements.stageCardItem.innerHTML = `
         <video src="${card.media_file}" controls autoplay playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
+      `;
+    } else if (card.media_type === 'audio' || (thumb && thumb.endsWith('.mp3'))) {
+      elements.stageCardItem.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:14px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:14px;">
+          <div class="vinyl-disc spinning" style="width:110px; height:110px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center;">
+            <div style="position:absolute; inset:20%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
+            <div style="width:40px; height:40px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.1rem; font-weight:900;">🎵</div>
+          </div>
+          <span style="font-size:0.85rem; color:var(--gold-light); font-weight:700; margin-top:10px;">רצועת שמע 🎵</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">לחצו להגדלה ושליטה</span>
+        </div>
       `;
     } else if (thumb) {
       elements.stageCardItem.innerHTML = `
@@ -1213,9 +1254,21 @@
 
   function stopAudio() {
     if (elements.audioElement) {
-      elements.audioElement.pause();
-      elements.audioElement.currentTime = 0;
+      try {
+        elements.audioElement.pause();
+        elements.audioElement.currentTime = 0;
+      } catch (e) { }
     }
+    // Also pause and stop all audio elements inside cinema modal or stage
+    try {
+      const allAudios = document.querySelectorAll('audio');
+      allAudios.forEach(a => {
+        a.pause();
+        a.currentTime = 0;
+      });
+      const allDiscs = document.querySelectorAll('.vinyl-disc');
+      allDiscs.forEach(d => d.classList.remove('spinning'));
+    } catch (e) { }
     isAudioPlaying = false;
   }
 

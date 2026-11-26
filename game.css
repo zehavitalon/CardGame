@@ -404,7 +404,8 @@ body {
   transition: transform 0.3s ease;
 }
 
-.vinyl-disc.playing {
+.vinyl-disc.playing,
+.vinyl-disc.spinning {
   animation: spin-vinyl 4s linear infinite;
 }
 

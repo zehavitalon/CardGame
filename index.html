@@ -923,6 +923,16 @@
       document.getElementById('revealedTitle').textContent = currentCard.title || 'אירוע משפחתי';
       document.getElementById('revealedDesc').textContent = currentCard.description || '';
 
+      // Stop any existing playing media before loading new card
+      const oldAudio = document.getElementById('audioEl');
+      if (oldAudio) {
+        try { oldAudio.pause(); oldAudio.currentTime = 0; oldAudio.src = ''; } catch(e) {}
+      }
+      const oldVideo = document.getElementById('videoEl');
+      if (oldVideo) {
+        try { oldVideo.pause(); oldVideo.currentTime = 0; oldVideo.src = ''; } catch(e) {}
+      }
+
       // Media Container Rendering
       const container = document.getElementById('mediaContainer');
       container.innerHTML = '';
