@@ -1066,7 +1066,7 @@
         const year = c.year || '----';
         const title = c.title || 'ללא כותרת';
         const desc = c.description || '';
-        const isFlipped = showAllQR ? !flippedCards.has(idx) : flippedCards.has(idx);
+        const isFlipped = !isClientMode && (showAllQR ? !flippedCards.has(idx) : flippedCards.has(idx));
         
         let mediaHtml = `
           <div class="card-placeholder">
@@ -1120,7 +1120,7 @@
                 ${(!isClientMode && hasMedia) ? `
                   <button class="btn btn-gold admin-only" onclick="playMediaPreview(${idx}, event)" title="נגן ובדוק מדיה">▶️ נגן</button>
                 ` : ''}
-                <button class="btn btn-outline" onclick="toggleSingleCardFace(${idx}, event)" title="${isFlipped ? 'הצג תמונה' : 'הצג ברקוד QR'}">🔄 ${isFlipped ? 'תמונה' : 'ברקוד'}</button>
+                <button class="btn btn-outline admin-only" onclick="toggleSingleCardFace(${idx}, event)" title="${isFlipped ? 'הצג תמונה' : 'הצג ברקוד QR'}">🔄 ${isFlipped ? 'תמונה' : 'ברקוד'}</button>
                 <button class="btn btn-outline" onclick="editCard(${idx})">✏️ עריכה</button>
                 <button class="btn btn-danger" onclick="deleteCard(${idx})" title="מחיקה">🗑️</button>
               </div>
