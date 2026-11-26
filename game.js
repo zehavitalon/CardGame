@@ -27,6 +27,7 @@
   let isChecking = false;
   let isCardActivated = false;
   let isDrawingCard = false;
+  let isModalClosing = false;
   let isAudioPlaying = false;
   let toastTimer = null;
 
@@ -571,16 +572,31 @@
     const thumb = mediaThumb(card);
     const titleBadge = titleOverride ? `<div class="cinema-title-badge">${titleOverride}</div>` : '';
 
-    stopAudio();
-
-    // Capture playback position from background stage video before pausing
+    // Capture playback position, mute, volume, and pause state from background stage video/audio before pausing
     let stageVideoTime = 0;
+    let stageVideoMuted = false;
+    let stageVideoVolume = 1;
+    let stageVideoPaused = false;
+    let stageAudioTime = 0;
+    let stageAudioPaused = false;
+
     if (elements.stageCardItem) {
       const bgVid = elements.stageCardItem.querySelector('video');
       if (bgVid) {
         try {
           stageVideoTime = bgVid.currentTime || 0;
+          stageVideoMuted = bgVid.muted;
+          stageVideoVolume = bgVid.volume;
+          stageVideoPaused = bgVid.paused;
           bgVid.pause();
+        } catch (e) { }
+      }
+      const bgAud = elements.stageCardItem.querySelector('audio');
+      if (bgAud) {
+        try {
+          stageAudioTime = bgAud.currentTime || 0;
+          stageAudioPaused = bgAud.paused;
+          bgAud.pause();
         } catch (e) { }
       }
     }
@@ -597,12 +613,17 @@
           <video src="${videoSrc}" controls autoplay playsinline loop class="cinema-view-video"></video>
         </div>
       `;
-      // Seamless continuation: sync currentTime from stage video
+      // Seamless continuation: sync currentTime, mute, volume from stage video
       const cinVid = content.querySelector('video');
-      if (cinVid && stageVideoTime > 0) {
-        try {
-          cinVid.currentTime = stageVideoTime;
-        } catch (e) { }
+      if (cinVid) {
+        if (stageVideoTime > 0) {
+          try { cinVid.currentTime = stageVideoTime; } catch (e) { }
+        }
+        cinVid.muted = stageVideoMuted;
+        cinVid.volume = stageVideoVolume;
+        if (stageVideoPaused) {
+          try { cinVid.pause(); } catch (e) { }
+        }
       }
     } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
       const audioSrc = card.media_file || thumb;
@@ -624,10 +645,18 @@
       setTimeout(() => {
         const aud = content.querySelector('#cinemaAudioPlayer');
         const disc = content.querySelector('#cinemaVinylDisc');
-        if (aud && disc) {
-          aud.onplay = () => disc.classList.add('spinning');
-          aud.onpause = () => disc.classList.remove('spinning');
-          aud.onended = () => disc.classList.remove('spinning');
+        if (aud) {
+          if (stageAudioTime > 0) {
+            try { aud.currentTime = stageAudioTime; } catch (e) { }
+          }
+          if (stageAudioPaused) {
+            try { aud.pause(); } catch (e) { }
+          }
+          if (disc) {
+            aud.onplay = () => disc.classList.add('spinning');
+            aud.onpause = () => disc.classList.remove('spinning');
+            aud.onended = () => disc.classList.remove('spinning');
+          }
         }
       }, 50);
     } else if (thumb) {
@@ -651,36 +680,77 @@
   };
 
   window.closeMediaModal = function (e) {
-    if (e) e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
     const modal = elements.mediaCinemaModal || document.getElementById('mediaCinemaModal');
     if (!modal) return;
     const content = elements.mediaCinemaContent || document.getElementById('mediaCinemaContent');
+
+    // Prevent click-bleed / ghost-clicks on timeline slots underneath the modal button!
+    isModalClosing = true;
+    setTimeout(() => { isModalClosing = false; }, 400);
+
     let modalVideoTime = 0;
+    let modalVideoMuted = false;
+    let modalVideoVolume = 1;
+    let modalVideoPaused = false;
+    let modalAudioTime = 0;
+    let modalAudioPaused = true;
+
     if (content) {
       const vid = content.querySelector('video');
       if (vid) {
         try {
           modalVideoTime = vid.currentTime || 0;
+          modalVideoMuted = vid.muted;
+          modalVideoVolume = vid.volume;
+          modalVideoPaused = vid.paused;
           vid.pause();
         } catch (err) { }
       }
       const aud = content.querySelector('audio');
       if (aud) {
-        try { aud.pause(); } catch (err) { }
+        try {
+          modalAudioTime = aud.currentTime || 0;
+          modalAudioPaused = aud.paused;
+          aud.pause();
+        } catch (err) { }
       }
     }
-    stopAudio();
+
     modal.classList.remove('active');
 
-    // Seamless continuation: resume playback on stage from the exact second modal closed
+    // Seamless continuation: resume playback on stage exactly matching modal state (time, muted, paused)
     if (elements.stageCardItem) {
       const stageVid = elements.stageCardItem.querySelector('video');
       if (stageVid) {
         try {
-          if (modalVideoTime > 0) {
-            stageVid.currentTime = modalVideoTime;
+          if (modalVideoTime > 0) stageVid.currentTime = modalVideoTime;
+          stageVid.muted = modalVideoMuted;
+          stageVid.volume = modalVideoVolume;
+          if (modalVideoPaused) {
+            stageVid.pause();
+          } else {
+            stageVid.play().catch(() => { });
           }
-          stageVid.play().catch(() => { });
+        } catch (err) { }
+      }
+
+      const stageAud = elements.stageCardItem.querySelector('#stageAudioPlayer');
+      const stageDisc = elements.stageCardItem.querySelector('#stageVinylDisc');
+      if (stageAud) {
+        try {
+          if (modalAudioTime > 0) stageAud.currentTime = modalAudioTime;
+          if (!modalAudioPaused) {
+            stageAud.play().catch(() => { });
+            if (stageDisc) stageDisc.classList.add('spinning');
+          } else {
+            stageAud.pause();
+            if (stageDisc) stageDisc.classList.remove('spinning');
+          }
         } catch (err) { }
       }
     }
@@ -876,16 +946,28 @@
         <video src="${videoSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
       `;
     } else if (card.media_type === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
+      const audioSrc = card.media_file || thumb;
       elements.stageCardItem.innerHTML = `
-        <div class="stage-audio-card-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; min-width:280px; max-width:360px; padding:20px 24px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:18px; box-sizing:border-box;">
-          <div class="vinyl-disc spinning" style="width:130px; height:130px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center;">
+        <div class="stage-audio-card-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; min-width:280px; max-width:360px; padding:18px 20px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:18px; box-sizing:border-box;">
+          <div class="vinyl-disc spinning" id="stageVinylDisc" style="width:115px; height:115px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer;" title="לחצו להגדלה">
             <div style="position:absolute; inset:20%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
-            <div style="width:48px; height:48px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.3rem; font-weight:900;">🎵</div>
+            <div style="width:42px; height:42px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.15rem; font-weight:900;">🎵</div>
           </div>
-          <span style="font-size:1.05rem; color:var(--gold-light); font-weight:700; margin-top:14px;">רצועת שמע 🎵</span>
-          <span style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">לחצו להגדלה ושליטה</span>
+          <span style="font-size:1rem; color:var(--gold-light); font-weight:700; margin-top:10px;">רצועת שמע 🎵</span>
+          ${audioSrc ? `<audio id="stageAudioPlayer" src="${audioSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline style="margin-top:10px; width:250px; max-width:92%; z-index:20;" onclick="event.stopPropagation()"></audio>` : ''}
+          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">האזינו ישירות או לחצו להגדלה</span>
         </div>
       `;
+
+      setTimeout(() => {
+        const aud = elements.stageCardItem.querySelector('#stageAudioPlayer');
+        const disc = elements.stageCardItem.querySelector('#stageVinylDisc');
+        if (aud && disc) {
+          aud.onplay = () => disc.classList.add('spinning');
+          aud.onpause = () => disc.classList.remove('spinning');
+          aud.onended = () => disc.classList.remove('spinning');
+        }
+      }, 50);
     } else if (thumb) {
       elements.stageCardItem.innerHTML = `
         <img src="${thumb}" alt="קלף מסתורי" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);">
@@ -1025,7 +1107,7 @@
   }
 
   function handleSlotChosen(slotIndex) {
-    if (isChecking) return;
+    if (isChecking || isModalClosing) return;
 
     if (!currentCard) {
       showToast('פתחו קודם את הקלף! 🎴', 'toast-wrong', 2000);
@@ -1171,11 +1253,15 @@
 
     document.body.appendChild(flyer);
 
-    // Hide verdict & reset tabletop stage underneath
+    // Hide verdict & clear stage card while flyer travels to slot
     if (elements.stageVerdict) {
       elements.stageVerdict.style.display = 'none';
     }
-    renderMysteryStageDeckStack();
+    if (elements.stageCardItem) {
+      elements.stageCardItem.innerHTML = '';
+      elements.stageCardItem.style.border = 'none';
+      elements.stageCardItem.style.boxShadow = 'none';
+    }
 
     // Force reflow before GPU transition starts
     void flyer.offsetWidth;
