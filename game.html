@@ -35,7 +35,7 @@
           <span id="fullScreenLabel">מסך מלא</span>
         </button>
         <button type="button" class="nav-btn" id="restartGameBtn"
-          onclick="document.getElementById('setupModal').classList.remove('hidden')" title="הגדרות ומשחק חדש">
+          onclick="if (window.stopAudio) window.stopAudio(); document.getElementById('setupModal').classList.remove('hidden')" title="הגדרות ומשחק חדש">
           <span>⚙️</span>
           <span>משחק חדש</span>
         </button>

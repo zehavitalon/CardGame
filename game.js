@@ -30,6 +30,7 @@
   let isModalClosing = false;
   let isAudioPlaying = false;
   let toastTimer = null;
+  const activeMediaElements = new Set();
 
   let activePlayerCount = 1;
   let activePlayers = [];
@@ -572,24 +573,24 @@
     const thumb = mediaThumb(card);
     const titleBadge = titleOverride ? `<div class="cinema-title-badge">${titleOverride}</div>` : '';
 
-    // Capture playback position, mute, volume, and pause state from background stage video/audio before pausing
-    let stageVideoTime = 0;
-    let stageVideoMuted = false;
-    let stageVideoVolume = 1;
-    let stageVideoPaused = false;
-    let stageAudioTime = 0;
-    let stageAudioPaused = false;
+    const isVideo = (mediaType === 'video') ||
+      (card.media_file && (card.media_file.endsWith('.mp4') || card.media_file.includes('video') || card.media_file.startsWith('data:video'))) ||
+      (thumb && (thumb.endsWith('.mp4') || thumb.includes('.mp4')));
+    const videoSrc = (isVideo && card.media_file) ? card.media_file : thumb;
 
     if (elements.stageCardItem) {
       const bgVid = elements.stageCardItem.querySelector('video');
-      if (bgVid) {
+      const isSameVideo = bgVid && videoSrc && bgVid.src && (bgVid.src.endsWith(videoSrc) || bgVid.src.includes(videoSrc.split('/').pop()));
+      if (isSameVideo) {
         try {
           stageVideoTime = bgVid.currentTime || 0;
           stageVideoMuted = bgVid.muted;
           stageVideoVolume = bgVid.volume;
           stageVideoPaused = bgVid.paused;
-          bgVid.pause();
         } catch (e) { }
+      }
+      if (bgVid) {
+        try { bgVid.pause(); } catch (e) { }
       }
       const bgAud = elements.stageCardItem.querySelector('audio');
       if (bgAud) {
@@ -601,11 +602,6 @@
       }
     }
 
-    const isVideo = (mediaType === 'video') ||
-      (card.media_file && (card.media_file.endsWith('.mp4') || card.media_file.includes('video') || card.media_file.startsWith('data:video'))) ||
-      (thumb && (thumb.endsWith('.mp4') || thumb.includes('.mp4')));
-    const videoSrc = (isVideo && card.media_file) ? card.media_file : thumb;
-
     if (isVideo && videoSrc) {
       content.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw; width:100%;">
@@ -616,13 +612,23 @@
       // Seamless continuation: sync currentTime, mute, volume from stage video
       const cinVid = content.querySelector('video');
       if (cinVid) {
-        if (stageVideoTime > 0) {
-          try { cinVid.currentTime = stageVideoTime; } catch (e) { }
-        }
-        cinVid.muted = stageVideoMuted;
-        cinVid.volume = stageVideoVolume;
-        if (stageVideoPaused) {
-          try { cinVid.pause(); } catch (e) { }
+        activeMediaElements.add(cinVid);
+        const syncCinVid = () => {
+          if (stageVideoTime > 0 && cinVid.duration && stageVideoTime < cinVid.duration) {
+            try { cinVid.currentTime = stageVideoTime; } catch (e) { }
+          }
+          cinVid.muted = stageVideoMuted;
+          cinVid.volume = stageVideoVolume;
+          if (stageVideoPaused) {
+            try { cinVid.pause(); } catch (e) { }
+          } else {
+            cinVid.play().catch(() => { });
+          }
+        };
+        if (cinVid.readyState >= 1) {
+          syncCinVid();
+        } else {
+          cinVid.addEventListener('loadedmetadata', syncCinVid, { once: true });
         }
       }
     } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
@@ -646,6 +652,7 @@
         const aud = content.querySelector('#cinemaAudioPlayer');
         const disc = content.querySelector('#cinemaVinylDisc');
         if (aud) {
+          activeMediaElements.add(aud);
           if (stageAudioTime > 0) {
             try { aud.currentTime = stageAudioTime; } catch (e) { }
           }
@@ -691,7 +698,15 @@
 
     // Prevent click-bleed / ghost-clicks on timeline slots underneath the modal button!
     isModalClosing = true;
-    setTimeout(() => { isModalClosing = false; }, 400);
+    const timelineSection = elements.timelineSection || document.querySelector('.timeline-section');
+    if (timelineSection) timelineSection.style.pointerEvents = 'none';
+    if (elements.stageCardItem) elements.stageCardItem.style.pointerEvents = 'none';
+
+    setTimeout(() => {
+      isModalClosing = false;
+      if (timelineSection) timelineSection.style.pointerEvents = 'auto';
+      if (elements.stageCardItem) elements.stageCardItem.style.pointerEvents = 'auto';
+    }, 400);
 
     let modalVideoTime = 0;
     let modalVideoMuted = false;
@@ -727,16 +742,25 @@
     if (elements.stageCardItem) {
       const stageVid = elements.stageCardItem.querySelector('video');
       if (stageVid) {
-        try {
-          if (modalVideoTime > 0) stageVid.currentTime = modalVideoTime;
-          stageVid.muted = modalVideoMuted;
-          stageVid.volume = modalVideoVolume;
-          if (modalVideoPaused) {
-            stageVid.pause();
-          } else {
-            stageVid.play().catch(() => { });
-          }
-        } catch (err) { }
+        const syncStageVid = () => {
+          try {
+            if (modalVideoTime > 0 && stageVid.duration && modalVideoTime < stageVid.duration) {
+              stageVid.currentTime = modalVideoTime;
+            }
+            stageVid.muted = modalVideoMuted;
+            stageVid.volume = modalVideoVolume;
+            if (modalVideoPaused) {
+              stageVid.pause();
+            } else {
+              stageVid.play().catch(() => { });
+            }
+          } catch (err) { }
+        };
+        if (stageVid.readyState >= 1) {
+          syncStageVid();
+        } else {
+          stageVid.addEventListener('loadedmetadata', syncStageVid, { once: true });
+        }
       }
 
       const stageAud = elements.stageCardItem.querySelector('#stageAudioPlayer');
@@ -945,27 +969,30 @@
       elements.stageCardItem.innerHTML = `
         <video src="${videoSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
       `;
+      const stageVid = elements.stageCardItem.querySelector('video');
+      if (stageVid) activeMediaElements.add(stageVid);
     } else if (card.media_type === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
       const audioSrc = card.media_file || thumb;
       elements.stageCardItem.innerHTML = `
-        <div class="stage-audio-card-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; min-width:280px; max-width:360px; padding:18px 20px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:18px; box-sizing:border-box;">
-          <div class="vinyl-disc spinning" id="stageVinylDisc" style="width:115px; height:115px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer;" title="לחצו להגדלה">
+        <div class="stage-audio-card-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:420px; min-width:320px; max-width:92vw; padding:22px 24px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:18px; box-sizing:border-box;">
+          <div class="vinyl-disc spinning" id="stageVinylDisc" style="width:130px; height:130px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer;" title="לחצו להגדלה">
             <div style="position:absolute; inset:20%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
-            <div style="width:42px; height:42px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.15rem; font-weight:900;">🎵</div>
+            <div style="width:48px; height:48px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.3rem; font-weight:900;">🎵</div>
           </div>
-          <span style="font-size:1rem; color:var(--gold-light); font-weight:700; margin-top:10px;">רצועת שמע 🎵</span>
-          ${audioSrc ? `<audio id="stageAudioPlayer" src="${audioSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline style="margin-top:10px; width:250px; max-width:92%; z-index:20;" onclick="event.stopPropagation()"></audio>` : ''}
-          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">האזינו ישירות או לחצו להגדלה</span>
+          <span style="font-size:1.1rem; color:var(--gold-light); font-weight:700; margin-top:12px;">רצועת שמע 🎵</span>
+          ${audioSrc ? `<audio id="stageAudioPlayer" src="${audioSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline style="margin-top:12px; width:290px; max-width:94%; z-index:20;" onclick="event.stopPropagation()"></audio>` : ''}
+          <span style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">האזינו ישירות או לחצו להגדלה</span>
         </div>
       `;
 
       setTimeout(() => {
         const aud = elements.stageCardItem.querySelector('#stageAudioPlayer');
         const disc = elements.stageCardItem.querySelector('#stageVinylDisc');
-        if (aud && disc) {
-          aud.onplay = () => disc.classList.add('spinning');
-          aud.onpause = () => disc.classList.remove('spinning');
-          aud.onended = () => disc.classList.remove('spinning');
+        if (aud) {
+          activeMediaElements.add(aud);
+          aud.onplay = () => { if (disc) disc.classList.add('spinning'); };
+          aud.onpause = () => { if (disc) disc.classList.remove('spinning'); };
+          aud.onended = () => { if (disc) disc.classList.remove('spinning'); };
         }
       }, 50);
     } else if (thumb) {
@@ -1115,6 +1142,8 @@
     }
 
     isChecking = true;
+    // Strictly terminate any active media immediately upon card placement!
+    stopAudio();
     playCardFlipSound();
 
     // Immediately disable clicking on stage card and hide fullscreen button
@@ -1254,6 +1283,7 @@
     document.body.appendChild(flyer);
 
     // Hide verdict & clear stage card while flyer travels to slot
+    stopAudio();
     if (elements.stageVerdict) {
       elements.stageVerdict.style.display = 'none';
     }
@@ -1483,24 +1513,42 @@
   }
 
   function stopAudio() {
+    isAudioPlaying = false;
+    // 1. Terminate all tracked active media elements (both stage and cinema modal)
+    activeMediaElements.forEach(m => {
+      try {
+        m.pause();
+        m.currentTime = 0;
+        m.src = '';
+        if (m.load) m.load();
+      } catch (e) { }
+    });
+    activeMediaElements.clear();
+
+    // 2. Also terminate any audio/video remaining in DOM
     if (elements.audioElement) {
       try {
         elements.audioElement.pause();
         elements.audioElement.currentTime = 0;
+        elements.audioElement.src = '';
+        if (elements.audioElement.load) elements.audioElement.load();
       } catch (e) { }
     }
-    // Also pause and stop all audio elements inside cinema modal or stage
     try {
-      const allAudios = document.querySelectorAll('audio');
-      allAudios.forEach(a => {
-        a.pause();
-        a.currentTime = 0;
+      const allMedia = document.querySelectorAll('audio, video');
+      allMedia.forEach(m => {
+        try {
+          m.pause();
+          m.currentTime = 0;
+          m.src = '';
+          if (m.load) m.load();
+        } catch (e) { }
       });
       const allDiscs = document.querySelectorAll('.vinyl-disc');
       allDiscs.forEach(d => d.classList.remove('spinning'));
     } catch (e) { }
-    isAudioPlaying = false;
   }
+  window.stopAudio = stopAudio;
 
   function showToast(msg, typeClass, duration = 2500) {
     if (!elements.toastVerdict) return;
