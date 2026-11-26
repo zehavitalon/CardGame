@@ -666,10 +666,6 @@
     <!-- Summary Count -->
     <div class="summary-bar">
       <div class="cards-count" id="cardsCountText">0 קלפים בחפיסה</div>
-      <button class="btn btn-gold" onclick="addNewCard()" style="padding: 8px 16px; font-size: 0.9rem;">
-        <span>➕</span>
-        <span>הוסף קלף הבא</span>
-      </button>
     </div>
 
     <!-- Cards Grid -->
@@ -723,7 +719,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-danger" onclick="deleteCurrentCard()">🗑️ מחק קלף</button>
+        <button class="btn btn-danger" id="btnModalDelete" onclick="deleteCurrentCard()">🗑️ מחק קלף</button>
         <div style="display:flex; gap:10px;">
           <button class="btn btn-outline" onclick="closeModal()">ביטול</button>
           <button class="btn btn-gold" onclick="saveCurrentCard()">שמור קלף ✨</button>
@@ -1006,9 +1002,13 @@
         }
       }
 
-      // Filter only real user cards (clean out any old poker template cards)
+      // Filter only real user cards: must have media OR year OR title (clean out empty/dummy cards)
       if (loaded && Array.isArray(loaded)) {
-        activeDeck = loaded.filter(c => c && (c.isCustomized || c.year || c.media_file || (c.title && c.title !== 'טרם הוגדר')));
+        activeDeck = loaded.filter(c => c && (c.media_file || c.card_image || (c.year && c.year !== '' && c.year !== 0) || (c.title && c.title.trim() && c.title !== 'טרם הוגדר')));
+        activeDeck.forEach((c, i) => {
+          c.number = i + 1;
+          c.id = i + 1;
+        });
       } else {
         activeDeck = [];
       }
@@ -1142,43 +1142,50 @@
     }
 
     // --- Add & Edit Cards ---
+    let isAddingNew = false;
+
     function addNewCard() {
-      const newCard = {
-        id: activeDeck.length + 1,
-        number: activeDeck.length + 1,
-        year: '',
-        title: '',
-        description: '',
-        media_type: 'photo',
-        media_file: '',
-        isCustomized: true
-      };
-      activeDeck.push(newCard);
-      editingIndex = activeDeck.length - 1;
-      openModal(editingIndex);
+      isAddingNew = true;
+      editingIndex = -1;
+      document.getElementById('modalCardTitle').textContent = `הוספת קלף חדש (#${activeDeck.length + 1})`;
+      document.getElementById('cardYearInput').value = '';
+      document.getElementById('cardTitleInput').value = '';
+      document.getElementById('cardDescInput').value = '';
+      
+      tempMediaData = '';
+      tempMediaType = 'photo';
+      updateDropzonePreview();
+
+      const delBtn = document.getElementById('btnModalDelete');
+      if (delBtn) delBtn.style.display = 'none';
+
+      document.getElementById('editModal').classList.add('active');
     }
 
     function editCard(idx) {
+      if (idx < 0 || idx >= activeDeck.length) return;
+      isAddingNew = false;
       editingIndex = idx;
-      openModal(idx);
-    }
-
-    function openModal(idx) {
       const card = activeDeck[idx];
       document.getElementById('modalCardTitle').textContent = `עריכת קלף #${idx + 1}`;
       document.getElementById('cardYearInput').value = card.year || '';
       document.getElementById('cardTitleInput').value = card.title || '';
       document.getElementById('cardDescInput').value = card.description || '';
       
-      tempMediaData = card.media_file || '';
+      tempMediaData = card.media_file || card.card_image || '';
       tempMediaType = card.media_type || 'photo';
       updateDropzonePreview();
+
+      const delBtn = document.getElementById('btnModalDelete');
+      if (delBtn) delBtn.style.display = 'block';
 
       document.getElementById('editModal').classList.add('active');
     }
 
     function closeModal() {
       document.getElementById('editModal').classList.remove('active');
+      isAddingNew = false;
+      editingIndex = -1;
       renderCards();
     }
 
@@ -1212,21 +1219,49 @@
     }
 
     function saveCurrentCard() {
-      if (editingIndex < 0 || editingIndex >= activeDeck.length) return;
-      const card = activeDeck[editingIndex];
-      card.year = parseInt(document.getElementById('cardYearInput').value, 10) || '';
-      card.title = document.getElementById('cardTitleInput').value.trim();
-      card.description = document.getElementById('cardDescInput').value.trim();
-      card.media_file = tempMediaData;
-      card.media_type = tempMediaType;
-      card.isCustomized = true;
+      const yearVal = parseInt(document.getElementById('cardYearInput').value, 10) || '';
+      const titleVal = document.getElementById('cardTitleInput').value.trim();
+      const descVal = document.getElementById('cardDescInput').value.trim();
+
+      if (!tempMediaData && !yearVal && !titleVal) {
+        alert('יש להעלות תמונה או למלא לפחות שנה/כותרת כדי לשמור את הקלף.');
+        return;
+      }
+
+      if (isAddingNew) {
+        const newCard = {
+          id: activeDeck.length + 1,
+          number: activeDeck.length + 1,
+          year: yearVal,
+          title: titleVal,
+          description: descVal,
+          media_type: tempMediaType,
+          media_file: tempMediaData,
+          isCustomized: true
+        };
+        activeDeck.push(newCard);
+        showToast('✨', `קלף #${activeDeck.length} נוסף בהצלחה!`);
+      } else {
+        if (editingIndex < 0 || editingIndex >= activeDeck.length) return;
+        const card = activeDeck[editingIndex];
+        card.year = yearVal;
+        card.title = titleVal;
+        card.description = descVal;
+        card.media_file = tempMediaData;
+        card.media_type = tempMediaType;
+        card.isCustomized = true;
+        showToast('✨', `קלף #${editingIndex + 1} עודכן בהצלחה!`);
+      }
 
       saveDeck();
       closeModal();
-      showToast('✨', `קלף #${editingIndex + 1} נשמר בהצלחה!`);
     }
 
     function deleteCurrentCard() {
+      if (isAddingNew) {
+        closeModal();
+        return;
+      }
       if (editingIndex < 0) return;
       deleteCard(editingIndex);
       closeModal();
