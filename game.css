@@ -1387,7 +1387,7 @@ body {
   to { opacity: 1; }
 }
 
-/* Flying Card Clone (FLIP Flight to Timeline Slot - Smooth & Clear Flight) */
+/* Flying Card Clone (FLIP Flight to Timeline Slot - Smooth GPU Flight) */
 .flying-card-clone {
   position: fixed;
   z-index: 99999;
@@ -1396,7 +1396,7 @@ body {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(245, 208, 97, 0.9);
   border: 2.5px solid #f5d061;
   pointer-events: none;
-  transition: all 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
 }
 
 @keyframes landingPulse {

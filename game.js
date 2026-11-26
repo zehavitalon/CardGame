@@ -947,10 +947,9 @@
       const scoreEl = document.getElementById(`playerScore_${currentTurnIndex}`);
       if (scoreEl) scoreEl.textContent = curr.score;
 
-      // 3. Give 2.0 seconds to clearly see the real year on the card and the green glow
+      // 3. Give 1.5 seconds to clearly see the real year on the card and the green glow
       setTimeout(() => {
         animateCardFlightToSlot(placedCard, targetSlot, slotIndex, () => {
-          timelineCards.splice(slotIndex, 0, placedCard);
           currentCard = null;
           isChecking = false;
           isCardActivated = false;
@@ -960,17 +959,9 @@
           }
 
           updateUI();
-          renderTimeline();
           renderMysteryStageDeckStack();
-
-          // Add sparkle landing pulse to the newly placed card on timeline
-          const placedCards = elements.timelineTrack.querySelectorAll('.timeline-card');
-          if (placedCards[slotIndex]) {
-            placedCards[slotIndex].classList.add('just-landed-glow');
-          }
-          playCardFlipSound();
         });
-      }, 2000);
+      }, 1500);
 
     } else {
       playErrorBuzz();
@@ -978,7 +969,7 @@
         elements.stageCardItem.classList.add('card-shake-wrong');
       }
 
-      // 3. Give 2.2 seconds to see the real year and red glow, then fade out
+      // 3. Give 2.0 seconds to see the real year and red glow, then fade out
       setTimeout(() => {
         if (elements.stageCardItem) {
           elements.stageCardItem.classList.add('fading-discard');
@@ -997,45 +988,57 @@
           updateUI();
           renderTimeline();
           renderMysteryStageDeckStack();
-        }, 500);
-      }, 2200);
+        }, 400);
+      }, 2000);
     }
   }
 
   function animateCardFlightToSlot(card, targetSlot, slotIndex, onComplete) {
     const stageEl = elements.stageCardItem;
     if (!stageEl) {
+      timelineCards.splice(slotIndex, 0, card);
+      renderTimeline();
       onComplete();
       return;
     }
 
-    // 1. Immediately expand the target slot: Neighboring timeline cards smoothly glide aside and clear room!
-    if (targetSlot) {
-      targetSlot.classList.add('is-expanding-slot');
+    // 1. Pre-insert the card into timelineCards and render immediately:
+    // This creates the permanent layout with zero shifting or jumping!
+    timelineCards.splice(slotIndex, 0, card);
+    renderTimeline();
+
+    // 2. Find the target card element that was just created in the timeline
+    const timelineCardEls = elements.timelineTrack.querySelectorAll('.timeline-card');
+    const targetCardEl = timelineCardEls[slotIndex];
+
+    if (!targetCardEl) {
+      onComplete();
+      return;
     }
 
-    // 2. Measure starting and destination coordinates
+    // Hide target card element momentarily while the flyer is flying towards it
+    targetCardEl.style.opacity = '0';
+    targetCardEl.style.transition = 'none';
+
+    // 3. Measure start (stage) and destination (timeline) coordinates
     const startRect = stageEl.getBoundingClientRect();
-    let destX = window.innerWidth / 2 - 63;
-    let destY = window.innerHeight - 200;
+    const destRect = targetCardEl.getBoundingClientRect();
 
-    if (targetSlot) {
-      const targetRect = targetSlot.getBoundingClientRect();
-      destX = targetRect.left + (targetRect.width / 2) - 63;
-      destY = targetRect.top + (targetRect.height / 2) - 88;
-    }
-
-    // 3. Create the traveling card clone
+    // 4. Create the traveling flyer clone
     const flyer = document.createElement('div');
     flyer.className = 'flying-card-clone';
+    flyer.style.position = 'fixed';
     flyer.style.left = `${startRect.left}px`;
     flyer.style.top = `${startRect.top}px`;
     flyer.style.width = `${startRect.width}px`;
     flyer.style.height = `${startRect.height}px`;
+    flyer.style.transformOrigin = 'top left';
+    flyer.style.pointerEvents = 'none';
+    flyer.style.zIndex = '99999';
 
     const thumb = mediaThumb(card);
     flyer.innerHTML = `
-      <div style="width:100%; height:100%; position:relative; background:#0f172a; display:flex; flex-direction:column;">
+      <div style="width:100%; height:100%; position:relative; background:#0f172a; display:flex; flex-direction:column; border-radius:14px; overflow:hidden;">
         <div style="width:100%; height:100%; position:relative; overflow:hidden;">
           ${thumb ? `<img src="${thumb}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:3rem;">📷</div>'}
         </div>
@@ -1048,31 +1051,34 @@
 
     document.body.appendChild(flyer);
 
-    // 4. Reset tabletop stage underneath to the waiting deck stack so only the card travels
-    renderMysteryStageDeckStack();
-
-    // 5. Hide verdict message as flight begins so screen cleans up
+    // Hide verdict & reset tabletop stage underneath
     if (elements.stageVerdict) {
       elements.stageVerdict.style.display = 'none';
     }
+    renderMysteryStageDeckStack();
 
-    // 6. Animate flyer smoothly down to the target slot over 1.15s
-    requestAnimationFrame(() => {
-      flyer.style.left = `${destX}px`;
-      flyer.style.top = `${destY}px`;
-      flyer.style.width = '126px';
-      flyer.style.height = '176px';
-      flyer.style.borderRadius = '14px';
-      flyer.style.boxShadow = '0 10px 35px rgba(245, 208, 97, 0.95)';
-    });
+    // Force reflow before GPU transition starts
+    void flyer.offsetWidth;
+
+    // 5. Hardware-accelerated GPU translation & scale directly to the slot (zero reflow, silky smooth!)
+    const dx = destRect.left - startRect.left;
+    const dy = destRect.top - startRect.top;
+    const sx = destRect.width / startRect.width;
+    const sy = destRect.height / startRect.height;
+
+    flyer.style.transition = 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease';
+    flyer.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${sx}, ${sy})`;
+    flyer.style.boxShadow = '0 10px 35px rgba(245, 208, 97, 0.95)';
 
     setTimeout(() => {
       flyer.remove();
-      if (targetSlot) {
-        targetSlot.classList.remove('is-expanding-slot');
-      }
+      targetCardEl.style.transition = 'opacity 0.25s ease';
+      targetCardEl.style.opacity = '1';
+      targetCardEl.classList.add('just-landed-glow');
+      playCardFlipSound();
       onComplete();
-    }, 1180);
+    }, 720);
+  }
   }
 
   function showStageCardReveal(card, isCorrect) {
