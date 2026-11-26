@@ -517,14 +517,27 @@
 
     stopAudio();
 
-    if (mediaType === 'video' || (thumb && thumb.endsWith('.mp4'))) {
+    // Mute or pause background stage video to prevent dual audio / ghost playback
+    if (elements.stageCardItem) {
+      const bgVid = elements.stageCardItem.querySelector('video');
+      if (bgVid) {
+        try { bgVid.pause(); } catch (e) { }
+      }
+    }
+
+    const isVideo = (mediaType === 'video') ||
+      (card.media_file && (card.media_file.endsWith('.mp4') || card.media_file.includes('video') || card.media_file.startsWith('data:video'))) ||
+      (thumb && (thumb.endsWith('.mp4') || thumb.includes('.mp4')));
+    const videoSrc = (isVideo && card.media_file) ? card.media_file : thumb;
+
+    if (isVideo && videoSrc) {
       content.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw;">
+        <div style="display:flex; flex-direction:column; align-items:center; max-height:82vh; max-width:95vw; width:100%;">
           ${titleBadge}
-          <video src="${thumb}" controls autoplay playsinline loop class="cinema-view-video"></video>
+          <video src="${videoSrc}" controls autoplay playsinline loop class="cinema-view-video"></video>
         </div>
       `;
-    } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3'))) {
+    } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
       const audioSrc = card.media_file || thumb;
       content.innerHTML = `
         <div style="text-align:center; color:#fff; padding:20px; display:flex; flex-direction:column; align-items:center;">
@@ -587,6 +600,14 @@
     }
     stopAudio();
     modal.classList.remove('active');
+
+    // If stage video was waiting underneath, resume playback cleanly
+    if (elements.stageCardItem) {
+      const stageVid = elements.stageCardItem.querySelector('video');
+      if (stageVid) {
+        try { stageVid.play(); } catch (err) { }
+      }
+    }
   };
 
   window.toggleMediaModalFullscreen = function () {
@@ -765,20 +786,26 @@
     };
 
     const thumb = mediaThumb(card);
+    const isModalActive = elements.mediaCinemaModal && elements.mediaCinemaModal.classList.contains('active');
 
-    if (card.media_type === 'video' && card.media_file) {
+    const isVideo = (card.media_type === 'video') ||
+      (card.media_file && (card.media_file.endsWith('.mp4') || card.media_file.includes('video') || card.media_file.startsWith('data:video'))) ||
+      (thumb && (thumb.endsWith('.mp4') || thumb.includes('.mp4')));
+    const videoSrc = (isVideo && card.media_file) ? card.media_file : thumb;
+
+    if (isVideo && videoSrc) {
       elements.stageCardItem.innerHTML = `
-        <video src="${card.media_file}" controls autoplay playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
+        <video src="${videoSrc}" controls ${isModalActive ? '' : 'autoplay'} playsinline loop style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.8);"></video>
       `;
-    } else if (card.media_type === 'audio' || (thumb && thumb.endsWith('.mp3'))) {
+    } else if (card.media_type === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
       elements.stageCardItem.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:14px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:14px;">
-          <div class="vinyl-disc spinning" style="width:110px; height:110px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center;">
+        <div class="stage-audio-card-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; min-width:280px; max-width:360px; padding:20px 24px; background:radial-gradient(circle at 50% 50%, #1c1524 0%, #0d0814 100%); border-radius:18px; box-sizing:border-box;">
+          <div class="vinyl-disc spinning" style="width:130px; height:130px; border-radius:50%; background:#111; border:3px solid #333; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center;">
             <div style="position:absolute; inset:20%; border-radius:50%; border:1px solid rgba(255,255,255,0.06);"></div>
-            <div style="width:40px; height:40px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.1rem; font-weight:900;">🎵</div>
+            <div style="width:48px; height:48px; border-radius:50%; background:radial-gradient(circle, #f5d061 0%, #d4af37 100%); display:flex; align-items:center; justify-content:center; color:#111; font-size:1.3rem; font-weight:900;">🎵</div>
           </div>
-          <span style="font-size:0.85rem; color:var(--gold-light); font-weight:700; margin-top:10px;">רצועת שמע 🎵</span>
-          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">לחצו להגדלה ושליטה</span>
+          <span style="font-size:1.05rem; color:var(--gold-light); font-weight:700; margin-top:14px;">רצועת שמע 🎵</span>
+          <span style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">לחצו להגדלה ושליטה</span>
         </div>
       `;
     } else if (thumb) {
@@ -1104,10 +1131,10 @@
     elements.stageCardItem.style.zIndex = '35';
 
     if (isCorrect) {
-      elements.stageCardItem.style.border = '3px solid #10b981';
+      elements.stageCardItem.style.border = '4px solid #10b981';
       elements.stageCardItem.style.boxShadow = '0 0 35px rgba(16, 185, 129, 0.9), 0 12px 40px rgba(0,0,0,0.8)';
     } else {
-      elements.stageCardItem.style.border = '3px solid #ef4444';
+      elements.stageCardItem.style.border = '4px solid #ef4444';
       elements.stageCardItem.style.boxShadow = '0 0 35px rgba(239, 68, 68, 0.9), 0 12px 40px rgba(0,0,0,0.8)';
     }
   }
