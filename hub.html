@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  <script src="assets/game_catalog.js"></script>
 
   <style>
     :root {
@@ -403,7 +404,286 @@
       color: #fff;
     }
 
-    /* Toast Notification */
+    /* Scalable Compact Games Table */
+    .games-table-container {
+      margin-top: 14px;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .games-search-bar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-card);
+      align-items: center;
+    }
+
+    .games-search-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .games-search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(245, 208, 97, 0.2);
+    }
+
+    .games-table-scroll {
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .games-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    .games-table th {
+      padding: 11px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-card);
+      background: rgba(255, 255, 255, 0.02);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .game-row {
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .game-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .game-row.active-row {
+      background: rgba(245, 208, 97, 0.1);
+    }
+
+    .game-row td {
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .row-radio {
+      width: 32px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .game-title-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .game-icon-small {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .game-name-text {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .game-sub-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .badge-code {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      display: inline-block;
+    }
+
+    .badge-cards-count {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(245, 208, 97, 0.1);
+      border: 1px solid rgba(245, 208, 97, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .status-active-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #2ed573;
+    }
+
+        .cust-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cust-contact {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .customer-empty-pill {
+      font-size: 0.78rem;
+      color: var(--blue);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px dashed rgba(56, 189, 248, 0.35);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .customer-empty-pill:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .customer-info-box {
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .customer-info-box:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Playback Mode Config Bar */
+    .playback-config-bar {
+      width: 100%;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .config-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .playback-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .playback-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .playback-pill input {
+      display: none;
+    }
+
+    .playback-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .playback-pill.active {
+      background: rgba(245, 208, 97, 0.15);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    .playback-pill.active strong {
+      color: var(--gold);
+    }
+
+    /* Custom Vector Table Radio Indicator */
+    .custom-radio-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      transition: all 0.2s ease;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .custom-radio-dot.checked {
+      border-color: var(--gold);
+      background: rgba(245, 208, 97, 0.15);
+      box-shadow: 0 0 10px rgba(245, 208, 97, 0.5);
+    }
+
+    .custom-radio-dot .radio-core {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .custom-radio-dot.checked .radio-core {
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+    }
+
+/* Toast Notification */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -445,20 +725,43 @@
 
     <!-- Active Deck Control Bar -->
     <section class="deck-bar">
-      <div class="deck-info">
-        <div class="deck-icon">🃏</div>
-        <div class="deck-meta">
-          <h3>
-            משחק פעיל: <span id="activeDeckCodeDisplay" class="deck-badge">ZIV-59</span>
-          </h3>
-          <p id="activeDeckDetails">טוען פרטי חפיסה...</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; width:100%;">
+        <div class="deck-info">
+          <div class="deck-icon">🃏</div>
+          <div class="deck-meta">
+            <h3>
+              משחק פעיל: <span id="activeDeckCodeDisplay" class="deck-badge">ZIV-59</span>
+            </h3>
+            <p id="activeDeckDetails">טוען פרטי חפיסה...</p>
+          </div>
+        </div>
+
+        <div class="deck-actions">
+          <input type="text" id="customCodeInput" class="input-code" placeholder="הקלד קוד...">
+          <button type="button" class="btn btn-outline" onclick="selectDeckFromInput()">בחר קוד</button>
+          <button type="button" class="btn btn-gold" onclick="createNewDeckPrompt()">➕ משחק חדש</button>
         </div>
       </div>
 
-      <div class="deck-actions">
-        <input type="text" id="customCodeInput" class="input-code" placeholder="הקלד קוד...">
-        <button type="button" class="btn btn-outline" onclick="selectDeckFromInput()">בחר קוד</button>
-        <button type="button" class="btn btn-gold" onclick="createNewDeckPrompt()">➕ משחק חדש</button>
+      <!-- Playback Mode Config for Active Deck -->
+      <div class="playback-config-bar">
+        <span class="config-label">
+          <span>⚙️</span>
+          <span>מצב ניגון קלפים:</span>
+        </span>
+
+        <div class="playback-pills">
+          <label class="playback-pill" id="pillMysteryAudio">
+            <input type="radio" name="playbackMode" value="mystery_audio" onchange="window.setDeckPlaybackMode(this.value)">
+            <span class="pill-icon">🎧</span>
+            <span><strong>חידה עיוורת</strong> (קודם קול בלבד, ואז חשיפה)</span>
+          </label>
+          <label class="playback-pill" id="pillDirectVideo">
+            <input type="radio" name="playbackMode" value="direct_video" onchange="window.setDeckPlaybackMode(this.value)">
+            <span class="pill-icon">🎬</span>
+            <span><strong>ניגון ישיר</strong> (וידאו ותמונה מידית)</span>
+          </label>
+        </div>
       </div>
     </section>
 
@@ -512,13 +815,16 @@
           </ul>
         </div>
         <div class="card-actions">
-          <a id="btnLaunchClient" href="client.html" target="_blank" class="btn btn-outline btn-launch"
+          <a id="btnLaunchClient" href="builder.html?mode=client" target="_blank" class="btn btn-outline btn-launch"
             style="border-color:rgba(46,213,115,0.4); color:#2ed573;">
             👁️ פתח כמסך לקוח
           </a>
           <button type="button" class="btn btn-copy" onclick="copyClientLink()">
             💬 העתק קישור לשליחה ללקוח
           </button>
+          <a id="btnLaunchAdminBuilder" href="builder.html" target="_blank" class="btn btn-copy" style="color:#cbd5e1; margin-top:4px;" title="פתיחת העורך כמנהלת עם כל כלי השליטה">
+            ⚙️ פתח כעורך מנהל
+          </a>
         </div>
       </div>
 
@@ -541,7 +847,7 @@
           </ul>
         </div>
         <div class="card-actions">
-          <a id="btnLaunchAdmin" href="builder.html" target="_blank" class="btn btn-outline btn-launch"
+          <a id="btnLaunchAdmin" href="dashboard.html" target="_blank" class="btn btn-outline btn-launch"
             style="border-color:rgba(245,208,97,0.4); color:#f5d061;">
             ⚙️ פתח לוח ניהול והפקה
           </a>
@@ -553,20 +859,49 @@
 
     </main>
 
-    <!-- Saved Decks Shelf -->
+            <!-- Saved Decks Shelf -->
     <section class="shelf-box">
       <div class="shelf-header">
         <div class="shelf-title">
-          <span>📚</span> חפיסות ומשחקים שמורים במערכת
+          <span>📚</span> ספריית המשחקים (לחצו על שורה להחלפת המשחק הפעיל)
         </div>
-        <button type="button" class="btn btn-outline" style="font-size:0.8rem; padding:6px 12px;"
-          onclick="refreshDecksShelf()">
-          🔄 רענן
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-gold" style="font-size:0.85rem; padding:6px 14px;"
+            onclick="createNewDeckPrompt()">
+            ➕ צור משחק אישי חדש
+          </button>
+          <button type="button" class="btn btn-outline" style="font-size:0.8rem; padding:6px 12px;"
+            onclick="refreshDecksShelf()">
+            🔄 רענן
+          </button>
+        </div>
       </div>
 
-      <div class="decks-list" id="savedDecksList">
-        <!-- Rendered via JS -->
+      <div class="games-table-container">
+        <div class="games-search-bar">
+          <span style="font-size:1.1rem;">🔍</span>
+          <input type="text" id="gamesSearchInput" class="games-search-input"
+            placeholder="חיפוש מהיר: הקלידו שם לקוח, טלפון, שם אירוע או קוד..." oninput="window.filterGamesTable(this.value)">
+          <span id="gamesCountBadge" style="font-size:0.82rem; color:var(--text-muted); white-space:nowrap;"></span>
+        </div>
+
+        <div class="games-table-scroll">
+          <table class="games-table">
+            <thead>
+              <tr>
+                <th style="width:40px; text-align:center;"></th>
+                <th>שם המשחק והאירוע</th>
+                <th style="width:125px;">קוד</th>
+                <th style="width:210px;">פרטי לקוח / מזמין</th>
+                <th style="width:100px;">קלפים</th>
+                <th style="width:120px; text-align:center;">סטטוס</th>
+              </tr>
+            </thead>
+            <tbody id="savedDecksList">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -590,7 +925,40 @@
         refreshDecksShelf();
       }
 
-      function updateActiveDeckUI() {
+            function getDeckPlaybackMode(code) {
+        if (!code) return 'direct_video';
+        const saved = localStorage.getItem('DECK_PLAYBACK_MODE_' + code);
+        if (saved) return saved;
+        if (code.includes('MOVIES') || code.includes('TRIVIA') || code === 'A' || code === 'B') {
+          return 'mystery_audio';
+        }
+        return 'direct_video';
+      }
+
+      window.setDeckPlaybackMode = function (mode) {
+        localStorage.setItem('DECK_PLAYBACK_MODE_' + currentCode, mode);
+        updatePlaybackConfigUI();
+        const modeLabel = mode === 'mystery_audio' ? 'חידה עיוורת (קול בלבד)' : 'ניגון ישיר (וידאו מידי)';
+        showToast(`⚙️ הגדרת הניגון לחפיסה ${currentCode} עודכנה: ${modeLabel}`);
+      };
+
+      function updatePlaybackConfigUI() {
+        const mode = getDeckPlaybackMode(currentCode);
+        const pillAudio = document.getElementById('pillMysteryAudio');
+        const pillVideo = document.getElementById('pillDirectVideo');
+        if (pillAudio) {
+          pillAudio.classList.toggle('active', mode === 'mystery_audio');
+          const radio = pillAudio.querySelector('input');
+          if (radio) radio.checked = (mode === 'mystery_audio');
+        }
+        if (pillVideo) {
+          pillVideo.classList.toggle('active', mode === 'direct_video');
+          const radio = pillVideo.querySelector('input');
+          if (radio) radio.checked = (mode === 'direct_video');
+        }
+      }
+
+function updateActiveDeckUI() {
         localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
 
         const codeDisplay = document.getElementById('activeDeckCodeDisplay');
@@ -603,12 +971,24 @@
         const btnClient = document.getElementById('btnLaunchClient');
         const btnAdmin = document.getElementById('btnLaunchAdmin');
 
+        const btnAdminBuilder = document.getElementById('btnLaunchAdminBuilder');
         if (btnPlayer) btnPlayer.href = `play.html?game=${encodeURIComponent(currentCode)}`;
-        if (btnClient) btnClient.href = `client.html?deck=${encodeURIComponent(currentCode)}`;
-        if (btnAdmin) btnAdmin.href = `builder.html?deck=${encodeURIComponent(currentCode)}`;
+        if (btnClient) btnClient.href = `builder.html?deck=${encodeURIComponent(currentCode)}&mode=client`;
+        if (btnAdminBuilder) btnAdminBuilder.href = `builder.html?deck=${encodeURIComponent(currentCode)}`;
+        if (btnAdmin) btnAdmin.href = `dashboard.html?deck=${encodeURIComponent(currentCode)}`;
 
         // Check cards count in deck
         checkDeckCardsCount(currentCode);
+        highlightActiveDeckCard();
+      }
+
+      function getCatalogEntry(code) {
+        if (!code) return null;
+        let catKey = code.toUpperCase().trim();
+        if (window.GAME_CATALOG_ALIASES && window.GAME_CATALOG_ALIASES[catKey]) {
+          catKey = window.GAME_CATALOG_ALIASES[catKey];
+        }
+        return (window.GAME_CATALOG && window.GAME_CATALOG[catKey]) || null;
       }
 
       async function checkDeckCardsCount(code) {
@@ -621,11 +1001,22 @@
           const raw = localStorage.getItem('MEMORIES_DECK_' + code);
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) count = parsed.length;
+            if (Array.isArray(parsed) && parsed.length > 0) count = parsed.length;
           }
         } catch (e) { }
 
-        if (count === 0 && window.indexedDB) {
+        if (count > 0) {
+          detailsEl.textContent = `${count} קלפים אישיים פעילים בחפיסה זו`;
+          return;
+        }
+
+        const cat = getCatalogEntry(code);
+        if (cat) {
+          detailsEl.textContent = `${cat.cardCount} קלפים פעילים • ${cat.title}`;
+          return;
+        }
+
+        if (window.indexedDB) {
           try {
             const req = indexedDB.open('CardGameMemoriesDB', 1);
             req.onsuccess = (e) => {
@@ -635,25 +1026,24 @@
                 const store = tx.objectStore('decks');
                 const getReq = store.get('MEMORIES_DECK_' + code);
                 getReq.onsuccess = () => {
-                  if (getReq.result && Array.isArray(getReq.result)) {
-                    count = getReq.result.length;
-                    detailsEl.textContent = `${count} קלפים פעילים בחפיסה זו`;
+                  if (getReq.result && Array.isArray(getReq.result) && getReq.result.length > 0) {
+                    detailsEl.textContent = `${getReq.result.length} קלפים אישיים פעילים בחפיסה זו`;
                   } else {
-                    detailsEl.textContent = count > 0 ? `${count} קלפים פעילים בחפיסה זו` : 'חפיסה ללא קלפים עדיין (עברו למסך לקוח/אדמין להעלאה)';
+                    detailsEl.textContent = 'חפיסה ללא קלפים עדיין (עברו לאשף הלקוח להעלאת תמונות)';
                   }
                 };
               }
             };
+            return;
           } catch (e) { }
-        } else {
-          detailsEl.textContent = count > 0 ? `${count} קלפים פעילים בחפיסה זו` : 'חפיסה ללא קלפים עדיין (עברו למסך לקוח/אדמין להעלאה)';
         }
+
+        detailsEl.textContent = 'חפיסה ללא קלפים עדיין (עברו לאשף הלקוח להעלאת תמונות)';
       }
 
       window.selectDeck = function (code) {
         currentCode = code.toUpperCase().trim();
         updateActiveDeckUI();
-        highlightActiveDeckChip();
       };
 
       window.selectDeckFromInput = function () {
@@ -665,9 +1055,10 @@
       window.createNewDeckPrompt = function () {
         const name = prompt('הזן קוד למשחק החדש (למשל: DANA-40):', '');
         if (name && name.trim()) {
-          const clean = name.trim().toUpperCase();
+          const clean = name.trim().toUpperCase().replace(/\s+/g, '-');
           selectDeck(clean);
-          showToast(`משחק ${clean} נבחר! פתחו את מסך הלקוח או הניהול להתחלת העלאה.`);
+          refreshDecksShelf();
+          showToast(`משחק ${clean} נוצר! פתחו את אשף הלקוח להתחלת העלאה.`);
         }
       };
 
@@ -677,12 +1068,12 @@
       };
 
       window.copyClientLink = function () {
-        const url = new URL(`client.html?deck=${encodeURIComponent(currentCode)}`, window.location.href).href;
-        copyToClipboard(url, 'קישור הלקוח הועתק! שלחו למזמין/ת המשחק בווטסאפ');
+        const url = new URL(`builder.html?deck=${encodeURIComponent(currentCode)}&mode=client`, window.location.href).href;
+        copyToClipboard(url, 'קישור אשף הלקוח (מצב לקוח מוגן ומאובטח) הועתק! שלחו למזמין/ת המשחק בווטסאפ');
       };
 
       window.copyAdminLink = function () {
-        const url = new URL(`builder.html?deck=${encodeURIComponent(currentCode)}`, window.location.href).href;
+        const url = new URL(`dashboard.html?deck=${encodeURIComponent(currentCode)}`, window.location.href).href;
         copyToClipboard(url, 'קישור הניהול וההדפסה הועתק!');
       };
 
@@ -703,33 +1094,222 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
       }
 
+      function getDeckCustomer(code) {
+        if (!code) return null;
+        const saved = localStorage.getItem('DECK_CUSTOMER_' + code);
+        if (saved) {
+          try {
+            const obj = JSON.parse(saved);
+            if (typeof obj === 'object' && obj !== null) return obj;
+            return { name: saved, phone: '', email: '' };
+          } catch (e) {
+            return { name: saved, phone: '', email: '' };
+          }
+        }
+        // Defaults for catalog demo decks
+        if (code === 'ZIV-59') return { name: 'משפחת שמשון', phone: '054-4441234', email: 'ziv@example.com' };
+        if (code === 'COUPLE-37') return { name: 'רוני ועמית', phone: '050-8889900', email: '' };
+        if (code === 'MOVIES-100' || code === 'TRIVIA-54') return { name: 'חפיסת מדף כללית', phone: '-', isShelf: true };
+        return null;
+      }
+
+      window.editCustomerPrompt = function (code) {
+        const current = getDeckCustomer(code) || { name: '', phone: '', email: '' };
+        const name = prompt(`פרטי לקוח עבור חפיסה ${code}\nהזן שם לקוח / מזמין:`, current.name && !current.isShelf ? current.name : '');
+        if (name === null) return;
+        const phone = prompt(`טלפון או אימייל של הלקוח:`, current.phone && current.phone !== '-' ? current.phone : '');
+        if (phone === null) return;
+
+        const data = {
+          name: name.trim(),
+          phone: phone.trim(),
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('DECK_CUSTOMER_' + code, JSON.stringify(data));
+        refreshDecksShelf();
+        showToast(`פרטי הלקוח עודכנו בהצלחה לחפיסה ${code}!`);
+      };
+
+      window.createNewDeckPrompt = function () {
+        const name = prompt('הזן קוד למשחק החדש (למשל: DANA-40):', '');
+        if (name && name.trim()) {
+          const clean = name.trim().toUpperCase().replace(/\s+/g, '-');
+          const custName = prompt('שם הלקוח / המזמין (אופציונלי):', '') || '';
+          let custPhone = '';
+          if (custName.trim()) {
+            custPhone = prompt('טלפון / אימייל של הלקוח (אופציונלי):', '') || '';
+            localStorage.setItem('DECK_CUSTOMER_' + clean, JSON.stringify({ 
+              name: custName.trim(), 
+              phone: custPhone.trim() 
+            }));
+          }
+          window.selectDeck(clean);
+          refreshDecksShelf();
+          showToast(`משחק ${clean} נוצר! פתחו את אשף הלקוח להתחלת העלאה.`);
+        }
+      };
+
       function refreshDecksShelf() {
         const shelf = document.getElementById('savedDecksList');
         if (!shelf) return;
 
-        const defaultDecks = ['ZIV-59', 'MOVIES-100', 'FAMILY-GAME'];
-        const found = new Set(defaultDecks);
+        const renderedCodes = new Set();
+        let rowsHtml = '';
 
-        // Check LocalStorage
+        // 1. Built-in Catalog Games
+        if (window.GAME_CATALOG) {
+          Object.values(window.GAME_CATALOG).forEach(game => {
+            renderedCodes.add(game.code);
+            const isActive = (game.code === currentCode);
+            const cust = getDeckCustomer(game.code);
+            let custHtml = '';
+            let custSearchStr = '';
+
+            if (cust && !cust.isShelf && (cust.name || cust.phone)) {
+              custHtml = `
+                <div class="customer-info-box" title="לחץ לעריכת פרטי לקוח" onclick="event.stopPropagation(); window.editCustomerPrompt('${game.code}')">
+                  <div class="cust-name">👤 ${cust.name}</div>
+                  <div class="cust-contact">📞 ${cust.phone || ''} ${cust.email ? '• ' + cust.email : ''}</div>
+                </div>
+              `;
+              custSearchStr = `${cust.name || ''} ${cust.phone || ''} ${cust.email || ''}`;
+            } else if (cust && cust.isShelf) {
+              custHtml = `<span style="font-size:0.8rem; color:var(--text-muted);">📦 מוצר מדף (כללי)</span>`;
+              custSearchStr = 'מדף קטלוג כללי';
+            } else {
+              custHtml = `
+                <span class="customer-empty-pill" title="לחץ להזנת שם וטלפון" onclick="event.stopPropagation(); window.editCustomerPrompt('${game.code}')">
+                  ➕ הוסף פרטי לקוח
+                </span>
+              `;
+            }
+
+            const searchStr = (game.title + ' ' + (game.subtitle || '') + ' ' + game.code + ' ' + custSearchStr).toLowerCase();
+
+            rowsHtml += `
+              <tr class="game-row ${isActive ? 'active-row' : ''}" data-code="${game.code}" data-search="${searchStr}" onclick="window.selectDeck('${game.code}')">
+                <td class="row-radio"><div class="custom-radio-dot ${isActive ? 'checked' : ''}"><div class="radio-core"></div></div></td>
+                <td>
+                  <div class="game-title-cell">
+                    <span class="game-icon-small">${game.icon || '🎬'}</span>
+                    <div>
+                      <div class="game-name-text">${game.title}</div>
+                      <div class="game-sub-text">${game.subtitle || ''}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge-code">${game.code}</span></td>
+                <td>${custHtml}</td>
+                <td><span class="badge-cards-count">${game.badge || (game.cardCount + ' קלפים')}</span></td>
+                <td style="text-align:center;">
+                  ${isActive ? '<span class="status-active-pill">● פעיל כעת</span>' : '<span style="font-size:0.8rem; color:var(--text-muted);">לחץ לבחירה</span>'}
+                </td>
+              </tr>
+            `;
+          });
+        }
+
+        // 2. Custom Decks from LocalStorage
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
           if (k && k.startsWith('MEMORIES_DECK_')) {
-            found.add(k.replace('MEMORIES_DECK_', ''));
+            const code = k.replace('MEMORIES_DECK_', '');
+            if (!renderedCodes.has(code) && code !== 'TEST') {
+              renderedCodes.add(code);
+              const isActive = (code === currentCode);
+              let count = 0;
+              try {
+                const parsed = JSON.parse(localStorage.getItem(k));
+                if (Array.isArray(parsed)) count = parsed.length;
+              } catch (e) { }
+
+              const titleText = `חפיסת זיכרונות ${code}`;
+              const subText = 'חפיסה מותאמת אישית שנוצרה דרך אשף הלקוח';
+              const cust = getDeckCustomer(code);
+              let custHtml = '';
+              let custSearchStr = '';
+
+              if (cust && (cust.name || cust.phone)) {
+                custHtml = `
+                  <div class="customer-info-box" title="לחץ לעריכת פרטי לקוח" onclick="event.stopPropagation(); window.editCustomerPrompt('${code}')">
+                    <div class="cust-name">👤 ${cust.name}</div>
+                    <div class="cust-contact">📞 ${cust.phone || ''} ${cust.email ? '• ' + cust.email : ''}</div>
+                  </div>
+                `;
+                custSearchStr = `${cust.name || ''} ${cust.phone || ''} ${cust.email || ''}`;
+              } else {
+                custHtml = `
+                  <span class="customer-empty-pill" title="לחץ להזנת שם וטלפון" onclick="event.stopPropagation(); window.editCustomerPrompt('${code}')">
+                    ➕ הוסף פרטי לקוח
+                  </span>
+                `;
+              }
+
+              const searchStr = `${titleText} ${subText} ${code} ${custSearchStr} מותאם אישית`.toLowerCase();
+
+              rowsHtml += `
+                <tr class="game-row ${isActive ? 'active-row' : ''}" data-code="${code}" data-search="${searchStr}" onclick="window.selectDeck('${code}')">
+                  <td class="row-radio"><div class="custom-radio-dot ${isActive ? 'checked' : ''}"><div class="radio-core"></div></div></td>
+                  <td>
+                    <div class="game-title-cell">
+                      <span class="game-icon-small">📸</span>
+                      <div>
+                        <div class="game-name-text">${titleText}</div>
+                        <div class="game-sub-text">${subText}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge-code">${code}</span></td>
+                  <td>${custHtml}</td>
+                  <td><span class="badge-cards-count" style="color:#2ed573; border-color:rgba(46,213,115,0.3); background:rgba(46,213,115,0.1);">${count} קלפים</span></td>
+                  <td style="text-align:center;">
+                    ${isActive ? '<span class="status-active-pill">● פעיל כעת</span>' : '<span style="font-size:0.8rem; color:var(--text-muted);">לחץ לבחירה</span>'}
+                  </td>
+                </tr>
+              `;
+            }
           }
         }
 
-        shelf.innerHTML = Array.from(found).map(code => `
-          <div class="deck-chip ${code === currentCode ? 'active' : ''}" onclick="window.selectDeck('${code}')">
-            <span>🃏</span>
-            <strong>${code}</strong>
-          </div>
-        `).join('');
+        shelf.innerHTML = rowsHtml;
+        updateGamesCountBadge();
       }
 
-      function highlightActiveDeckChip() {
-        document.querySelectorAll('.deck-chip').forEach(el => {
-          el.classList.toggle('active', el.textContent.includes(currentCode));
+      function highlightActiveDeckCard() {
+        document.querySelectorAll('.game-row').forEach(row => {
+          const code = row.getAttribute('data-code');
+          const isAct = (code === currentCode);
+          row.classList.toggle('active-row', isAct);
+          const radioDot = row.querySelector('.custom-radio-dot');
+          if (radioDot) radioDot.classList.toggle('checked', isAct);
+          const statusCell = row.cells[row.cells.length - 1];
+          if (statusCell) {
+            statusCell.innerHTML = isAct 
+              ? '<span class="status-active-pill">● פעיל כעת</span>' 
+              : '<span style="font-size:0.8rem; color:var(--text-muted);">לחץ לבחירה</span>';
+          }
         });
+      }
+
+      window.filterGamesTable = function(query) {
+        const q = (query || '').trim().toLowerCase();
+        const rows = document.querySelectorAll('#savedDecksList tr');
+        let visibleCount = 0;
+        rows.forEach(row => {
+          const searchData = row.getAttribute('data-search') || row.textContent.toLowerCase();
+          const matches = !q || searchData.includes(q);
+          row.style.display = matches ? '' : 'none';
+          if (matches) visibleCount++;
+        });
+        const badge = document.getElementById('gamesCountBadge');
+        if (badge) {
+          badge.textContent = q ? `נמצאו ${visibleCount} מתוך ${rows.length}` : `סה"כ ${rows.length} משחקים`;
+        }
+      };
+
+      function updateGamesCountBadge() {
+        const input = document.getElementById('gamesSearchInput');
+        window.filterGamesTable(input ? input.value : '');
       }
 
       if (document.readyState === 'loading') {

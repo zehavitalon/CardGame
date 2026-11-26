@@ -492,7 +492,65 @@
       pointer-events: none;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
-  </style>
+  
+    /* Client Mode Protection */
+    body.client-mode .admin-only {
+      display: none !important;
+    }
+    body.client-mode .client-only {
+      display: flex !important;
+    }
+
+
+    /* QR Flip Card in Builder */
+    .card-qr-view {
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      border-radius: 12px;
+    }
+    .card-qr-img {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      padding: 6px;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      margin-bottom: 8px;
+    }
+    .card-qr-link {
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .btn-card-flip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-card-flip:hover {
+      background: rgba(245,208,97,0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+</style>
+  <script src="assets/game_catalog.js"></script>
 </head>
 <body>
 
@@ -507,7 +565,8 @@
 
     <!-- Top Control Bar -->
     <div class="control-bar">
-      <div class="code-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <!-- Admin Mode Only: Full Deck Selector & Code Input -->
+      <div class="code-group admin-only" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <span class="code-label" style="font-weight:600;">📁 החפיסות שלי:</span>
         <select id="decksDropdown" class="form-input" style="padding:7px 12px; border-radius:8px; border:1px solid var(--gold-primary); color:var(--gold-light); font-weight:700; background:rgba(0,0,0,0.5); cursor:pointer;" onchange="onDeckDropdownChange(this.value)">
           <!-- Populated dynamically -->
@@ -523,25 +582,58 @@
         </button>
       </div>
 
+      <!-- Client Mode Only: Locked Deck Badge -->
+      <div class="client-only" style="display:none; align-items:center; gap:8px; background:rgba(245,208,97,0.12); border:1px solid rgba(245,208,97,0.35); padding:8px 18px; border-radius:999px;">
+        <span style="font-size:1.15rem;">🔒</span>
+        <span style="font-size:0.9rem; color:var(--text-muted);">חפיסת זיכרונות אישית:</span>
+        <strong id="clientLockedCodeDisplay" style="color:var(--gold-light); font-family:'Outfit', sans-serif; font-size:1.05rem; letter-spacing:1px;">ZIV-59</strong>
+      </div>
+
       <div class="action-btns">
-        <a href="hub.html" class="btn btn-outline" style="text-decoration:none; border-color:rgba(56,189,248,0.4); color:#38bdf8;" title="חזרה למרכז השליטה הראשי">
+        <a id="btnAdminHub" href="hub.html" class="btn btn-outline admin-only" style="text-decoration:none; border-color:rgba(56,189,248,0.4); color:#38bdf8;" title="חזרה למרכז השליטה הראשי">
           <span>🎛️</span>
           <span>מרכז השליטה (Hub)</span>
         </a>
+
+        <!-- Admin Only: Playback Mode Config -->
+        <div class="admin-only" style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.4); border:1px solid rgba(245,208,97,0.3); padding:4px 10px; border-radius:10px;">
+          <span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">⚙️ ניגון:</span>
+          <label style="font-size:0.8rem; cursor:pointer; color:#fff; display:flex; align-items:center; gap:4px;">
+            <input type="radio" name="builderPlaybackMode" value="mystery_audio" onchange="setBuilderPlaybackMode(this.value)">
+            <span>🎧 חידה</span>
+          </label>
+          <label style="font-size:0.8rem; cursor:pointer; color:#fff; display:flex; align-items:center; gap:4px;">
+            <input type="radio" name="builderPlaybackMode" value="direct_video" onchange="setBuilderPlaybackMode(this.value)">
+            <span>🎬 ישיר</span>
+          </label>
+        </div>
+
+        <!-- Admin Only: QR Flip Button -->
+        <button type="button" class="btn btn-outline admin-only" id="btnToggleAllQR" onclick="toggleAllCardFaces()" title="הפיכת כל הקלפים להצגת ברקוד QR">
+          <span>🔄</span>
+          <span id="btnToggleAllQRText">הצג ברקודים (QR)</span>
+        </button>
+
         <button class="btn btn-outline" onclick="addNewCard()">
           <span>➕</span>
           <span>הוסף קלף</span>
         </button>
-        <button class="btn btn-primary" onclick="launchGame()">
+        <button id="btnAdminLaunch" class="btn btn-primary admin-only" onclick="launchGame()">
           <span>🎮</span>
           <span>שחק בטלוויזיה</span>
         </button>
-        <button class="btn btn-outline" onclick="exportZip()">
+        <button id="btnAdminExport" class="btn btn-outline admin-only" onclick="exportZip()">
           <span>📦</span>
           <span>הורד גיבוי</span>
         </button>
-        <button class="btn btn-danger" onclick="clearAllCards()" style="padding: 10px 14px;" title="מחיקת כל הקלפים והתחלה מ-0">
+        <button id="btnAdminClear" class="btn btn-danger admin-only" onclick="clearAllCards()" style="padding: 10px 14px;" title="מחיקת כל הקלפים והתחלה מ-0">
           <span>🧹</span>
+        </button>
+
+        <!-- Client Finish Button -->
+        <button type="button" class="btn btn-primary client-only" style="display:none;" onclick="onClientFinish()">
+          <span>✅</span>
+          <span>סיימתי להעלות!</span>
         </button>
       </div>
     </div>
@@ -735,17 +827,91 @@
       showToast('🆕', `נוצרה חפיסה חדשה: ${clean}`);
     }
 
+    let showAllQR = false;
+    const flippedCards = new Set();
+
+    function setBuilderPlaybackMode(val) {
+      localStorage.setItem('DECK_PLAYBACK_MODE_' + currentCode, val);
+      showToast('⚙️', `מצב ניגון עודכן: ${val === 'mystery_audio' ? 'חידה עיוורת' : 'ניגון ישיר'}`);
+    }
+
+    function syncBuilderPlaybackRadios() {
+      const mode = localStorage.getItem('DECK_PLAYBACK_MODE_' + currentCode) || 
+        ((currentCode.includes('MOVIES') || currentCode.includes('TRIVIA') || currentCode === 'A' || currentCode === 'B') ? 'mystery_audio' : 'direct_video');
+      document.querySelectorAll('input[name="builderPlaybackMode"]').forEach(r => {
+        r.checked = (r.value === mode);
+      });
+    }
+
+    window.toggleAllCardFaces = function () {
+      showAllQR = !showAllQR;
+      flippedCards.clear();
+      const txt = document.getElementById('btnToggleAllQRText');
+      if (txt) txt.textContent = showAllQR ? 'הצג תמונות' : 'הצג ברקודים (QR)';
+      renderCards();
+    };
+
+    window.toggleSingleCardFace = function (idx, e) {
+      if (e) e.stopPropagation();
+      if (flippedCards.has(idx)) {
+        flippedCards.delete(idx);
+      } else {
+        flippedCards.add(idx);
+      }
+      renderCards();
+    };
+
 // --- Init App ---
+    let isClientMode = false;
+
+    window.onClientFinish = function () {
+      const count = (activeDeck && activeDeck.length) ? activeDeck.length : 0;
+      alert(`🎉 תודה רבה!\nכל ${count} התמונות והזיכרונות שלכם נשמרו בהצלחה במערכת.\nנעדכן אתכם כשהחפיסה שלכם תהיה מוכנה למשחק!`);
+    };
+
     window.addEventListener('DOMContentLoaded', async () => {
-      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
-      if (savedCode) currentCode = savedCode.toUpperCase();
-      document.getElementById('deckCodeInput').value = currentCode;
+      const urlParams = new URLSearchParams(window.location.search);
+      isClientMode = urlParams.get('mode') === 'client' || urlParams.has('client') || urlParams.get('role') === 'client';
+      
+      const urlCode = urlParams.get('deck') || urlParams.get('game');
+      if (urlCode && urlCode.trim()) {
+        currentCode = urlCode.toUpperCase().trim();
+      } else {
+        const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
+        if (savedCode) currentCode = savedCode.toUpperCase().trim();
+      }
+
+      if (isClientMode) {
+        document.body.classList.add('client-mode');
+        const badgeEl = document.querySelector('.app-badge');
+        if (badgeEl) badgeEl.innerHTML = '✨ אשף הלקוח • העלאת תמונות וזיכרונות';
+        const subEl = document.querySelector('.app-subtitle');
+        if (subEl) subEl.textContent = 'העלו תמונות, תייגו שנים ורגעים אישיים בקצב שלכם!';
+        const lockEl = document.getElementById('clientLockedCodeDisplay');
+        if (lockEl) lockEl.textContent = currentCode;
+      }
+
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, 0);
+      const inp = document.getElementById('deckCodeInput');
+      if (inp) inp.value = currentCode;
       updatePageTitle();
+      syncBuilderPlaybackRadios();
       await loadDeck();
-      renderDecksDropdown();
+      if (!isClientMode) {
+        renderDecksDropdown();
+      }
     });
 
     function updatePageTitle() {
+      if (window.GAME_CATALOG) {
+        let catKey = currentCode;
+        if (window.GAME_CATALOG_ALIASES && window.GAME_CATALOG_ALIASES[catKey]) catKey = window.GAME_CATALOG_ALIASES[catKey];
+        if (window.GAME_CATALOG[catKey]) {
+          document.getElementById('pageTitle').textContent = window.GAME_CATALOG[catKey].title;
+          return;
+        }
+      }
       const t = currentCode === 'ZIV' ? 'ציר הזמן של זיו' : `ציר הזמן • חפיסת ${currentCode}`;
       document.getElementById('pageTitle').textContent = t;
     }
@@ -757,6 +923,17 @@
           const raw = localStorage.getItem('MEMORIES_DECK_' + currentCode);
           if (raw) loaded = JSON.parse(raw);
         } catch (e) {}
+      }
+
+      // Check built-in catalog (MOVIES-100, TRIVIA-54, COUPLE-37, ZIV-59) if not customized
+      if ((!loaded || loaded.length === 0) && window.GAME_CATALOG) {
+        let catKey = currentCode;
+        if (window.GAME_CATALOG_ALIASES && window.GAME_CATALOG_ALIASES[catKey]) {
+          catKey = window.GAME_CATALOG_ALIASES[catKey];
+        }
+        if (window.GAME_CATALOG[catKey] && window.GAME_CATALOG[catKey].deck) {
+          loaded = window.GAME_CATALOG[catKey].deck;
+        }
       }
 
       // Filter only real user cards (clean out any old poker template cards)
@@ -819,6 +996,7 @@
         const year = c.year || '----';
         const title = c.title || 'ללא כותרת';
         const desc = c.description || '';
+        const isFlipped = showAllQR ? !flippedCards.has(idx) : flippedCards.has(idx);
         
         let mediaHtml = `
           <div class="card-placeholder">
@@ -826,25 +1004,44 @@
             <span>לחצו להוספת תמונה</span>
           </div>
         `;
-        if (c.media_file) {
-          mediaHtml = `<img src="${c.media_file}" alt="${title}">`;
+        if (c.card_image) {
+          mediaHtml = `<img src="${c.card_image}" alt="${title}">`;
+        } else if (c.media_file) {
+          if (c.media_file.endsWith('.mp4') || c.media_type === 'video') {
+            mediaHtml = `<video src="${c.media_file}" preload="metadata" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>`;
+          } else {
+            mediaHtml = `<img src="${c.media_file}" alt="${title}">`;
+          }
         }
 
+        const cardUrl = `https://zehavitalon.github.io/PartyGame/index.html?card=${num}&game=${encodeURIComponent(currentCode)}`;
+        const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(cardUrl)}`;
+
+        const displayBoxHtml = isFlipped ? `
+          <div class="card-img-box qr-flipped" onclick="toggleSingleCardFace(${idx}, event)" style="background:#ffffff; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; cursor:pointer;" title="לחצו להפיכה חזרה לתמונה">
+            <img src="${qrImgUrl}" alt="QR קלף #${num}" style="width:115px; height:115px; object-fit:contain; border-radius:6px;">
+            <div style="font-size:0.75rem; color:#111; font-weight:800; margin-top:4px;">סרקו לקלף #${num}</div>
+          </div>
+        ` : `
+          <div class="card-img-box" onclick="editCard(${idx})">
+            ${mediaHtml}
+          </div>
+        `;
+
         html += `
-          <div class="card-item">
+          <div class="card-item ${isFlipped ? 'is-qr-mode' : ''}">
             <div class="card-top">
               <span class="card-num">קלף #${num}</span>
               <span class="card-year-pill ${c.year ? '' : 'empty'}">${year}</span>
             </div>
-            <div class="card-img-box" onclick="editCard(${idx})">
-              ${mediaHtml}
-            </div>
+            ${displayBoxHtml}
             <div class="card-body">
               <div>
                 <div class="card-title ${c.title ? '' : 'empty'}">${title}</div>
                 ${desc ? `<div class="card-desc">${desc}</div>` : ''}
               </div>
               <div class="card-actions">
+                <button class="btn btn-outline" onclick="toggleSingleCardFace(${idx}, event)" title="${isFlipped ? 'הצג תמונה' : 'הצג ברקוד QR'}">🔄 ${isFlipped ? 'תמונה' : 'ברקוד'}</button>
                 <button class="btn btn-outline" onclick="editCard(${idx})">✏️ עריכה</button>
                 <button class="btn btn-danger" onclick="deleteCard(${idx})" title="מחיקה">🗑️</button>
               </div>
