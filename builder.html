@@ -255,6 +255,31 @@
     }
     .card-item:hover .card-img-box img { transform: scale(1.04); }
 
+    .play-card-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(10, 15, 25, 0.88);
+      border: 1px solid rgba(245, 208, 97, 0.7);
+      color: var(--gold-light);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      z-index: 5;
+    }
+    .card-item:hover .play-card-badge {
+      background: var(--gold-primary);
+      color: #0b0f19;
+      transform: scale(1.06);
+    }
+
     .card-placeholder {
       display: flex;
       flex-direction: column;
@@ -707,6 +732,51 @@
     </div>
   </div>
 
+  <!-- Media Player / Preview Modal (Admin Mode) -->
+  <div class="modal-overlay" id="mediaPreviewModal" onclick="if(event.target===this) closeMediaPreview()">
+    <div class="modal-window" style="max-width: 650px; background:#0c101a; border-color:var(--gold-primary);">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.4rem;">🎬</span>
+          <span class="modal-title" id="mediaPreviewTitle">נגן קלף #1</span>
+        </div>
+        <button class="modal-close" onclick="closeMediaPreview()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px; text-align:center;">
+        
+        <!-- Media Container -->
+        <div id="mediaPlayerContainer" style="background:#000; border-radius:14px; min-height:240px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; box-shadow:0 8px 28px rgba(0,0,0,0.7); margin-bottom:14px; border:1px solid rgba(255,255,255,0.1);">
+          <!-- Video / Audio / Image injected by JS -->
+        </div>
+
+        <!-- Blind Guess (Audio Only) Simulation bar -->
+        <div id="mediaModeIndicator" style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:12px; border:1px solid rgba(255,255,255,0.08);">
+          <span id="mediaModeText" style="color:var(--gold-light); font-weight:700;">מצב מוגדר: 🎬 ניגון ישיר</span>
+          <button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.8rem;" onclick="testMysteryToggle()">🎧 הדמיית חידה (שמע בלבד)</button>
+        </div>
+
+        <!-- Card Info in Preview -->
+        <div style="background:rgba(255,255,255,0.03); border-radius:10px; padding:12px 16px; text-align:right;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div id="previewCardHeading" style="font-size:1.15rem; font-weight:800; color:#fff;"></div>
+            <div id="previewCardYearBadge" class="card-year-pill" style="font-size:0.95rem;"></div>
+          </div>
+          <div id="previewCardDesc" style="color:var(--text-muted); font-size:0.88rem; line-height:1.4;"></div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" class="btn btn-outline" onclick="closeMediaPreview()">סגור</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="editFromPreviewModal()">✏️ ערוך קלף</button>
+          <a id="btnPreviewTestPhone" href="#" target="_blank" class="btn btn-gold" style="text-decoration:none;">📱 פתח בנגן</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast">
     <span id="toastIcon">✨</span>
@@ -1016,6 +1086,7 @@
 
         const cardUrl = `https://zehavitalon.github.io/PartyGame/index.html?card=${num}&game=${encodeURIComponent(currentCode)}`;
         const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(cardUrl)}`;
+        const hasMedia = !!(c.card_image || c.media_file);
 
         const displayBoxHtml = isFlipped ? `
           <div class="card-img-box qr-flipped" onclick="toggleSingleCardFace(${idx}, event)" style="background:#ffffff; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; cursor:pointer;" title="לחצו להפיכה חזרה לתמונה">
@@ -1023,8 +1094,13 @@
             <div style="font-size:0.75rem; color:#111; font-weight:800; margin-top:4px;">סרקו לקלף #${num}</div>
           </div>
         ` : `
-          <div class="card-img-box" onclick="editCard(${idx})">
+          <div class="card-img-box" onclick="${!isClientMode && hasMedia ? `playMediaPreview(${idx}, event)` : `editCard(${idx})`}" style="position:relative;" title="${!isClientMode && hasMedia ? 'לחצו לניגון ובדיקת המדיה' : 'לחצו לעריכה'}">
             ${mediaHtml}
+            ${(!isClientMode && hasMedia) ? `
+              <div class="admin-only play-card-badge" onclick="playMediaPreview(${idx}, event)" title="נגן מדיה">
+                <span>▶️</span> נגן
+              </div>
+            ` : ''}
           </div>
         `;
 
@@ -1041,6 +1117,9 @@
                 ${desc ? `<div class="card-desc">${desc}</div>` : ''}
               </div>
               <div class="card-actions">
+                ${(!isClientMode && hasMedia) ? `
+                  <button class="btn btn-gold admin-only" onclick="playMediaPreview(${idx}, event)" title="נגן ובדוק מדיה">▶️ נגן</button>
+                ` : ''}
                 <button class="btn btn-outline" onclick="toggleSingleCardFace(${idx}, event)" title="${isFlipped ? 'הצג תמונה' : 'הצג ברקוד QR'}">🔄 ${isFlipped ? 'תמונה' : 'ברקוד'}</button>
                 <button class="btn btn-outline" onclick="editCard(${idx})">✏️ עריכה</button>
                 <button class="btn btn-danger" onclick="deleteCard(${idx})" title="מחיקה">🗑️</button>
@@ -1223,6 +1302,109 @@
       saveAs(content, `Memories_Deck_${currentCode}.zip`);
       showToast('✅', 'ארכיון ה-ZIP ירד בהצלחה!');
     }
+
+    // --- Media Preview & Player (Admin Mode) ---
+    let currentPreviewIdx = -1;
+
+    window.playMediaPreview = function(idx, e) {
+      if (e) e.stopPropagation();
+      const c = activeDeck[idx];
+      if (!c) return;
+      currentPreviewIdx = idx;
+
+      const num = idx + 1;
+      const year = c.year || '----';
+      const title = c.title || 'ללא כותרת';
+      const desc = c.description || '';
+
+      document.getElementById('mediaPreviewTitle').textContent = `קלף #${num} • ${title}`;
+      document.getElementById('previewCardHeading').textContent = `קלף #${num} – ${title}`;
+      document.getElementById('previewCardYearBadge').textContent = year;
+      document.getElementById('previewCardDesc').textContent = desc || 'אין תיאור נוסף';
+
+      const phoneUrl = `https://zehavitalon.github.io/PartyGame/index.html?card=${num}&game=${encodeURIComponent(currentCode)}`;
+      document.getElementById('btnPreviewTestPhone').href = phoneUrl;
+
+      const container = document.getElementById('mediaPlayerContainer');
+      container.innerHTML = '';
+
+      const mode = localStorage.getItem('DECK_PLAYBACK_MODE_' + currentCode) || 'direct_video';
+      document.getElementById('mediaModeText').textContent = `מצב מוגדר לחפיסה: ${mode === 'mystery_audio' ? '🎧 חידה עיוורת (שמע תחילה)' : '🎬 ניגון ישיר (וידאו מידי)'}`;
+
+      const mediaSrc = c.media_file || c.card_image || '';
+      const isVideo = (c.media_type === 'video') || (mediaSrc && (mediaSrc.endsWith('.mp4') || mediaSrc.includes('video') || mediaSrc.startsWith('data:video')));
+      const isAudio = (c.media_type === 'audio') || (mediaSrc && (mediaSrc.endsWith('.mp3') || mediaSrc.includes('audio')));
+
+      if (isVideo) {
+        container.innerHTML = `
+          <div style="position:relative; width:100%; height:100%; min-height:280px; display:flex; align-items:center; justify-content:center; background:#000;">
+            <video id="previewVideoEl" src="${mediaSrc}" controls autoplay playsinline style="max-width:100%; max-height:55vh; border-radius:8px;"></video>
+            <div id="previewBlindCover" style="display:none; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, #151d30 0%, #080c14 100%); flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer;" onclick="revealBlindVideo()">
+              <span style="font-size:3.5rem;">🎧</span>
+              <span style="font-size:1.15rem; font-weight:800; color:var(--gold-light);">חידה עיוורת – שמע בלבד</span>
+              <span style="font-size:0.85rem; color:var(--text-muted); background:rgba(0,0,0,0.6); padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.15);">לחצו בכל שלב לחשיפת הווידאו 🎬</span>
+            </div>
+          </div>
+        `;
+        if (mode === 'mystery_audio') {
+          setTimeout(() => testMysteryToggle(true), 50);
+        }
+      } else if (isAudio) {
+        container.innerHTML = `
+          <div style="padding:40px 20px; display:flex; flex-direction:column; align-items:center; gap:16px; width:100%;">
+            <span style="font-size:4rem;">🎵</span>
+            <div style="font-weight:700; color:var(--gold-light); font-size:1.1rem;">רצועת שמע בלבד</div>
+            <audio id="previewAudioEl" src="${mediaSrc}" controls autoplay style="width:90%; max-width:400px;"></audio>
+          </div>
+        `;
+      } else if (mediaSrc) {
+        container.innerHTML = `
+          <img src="${mediaSrc}" alt="${title}" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px;">
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="padding:50px 20px; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <span style="font-size:3rem;">📷</span>
+            <span>טרם הועלתה מדיה לקלף זה</span>
+          </div>
+        `;
+      }
+
+      document.getElementById('mediaPreviewModal').classList.add('active');
+    };
+
+    window.closeMediaPreview = function() {
+      const vid = document.getElementById('previewVideoEl');
+      if (vid) vid.pause();
+      const aud = document.getElementById('previewAudioEl');
+      if (aud) aud.pause();
+      document.getElementById('mediaPreviewModal').classList.remove('active');
+    };
+
+    window.testMysteryToggle = function(force) {
+      const cover = document.getElementById('previewBlindCover');
+      const vid = document.getElementById('previewVideoEl');
+      if (!cover || !vid) return;
+
+      if (force === true || cover.style.display === 'none') {
+        cover.style.display = 'flex';
+        vid.currentTime = 0;
+        vid.play();
+      } else {
+        cover.style.display = 'none';
+      }
+    };
+
+    window.revealBlindVideo = function() {
+      const cover = document.getElementById('previewBlindCover');
+      if (cover) cover.style.display = 'none';
+    };
+
+    window.editFromPreviewModal = function() {
+      const idx = currentPreviewIdx;
+      window.closeMediaPreview();
+      if (idx >= 0) window.editCard(idx);
+    };
 
     function showToast(icon, msg) {
       const t = document.getElementById('toast');
