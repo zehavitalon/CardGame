@@ -26,6 +26,7 @@
   let currentCard = null;
   let isChecking = false;
   let isCardActivated = false;
+  let isDrawingCard = false;
   let isAudioPlaying = false;
   let toastTimer = null;
 
@@ -477,12 +478,67 @@
     return arr;
   }
 
+  function isAudioCard(card) {
+    if (!card) return false;
+    const mType = card.media_type;
+    const mFile = (card.media_file || '').toLowerCase();
+    const cImg = (card.card_image || '').toLowerCase();
+    return mType === 'audio' || mFile.endsWith('.mp3') || cImg.endsWith('.mp3');
+  }
+
+  function smartInterleaveDeck(cards) {
+    if (!cards || cards.length <= 2) return shuffle(cards);
+
+    const audios = shuffle(cards.filter(c => isAudioCard(c)));
+    const others = shuffle(cards.filter(c => !isAudioCard(c)));
+
+    // If there are no audio songs or only audio songs, fallback to regular shuffle
+    if (audios.length === 0 || others.length === 0) {
+      return shuffle(cards);
+    }
+
+    const result = [];
+    // Spacing between songs (at least 2 non-songs if possible)
+    const spacing = Math.max(2, Math.floor(others.length / audios.length));
+
+    let otherIdx = 0;
+    let audioIdx = 0;
+
+    // Distribute evenly
+    while (otherIdx < others.length || audioIdx < audios.length) {
+      for (let s = 0; s < spacing && otherIdx < others.length; s++) {
+        result.push(others[otherIdx++]);
+      }
+      if (audioIdx < audios.length) {
+        result.push(audios[audioIdx++]);
+      }
+    }
+
+    // Safety pass: strictly enforce zero adjacent audio cards
+    for (let i = 0; i < result.length - 1; i++) {
+      if (isAudioCard(result[i]) && isAudioCard(result[i + 1])) {
+        let swapIdx = -1;
+        for (let j = i + 2; j < result.length; j++) {
+          if (!isAudioCard(result[j])) {
+            swapIdx = j;
+            break;
+          }
+        }
+        if (swapIdx !== -1) {
+          [result[i + 1], result[swapIdx]] = [result[swapIdx], result[i + 1]];
+        }
+      }
+    }
+
+    return result;
+  }
+
   function prepareDeck() {
     discardedCards = [];
     timelineCards = [];
-    drawDeck = shuffle([...masterDeck]);
+    drawDeck = smartInterleaveDeck([...masterDeck]);
     gameConfig.targetCards = masterDeck.length;
-    console.log(`Deck prepared: ${drawDeck.length} cards, zero pre-placed anchors.`);
+    console.log(`Deck prepared: ${drawDeck.length} cards with smart audio spacing (no consecutive songs).`);
   }
 
   function mediaThumb(card) {
@@ -517,11 +573,15 @@
 
     stopAudio();
 
-    // Mute or pause background stage video to prevent dual audio / ghost playback
+    // Capture playback position from background stage video before pausing
+    let stageVideoTime = 0;
     if (elements.stageCardItem) {
       const bgVid = elements.stageCardItem.querySelector('video');
       if (bgVid) {
-        try { bgVid.pause(); } catch (e) { }
+        try {
+          stageVideoTime = bgVid.currentTime || 0;
+          bgVid.pause();
+        } catch (e) { }
       }
     }
 
@@ -537,6 +597,13 @@
           <video src="${videoSrc}" controls autoplay playsinline loop class="cinema-view-video"></video>
         </div>
       `;
+      // Seamless continuation: sync currentTime from stage video
+      const cinVid = content.querySelector('video');
+      if (cinVid && stageVideoTime > 0) {
+        try {
+          cinVid.currentTime = stageVideoTime;
+        } catch (e) { }
+      }
     } else if (mediaType === 'audio' || (thumb && thumb.endsWith('.mp3')) || (card.media_file && card.media_file.endsWith('.mp3'))) {
       const audioSrc = card.media_file || thumb;
       content.innerHTML = `
@@ -588,10 +655,14 @@
     const modal = elements.mediaCinemaModal || document.getElementById('mediaCinemaModal');
     if (!modal) return;
     const content = elements.mediaCinemaContent || document.getElementById('mediaCinemaContent');
+    let modalVideoTime = 0;
     if (content) {
       const vid = content.querySelector('video');
       if (vid) {
-        try { vid.pause(); } catch (err) { }
+        try {
+          modalVideoTime = vid.currentTime || 0;
+          vid.pause();
+        } catch (err) { }
       }
       const aud = content.querySelector('audio');
       if (aud) {
@@ -601,11 +672,16 @@
     stopAudio();
     modal.classList.remove('active');
 
-    // If stage video was waiting underneath, resume playback cleanly
+    // Seamless continuation: resume playback on stage from the exact second modal closed
     if (elements.stageCardItem) {
       const stageVid = elements.stageCardItem.querySelector('video');
       if (stageVid) {
-        try { stageVid.play(); } catch (err) { }
+        try {
+          if (modalVideoTime > 0) {
+            stageVid.currentTime = modalVideoTime;
+          }
+          stageVid.play().catch(() => { });
+        } catch (err) { }
       }
     }
   };
@@ -733,6 +809,7 @@
     elements.stageCardItem.style.borderWidth = '';
     elements.stageCardItem.style.border = '';
     elements.stageCardItem.style.zIndex = '';
+    elements.stageCardItem.style.cursor = 'pointer';
     elements.stageCardItem.innerHTML = `
       <div class="deck-3d-wrapper" title="לחצו לשליפת הקלף הבא!">
         <div class="deck-card-layer layer-3"></div>
@@ -744,7 +821,7 @@
               <div class="card-center-emblem">
                 <span class="deck-emblem-icon">⏳</span>
                 <span class="deck-emblem-text">ציר הזמן</span>
-                <button type="button" class="deck-draw-action-btn">
+                <button type="button" class="deck-draw-action-btn" onclick="window.proceedToNextCard(event)">
                   <span>${drawText}</span>
                   <span>⬅️</span>
                 </button>
@@ -755,12 +832,13 @@
       </div>
     `;
 
-    elements.stageCardItem.onclick = function () {
-      if (drawDeck.length > 0) {
-        proceedToNextCard();
-      } else {
-        showVictoryScreen();
-      }
+    window.proceedToNextCard = function (e) {
+      if (e) e.stopPropagation();
+      proceedToNextCard();
+    };
+
+    elements.stageCardItem.onclick = function (e) {
+      window.proceedToNextCard(e);
     };
   }
 
@@ -957,6 +1035,16 @@
     isChecking = true;
     playCardFlipSound();
 
+    // Immediately disable clicking on stage card and hide fullscreen button
+    // This strictly prevents the card just placed from popping open again!
+    if (elements.stageCardItem) {
+      elements.stageCardItem.onclick = null;
+      elements.stageCardItem.style.cursor = 'default';
+    }
+    if (elements.mediaFullscreenBtn) {
+      elements.mediaFullscreenBtn.style.display = 'none';
+    }
+
     // 1. Visually mark the selected slot so the player sees exactly where they guessed
     const targetSlot = document.querySelector(`.timeline-slot-slender[data-slot-index="${slotIndex}"]`);
     if (targetSlot) {
@@ -1147,15 +1235,34 @@
 
   function proceedToNextCard() {
     clearTimeout(toastTimer);
-    stopAudio();
+
+    // 1. Block if currently checking, revealing, flying or drawing
+    if (isChecking || isDrawingCard) return;
+
+    // 2. Protect active card: if user already has an active card, they must place it first
+    // This strictly prevents the card from vanishing or skipping on rapid clicks!
+    if (currentCard !== null) {
+      showToast('שבצו קודם את הקלף הפעיל בציר הזמן! 🎯', 'toast-wrong', 2200);
+      return;
+    }
 
     if (drawDeck.length === 0) {
       showVictoryScreen();
       return;
     }
+
+    isDrawingCard = true;
+    stopAudio();
+
     if (elements.stageVerdict) elements.stageVerdict.style.display = 'none';
     if (elements.nextCardBtn) elements.nextCardBtn.style.display = 'none';
+
     drawNextMysteryCard();
+
+    // Release draw lock after 450ms debounce
+    setTimeout(() => {
+      isDrawingCard = false;
+    }, 450);
   }
 
   function updateUI() {
