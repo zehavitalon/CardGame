@@ -443,7 +443,7 @@
         bannerClass: 'p-banner-2',
         cardClass: 'card-p-theme-2'
       };
-      const name = inp.value.trim();
+      const name = (inp && inp.value.trim()) ? inp.value.trim() : (cfg.defaultName || (`שחקן ${i + 1}`));
       activePlayers.push({
         ...cfg,
         name: name,
@@ -661,7 +661,7 @@
             </div>
           </div>
           <div class="deck-instr-footer">
-            <button type="button" class="deck-start-btn">
+            <button type="button" class="deck-start-btn" onclick="window.proceedToNextCard(event)">
               <span>התחילו לשחק</span> <span>🚀</span>
             </button>
           </div>
@@ -673,8 +673,13 @@
       elements.nextCardBtn.style.display = 'none';
     }
 
-    elements.stageCardItem.onclick = function () {
+    window.proceedToNextCard = function (e) {
+      if (e) e.stopPropagation();
       proceedToNextCard();
+    };
+
+    elements.stageCardItem.onclick = function (e) {
+      window.proceedToNextCard(e);
     };
   }
 
@@ -1078,7 +1083,6 @@
       playCardFlipSound();
       onComplete();
     }, 720);
-  }
   }
 
   function showStageCardReveal(card, isCorrect) {
