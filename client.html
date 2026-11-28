@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>אשף הלקוח • העלאת זיכרונות ותמונות</title>
+  <script>
+    // Immediate clean redirect to builder.html with preserved query parameters
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('mode')) params.set('mode', 'client');
+    const targetUrl = 'builder.html?' + params.toString();
+    window.location.replace(targetUrl);
+  </script>
+  <style>
+    body {
+      background-color: #0a0d14;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(22, 28, 45, 0.9);
+      border: 1px solid rgba(245, 208, 97, 0.3);
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 420px;
+      width: 100%;
+    }
+    .icon { font-size: 3rem; margin-bottom: 12px; }
+    h1 { font-size: 1.4rem; color: #f5d061; margin-bottom: 8px; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+    a.btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #f5d061, #e5a93c);
+      color: #000;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📱</div>
+    <h1>מעביר אותך לאשף הלקוח...</h1>
+    <p>מיד תיפתח מערכת העלאת התמונות ותיוג השנים לציר הזמן שלכם.</p>
+    <a id="fallbackLink" href="builder.html" class="btn">לחצו כאן למעבר מיידי 🚀</a>
+  </div>
+  <script>
+    document.getElementById('fallbackLink').href = targetUrl;
+  </script>
+</body>
+</html>
+

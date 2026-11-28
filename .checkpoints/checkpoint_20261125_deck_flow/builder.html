@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>יצירת ציר הזמן • אלבום זיכרונות אישי</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --card-bg: rgba(26, 31, 46, 0.85);
+      --card-border: rgba(212, 175, 55, 0.25);
+      --gold-primary: #d4af37;
+      --gold-light: #f5e6a3;
+      --cyan-light: #00d2ff;
+      --text-main: #f0f4fc;
+      --text-muted: #8c9bb5;
+      --danger: #ff4757;
+      --success: #2ed573;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(0, 210, 255, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: 'Rubik', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .app-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 999px;
+      color: var(--gold-light);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .app-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 40%, var(--gold-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .app-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Top Control Bar */
+    .control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .code-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .code-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .code-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      width: 140px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: 'Rubik', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold-primary), #b8972e);
+      color: #0b0e14;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1e90ff, #00d2ff);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 210, 255, 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+
+    .btn-danger {
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+    .btn-danger:hover { background: rgba(255, 71, 87, 0.25); }
+
+    /* Summary Bar */
+    .summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+
+    .cards-count {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    /* Card Item */
+    .card-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .card-item:hover {
+      transform: translateY(-4px);
+      border-color: rgba(212, 175, 55, 0.6);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-num {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--gold-light);
+    }
+
+    .card-year-pill {
+      background: rgba(212, 175, 55, 0.18);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .card-year-pill.empty {
+      color: var(--text-muted);
+      border-color: rgba(255, 255, 255, 0.1);
+      background: transparent;
+    }
+
+    .card-img-box {
+      width: 100%;
+      height: 160px;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .card-img-box img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .card-item:hover .card-img-box img { transform: scale(1.04); }
+
+    .card-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .card-placeholder span { font-size: 2rem; }
+
+    .card-body {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+    .card-title.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .card-actions .btn {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      justify-content: center;
+    }
+
+    /* Add Card Big Tile */
+    .add-card-tile {
+      background: rgba(212, 175, 55, 0.04);
+      border: 2px dashed rgba(212, 175, 55, 0.4);
+      border-radius: 16px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      padding: 24px;
+      text-align: center;
+    }
+    .add-card-tile:hover {
+      background: rgba(212, 175, 55, 0.09);
+      border-color: var(--gold-primary);
+      transform: translateY(-4px);
+    }
+    .add-tile-icon {
+      font-size: 3rem;
+      background: rgba(212, 175, 55, 0.15);
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .add-tile-text {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--gold-light);
+    }
+    .add-tile-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Empty State */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px dashed rgba(212, 175, 55, 0.3);
+      border-radius: 20px;
+      max-width: 550px;
+      margin: 20px auto;
+    }
+    .empty-icon { font-size: 4rem; margin-bottom: 14px; }
+    .empty-title { font-size: 1.5rem; font-weight: 700; color: var(--gold-light); margin-bottom: 8px; }
+    .empty-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+
+    /* Edit Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-window {
+      background: #121722;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      animation: popIn 0.25s ease-out;
+      overflow: hidden;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--gold-light); }
+    .modal-close {
+      background: none; border: none; font-size: 1.6rem; color: var(--text-muted); cursor: pointer;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.95rem;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--gold-primary);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .dropzone {
+      border: 2px dashed rgba(212, 175, 55, 0.4);
+      background: rgba(212, 175, 55, 0.04);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .dropzone:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--gold-primary);
+    }
+    .dropzone img {
+      max-height: 140px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1f2738;
+      border: 1px solid var(--gold-primary);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+      z-index: 2000;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-badge">✨ אלבום ציר הזמן המשפחתי</div>
+      <h1 class="app-title" id="pageTitle">ציר הזמן של זיו</h1>
+      <p class="app-subtitle">הוסיפו תמונות ורגעים אישיים אחד-אחד בקצב שלכם!</p>
+    </header>
+
+    <!-- Top Control Bar -->
+    <div class="control-bar">
+      <div class="code-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="code-label" style="font-weight:600;">📁 החפיסות שלי:</span>
+        <select id="decksDropdown" class="form-input" style="padding:7px 12px; border-radius:8px; border:1px solid var(--gold-primary); color:var(--gold-light); font-weight:700; background:rgba(0,0,0,0.5); cursor:pointer;" onchange="onDeckDropdownChange(this.value)">
+          <!-- Populated dynamically -->
+        </select>
+        
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="code-label" style="font-size:0.8rem; color:var(--text-muted);">קוד:</span>
+          <input type="text" id="deckCodeInput" class="code-input" value="ZIV-59" style="width:120px; padding:6px 10px; font-size:0.95rem;" onchange="switchDeckCode()">
+        </div>
+
+        <button class="btn btn-outline" onclick="promptNewDeck()" style="padding:6px 12px; font-size:0.82rem;" title="פתיחת חפיסה חדשה למשחק נוסף">
+          <span>✨ חפיסה חדשה</span>
+        </button>
+      </div>
+
+      <div class="action-btns">
+        <a href="hub.html" class="btn btn-outline" style="text-decoration:none; border-color:rgba(56,189,248,0.4); color:#38bdf8;" title="חזרה למרכז השליטה הראשי">
+          <span>🎛️</span>
+          <span>מרכז השליטה (Hub)</span>
+        </a>
+        <button class="btn btn-outline" onclick="addNewCard()">
+          <span>➕</span>
+          <span>הוסף קלף</span>
+        </button>
+        <button class="btn btn-primary" onclick="launchGame()">
+          <span>🎮</span>
+          <span>שחק בטלוויזיה</span>
+        </button>
+        <button class="btn btn-outline" onclick="exportZip()">
+          <span>📦</span>
+          <span>הורד גיבוי</span>
+        </button>
+        <button class="btn btn-danger" onclick="clearAllCards()" style="padding: 10px 14px;" title="מחיקת כל הקלפים והתחלה מ-0">
+          <span>🧹</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Count -->
+    <div class="summary-bar">
+      <div class="cards-count" id="cardsCountText">0 קלפים בחפיסה</div>
+      <button class="btn btn-gold" onclick="addNewCard()" style="padding: 8px 16px; font-size: 0.9rem;">
+        <span>➕</span>
+        <span>הוסף קלף הבא</span>
+      </button>
+    </div>
+
+    <!-- Cards Grid -->
+    <main class="cards-grid" id="cardsGrid">
+      <!-- Populated via JS -->
+    </main>
+
+  </div>
+
+  <!-- Edit Card Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title" id="modalCardTitle">עריכת קלף #1</span>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Image Upload -->
+        <div class="form-group">
+          <label class="form-label">תמונה או סרטון:</label>
+          <div class="dropzone" id="modalDropzone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*" onchange="handleFileUpload(event)">
+            <div id="dropzonePreview">
+              <span style="font-size:2rem; display:block; margin-bottom:4px;">📤</span>
+              <span style="color:var(--gold-light); font-weight:600;">לחצו לבחירת תמונה מהמחשב/טלפון</span>
+              <span style="color:var(--text-muted); font-size:0.78rem; display:block; margin-top:2px;">או גררו קובץ לכאן</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Year -->
+        <div class="form-group">
+          <label class="form-label">📅 שנת האירוע (השנה לניחוש):</label>
+          <input type="number" id="cardYearInput" class="form-input" placeholder="למשל: 1995" min="1900" max="2030">
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label">✍️ כותרת הזיכרון:</label>
+          <input type="text" id="cardTitleInput" class="form-input" placeholder="למשל: טיול ראשון לצפון / יום הגיוס">
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">📖 תיאור / סיפור קצר (מופיע בחשיפה):</label>
+          <textarea id="cardDescInput" class="form-input" rows="2" placeholder="ספרו בכמה מילים מה קרה שם..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="deleteCurrentCard()">🗑️ מחק קלף</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" onclick="closeModal()">ביטול</button>
+          <button class="btn btn-gold" onclick="saveCurrentCard()">שמור קלף ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">הקלף נשמר!</span>
+  </div>
+
+  <script>
+    let activeDeck = [];
+    let currentCode = 'ZIV';
+    let editingIndex = -1;
+    let tempMediaData = '';
+    let tempMediaType = 'photo';
+
+    // --- IndexedDB Support ---
+    const DB_NAME = 'CardGameMemoriesDB';
+    function getDB() {
+      return new Promise((resolve) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('decks')) {
+            db.createObjectStore('decks');
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function dbGet(key) {
+      const db = await getDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction('decks', 'readonly');
+        const req = tx.objectStore('decks').get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function dbSet(key, val) {
+      const db = await getDB();
+      if (!db) return;
+      return new Promise((resolve) => {
+        const tx = db.transaction('decks', 'readwrite');
+        tx.objectStore('decks').put(val, key);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    
+    // --- Saved Decks Registry (Manage Multiple Games Simultaneously) ---
+    function getDecksRegistry() {
+      try {
+        const raw = localStorage.getItem('SAVED_DECKS_REGISTRY');
+        return raw ? JSON.parse(raw) : ['ZIV-59', 'ZIV'];
+      } catch (e) {
+        return ['ZIV-59', 'ZIV'];
+      }
+    }
+
+    function registerDeckCode(code, count) {
+      if (!code) return;
+      let registry = getDecksRegistry();
+      if (!registry.includes(code)) {
+        registry.unshift(code);
+      }
+      try {
+        localStorage.setItem('SAVED_DECKS_REGISTRY', JSON.stringify(registry));
+        localStorage.setItem('DECK_COUNT_' + code, count || 0);
+      } catch (e) {}
+      renderDecksDropdown();
+    }
+
+    function renderDecksDropdown() {
+      const select = document.getElementById('decksDropdown');
+      if (!select) return;
+      const registry = getDecksRegistry();
+      
+      let optsHtml = '';
+      registry.forEach(c => {
+        const count = localStorage.getItem('DECK_COUNT_' + c) || (c === currentCode ? activeDeck.length : 0);
+        const label = `${c} (${count} קלפים)`;
+        optsHtml += `<option value="${c}" ${c === currentCode ? 'selected' : ''}>${label}</option>`;
+      });
+      optsHtml += `<option value="__NEW__">✨ + פתח חפיסה חדשה...</option>`;
+      select.innerHTML = optsHtml;
+    }
+
+    function onDeckDropdownChange(val) {
+      if (val === '__NEW__') {
+        promptNewDeck();
+      } else {
+        currentCode = val;
+        document.getElementById('deckCodeInput').value = currentCode;
+        localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+        updatePageTitle();
+        loadDeck();
+        showToast('🔄', `עברת לחפיסה: ${currentCode}`);
+      }
+    }
+
+    function promptNewDeck() {
+      const name = prompt('הקלידו קוד לחפיסה החדשה (למשל: DANA-30, MOM-70):');
+      if (!name) {
+        renderDecksDropdown();
+        return;
+      }
+      const clean = name.trim().toUpperCase().replace(/\s+/g, '-');
+      currentCode = clean;
+      document.getElementById('deckCodeInput').value = currentCode;
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+      registerDeckCode(clean, 0);
+      updatePageTitle();
+      loadDeck();
+      showToast('🆕', `נוצרה חפיסה חדשה: ${clean}`);
+    }
+
+// --- Init App ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      const savedCode = localStorage.getItem('ACTIVE_DECK_CODE');
+      if (savedCode) currentCode = savedCode.toUpperCase();
+      document.getElementById('deckCodeInput').value = currentCode;
+      updatePageTitle();
+      await loadDeck();
+      renderDecksDropdown();
+    });
+
+    function updatePageTitle() {
+      const t = currentCode === 'ZIV' ? 'ציר הזמן של זיו' : `ציר הזמן • חפיסת ${currentCode}`;
+      document.getElementById('pageTitle').textContent = t;
+    }
+
+    async function loadDeck() {
+      let loaded = await dbGet('MEMORIES_DECK_' + currentCode);
+      if (!loaded) {
+        try {
+          const raw = localStorage.getItem('MEMORIES_DECK_' + currentCode);
+          if (raw) loaded = JSON.parse(raw);
+        } catch (e) {}
+      }
+
+      // Filter only real user cards (clean out any old poker template cards)
+      if (loaded && Array.isArray(loaded)) {
+        activeDeck = loaded.filter(c => c && (c.isCustomized || c.year || c.media_file || (c.title && c.title !== 'טרם הוגדר')));
+      } else {
+        activeDeck = [];
+      }
+
+      renderCards();
+    }
+
+    async function saveDeck() {
+      await dbSet('MEMORIES_DECK_' + currentCode, activeDeck);
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+      try {
+        localStorage.setItem('MEMORIES_DECK_' + currentCode, JSON.stringify(activeDeck));
+      } catch (e) {}
+    }
+
+    function switchDeckCode() {
+      const val = document.getElementById('deckCodeInput').value.trim().toUpperCase();
+      if (!val) return;
+      currentCode = val;
+      localStorage.setItem('ACTIVE_DECK_CODE', currentCode);
+      registerDeckCode(currentCode, activeDeck.length);
+      updatePageTitle();
+      loadDeck();
+      showToast('🔄', `נטענה חפיסה: ${currentCode}`);
+    }
+
+    // --- Render Grid ---
+    function renderCards() {
+      const grid = document.getElementById('cardsGrid');
+      const countText = document.getElementById('cardsCountText');
+      countText.textContent = `${activeDeck.length} קלפים בחפיסה`;
+
+      if (activeDeck.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <div class="empty-title">החפיסה נקייה ומוכנה</div>
+            <div class="empty-desc">
+              הוסיפו את התמונות והזיכרונות אחד-אחד בקצב שלכם.<br>
+              אין צורך בכמות מסוימת – כמה שיש, בזה נשחק!
+            </div>
+            <button class="btn btn-gold" onclick="addNewCard()" style="font-size:1.1rem; padding:12px 28px;">
+              <span>➕</span>
+              <span>הוסף את הקלף הראשון (#1)</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      activeDeck.forEach((c, idx) => {
+        const num = idx + 1;
+        const year = c.year || '----';
+        const title = c.title || 'ללא כותרת';
+        const desc = c.description || '';
+        
+        let mediaHtml = `
+          <div class="card-placeholder">
+            <span>📷</span>
+            <span>לחצו להוספת תמונה</span>
+          </div>
+        `;
+        if (c.media_file) {
+          mediaHtml = `<img src="${c.media_file}" alt="${title}">`;
+        }
+
+        html += `
+          <div class="card-item">
+            <div class="card-top">
+              <span class="card-num">קלף #${num}</span>
+              <span class="card-year-pill ${c.year ? '' : 'empty'}">${year}</span>
+            </div>
+            <div class="card-img-box" onclick="editCard(${idx})">
+              ${mediaHtml}
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-title ${c.title ? '' : 'empty'}">${title}</div>
+                ${desc ? `<div class="card-desc">${desc}</div>` : ''}
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-outline" onclick="editCard(${idx})">✏️ עריכה</button>
+                <button class="btn btn-danger" onclick="deleteCard(${idx})" title="מחיקה">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Big Add Tile at the end
+      html += `
+        <div class="add-card-tile" onclick="addNewCard()">
+          <div class="add-tile-icon">➕</div>
+          <div class="add-tile-text">הוסף קלף #${activeDeck.length + 1}</div>
+          <div class="add-tile-sub">לחצו להוספת תמונה ושנה</div>
+        </div>
+      `;
+
+      grid.innerHTML = html;
+    }
+
+    // --- Add & Edit Cards ---
+    function addNewCard() {
+      const newCard = {
+        id: activeDeck.length + 1,
+        number: activeDeck.length + 1,
+        year: '',
+        title: '',
+        description: '',
+        media_type: 'photo',
+        media_file: '',
+        isCustomized: true
+      };
+      activeDeck.push(newCard);
+      editingIndex = activeDeck.length - 1;
+      openModal(editingIndex);
+    }
+
+    function editCard(idx) {
+      editingIndex = idx;
+      openModal(idx);
+    }
+
+    function openModal(idx) {
+      const card = activeDeck[idx];
+      document.getElementById('modalCardTitle').textContent = `עריכת קלף #${idx + 1}`;
+      document.getElementById('cardYearInput').value = card.year || '';
+      document.getElementById('cardTitleInput').value = card.title || '';
+      document.getElementById('cardDescInput').value = card.description || '';
+      
+      tempMediaData = card.media_file || '';
+      tempMediaType = card.media_type || 'photo';
+      updateDropzonePreview();
+
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('active');
+      renderCards();
+    }
+
+    function updateDropzonePreview() {
+      const p = document.getElementById('dropzonePreview');
+      if (tempMediaData) {
+        p.innerHTML = `
+          <img src="${tempMediaData}" style="max-height:140px; border-radius:8px; display:block; margin:0 auto 8px;">
+          <span style="color:var(--gold-light); font-size:0.85rem; font-weight:600;">לחצו להחלפת תמונה</span>
+        `;
+      } else {
+        p.innerHTML = `
+          <span style="font-size:2rem; display:block; margin-bottom:4px;">📤</span>
+          <span style="color:var(--gold-light); font-weight:600;">לחצו לבחירת תמונה מהמחשב/טלפון</span>
+          <span style="color:var(--text-muted); font-size:0.78rem; display:block; margin-top:2px;">או גררו קובץ לכאן</span>
+        `;
+      }
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        tempMediaData = ev.target.result;
+        tempMediaType = file.type.startsWith('video') ? 'video' : 'photo';
+        updateDropzonePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveCurrentCard() {
+      if (editingIndex < 0 || editingIndex >= activeDeck.length) return;
+      const card = activeDeck[editingIndex];
+      card.year = parseInt(document.getElementById('cardYearInput').value, 10) || '';
+      card.title = document.getElementById('cardTitleInput').value.trim();
+      card.description = document.getElementById('cardDescInput').value.trim();
+      card.media_file = tempMediaData;
+      card.media_type = tempMediaType;
+      card.isCustomized = true;
+
+      saveDeck();
+      closeModal();
+      showToast('✨', `קלף #${editingIndex + 1} נשמר בהצלחה!`);
+    }
+
+    function deleteCurrentCard() {
+      if (editingIndex < 0) return;
+      deleteCard(editingIndex);
+      closeModal();
+    }
+
+    function deleteCard(idx) {
+      if (!confirm(`האם למחוק את קלף #${idx + 1}?`)) return;
+      activeDeck.splice(idx, 1);
+      // Re-index
+      activeDeck.forEach((c, i) => {
+        c.number = i + 1;
+        c.id = i + 1;
+      });
+      saveDeck();
+      renderCards();
+      showToast('🗑️', 'הקלף נמחק');
+    }
+
+    function clearAllCards() {
+      if (!confirm(`האם לנקות את כל הקלפים בחפיסה "${currentCode}" ולהתחיל מאפס?`)) return;
+      activeDeck = [];
+      saveDeck();
+      renderCards();
+      showToast('🧹', 'החפיסה אופסה לחלוטין!');
+    }
+
+    // --- Actions ---
+    function launchGame() {
+      window.open(`play.html?game=${encodeURIComponent(currentCode)}`, '_blank');
+    }
+
+    async function exportZip() {
+      if (activeDeck.length === 0) {
+        alert('אין קלפים להורדה בחפיסה זו.');
+        return;
+      }
+
+      showToast('⏳', 'מייצא ארכיון ZIP...');
+      const zip = new JSZip();
+      const assetsFolder = zip.folder("assets");
+      const imagesFolder = assetsFolder.folder("images");
+
+      const exportDeck = activeDeck.map((c, i) => {
+        let mediaFile = '';
+        if (c.media_file && c.media_file.startsWith('data:')) {
+          const base64Data = c.media_file.split(',')[1];
+          const ext = c.media_file.includes('png') ? 'png' : 'jpg';
+          const filename = `photo_${i + 1}.${ext}`;
+          imagesFolder.file(filename, base64Data, { base64: true });
+          mediaFile = `assets/images/${filename}`;
+        } else {
+          mediaFile = c.media_file;
+        }
+
+        return {
+          id: i + 1,
+          number: i + 1,
+          year: c.year,
+          title: c.title,
+          description: c.description,
+          media_type: c.media_type || 'photo',
+          media_file: mediaFile,
+          isCustomized: true
+        };
+      });
+
+      zip.file("deck.json", JSON.stringify(exportDeck, null, 2));
+      zip.file("README.txt", `חפיסת זיכרונות • קוד: ${currentCode}
+נוצר ב: ${new Date().toLocaleDateString('he-IL')}
+כמות קלפים: ${exportDeck.length}`);
+
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `Memories_Deck_${currentCode}.zip`);
+      showToast('✅', 'ארכיון ה-ZIP ירד בהצלחה!');
+    }
+
+    function showToast(icon, msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
